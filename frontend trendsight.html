@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrendSight Analytics — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #080810;
+      --surface: #0f0f1a;
+      --surface2: #15151f;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.12);
+      --purple: #7F77DD;
+      --purple-dim: #534AB7;
+      --purple-glow: rgba(127, 119, 221, 0.15);
+      --green: #1D9E75;
+      --green-dim: #0a1f14;
+      --green-bright: #5DCAA5;
+      --red: #c0392b;
+      --red-dim: #1f0a0a;
+      --red-bright: #F09595;
+      --amber: #EF9F27;
+      --amber-dim: #1a1500;
+      --amber-bright: #FAC775;
+      --text: #f0f0f0;
+      --text-muted: #888;
+      --text-faint: #444;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--purple);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-mark svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .logo-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-name span {
+      color: var(--purple);
+    }
+
+    .topbar-center {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .mode-btn {
+      padding: 6px 18px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: transparent;
+      transition: all .2s;
+      letter-spacing: 0.01em;
+    }
+
+    .mode-btn.active {
+      background: var(--purple);
+      color: #fff;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-right .date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .live-dot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--green-bright);
+      background: var(--green-dim);
+      border: 1px solid var(--green);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .live-dot::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green-bright);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    /* ── LAYOUT ── */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+
+    /* ── VERDICT HERO ── */
+    .verdict-hero {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .verdict-hero::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 220px;
+      height: 220px;
+      background: var(--purple-glow);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .verdict-eyebrow {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--purple);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .verdict-heading {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .signals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 680px) {
+      .signals-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── ATUALIZAÇÃO DOS CARDS (GLOW E HOVER) ── */
+    .signal-card {
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background-color: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Efeito de flutuar ao passar o mouse */
+    .signal-card:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Cores e Brilho (Glow) para o card de COMPRA */
+    .signal-card.buy {
+      background: var(--green-dim);
+      border-color: var(--green);
+    }
+
+    .signal-card.buy:hover {
+      box-shadow: 0 8px 24px rgba(29, 158, 117, 0.25);
+    }
+
+    /* Cores e Brilho (Glow) para o card de VENDA */
+    .signal-card.sell {
+      background: var(--red-dim);
+      border-color: var(--red);
+    }
+
+    .signal-card.sell:hover {
+      box-shadow: 0 8px 24px rgba(192, 57, 43, 0.25);
+    }
+
+    /* Cores para o card de ESPERA */
+    .signal-card.hold {
+      background: var(--amber-dim);
+      border-color: var(--amber);
+    }
+
+    /* Container que vai receber o mini gráfico depois */
+    .chart-container {
+      height: 60px;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .signal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .signal-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .buy .signal-icon {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .sell .signal-icon {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .hold .signal-icon {
+      background: var(--amber);
+      color: #fff;
+    }
+
+    .signal-action {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .buy .signal-action {
+      color: var(--green-bright);
+    }
+
+    .sell .signal-action {
+      color: var(--red-bright);
+    }
+
+    .hold .signal-action {
+      color: var(--amber-bright);
+    }
+
+    .signal-text {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .tickers {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .ticker {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-family: 'Syne', sans-serif;
+    }
+
+    .buy .ticker {
+      background: rgba(29, 158, 117, .25);
+      color: var(--green-bright);
+      border: 1px solid var(--green);
+    }
+
+    .sell .ticker {
+      background: rgba(192, 57, 43, .25);
+      color: var(--red-bright);
+      border: 1px solid var(--red);
+    }
+
+    .hold .ticker {
+      background: rgba(239, 159, 39, .2);
+      color: var(--amber-bright);
+      border: 1px solid var(--amber);
+    }
+
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prob-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      min-width: 38px;
+    }
+
+    .prob-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .prob-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    .buy .prob-fill {
+      background: var(--green-bright);
+    }
+
+    .sell .prob-fill {
+      background: var(--red-bright);
+    }
+
+    .prob-pct {
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    .buy .prob-pct {
+      color: var(--green-bright);
+    }
+
+    .sell .prob-pct {
+      color: var(--red-bright);
+    }
+
+    /* ── TWO-COL GRID ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 680px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── OPERATION CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 22px;
+    }
+
+    .card-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--purple);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .op-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .op-ticker-big {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .op-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--green-dim);
+      color: var(--green-bright);
+      border: 1px solid var(--green);
+    }
+
+    .levels {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .level {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .level-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .level-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .level.entry .level-val {
+      color: #fff;
+    }
+
+    .level.target .level-val {
+      color: var(--green-bright);
+    }
+
+    .level.stop .level-val {
+      color: var(--red-bright);
+    }
+
+    .level-sub {
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    .level.target .level-sub {
+      color: var(--green);
+    }
+
+    .level.stop .level-sub {
+      color: var(--red);
+    }
+
+    /* ── SIMULATOR ── */
+    .sim-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sim-input-row {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .intro-section {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 0 20px;
+    }
+
+    .intro-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      color: #fff;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .intro-text {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 750px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .sim-prefix {
+      padding: 0 14px;
+      color: var(--text-muted);
+      font-size: 14px;
+      border-right: 1px solid var(--border2);
+      height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .sim-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      padding: 0 14px;
+      height: 44px;
+      outline: none;
+      color-scheme: dark;
+    }
+
+    .sim-result {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      border: 1px solid var(--border);
+      flex: 1;
+    }
+
+    .sim-result-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .sim-result-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green-bright);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .sim-gain {
+      font-size: 13px;
+      color: var(--green-bright);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .sim-note {
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    /* ── LONG TERM VIEW ── */
+    .long-rec {
+      display: flex;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .long-rec:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .long-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+
+    .long-dot.g {
+      background: var(--green-bright);
+    }
+
+    .long-dot.r {
+      background: var(--red-bright);
+    }
+
+    .long-rec-body {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.55;
+    }
+
+    .long-rec-body strong {
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+    }
+
+    .alloc-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 15px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .2s;
+      margin-bottom: 14px;
+    }
+
+    .alloc-input:focus {
+      border-color: var(--purple);
+    }
+
+    .alloc-result {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.65;
+      border: 1px solid var(--border);
+      min-height: 60px;
+    }
+
+    .alloc-result strong {
+      color: #fff;
+    }
+
+    /* ── CTA ── */
+    .cta-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary:hover {
+      background: var(--purple-dim);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--purple);
+      color: var(--purple);
+    }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      margin-top: 32px;
+      padding: 14px 18px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-faint);
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    /* ── REMOVER SETAS PADRÃO DO INPUT NUMBER ── */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    /* ── VIEWS ── */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .anim {
+      animation: fadeUp .4s ease both;
+    }
+
+    .anim-d1 {
+      animation-delay: .05s;
+    }
+
+    .anim-d2 {
+      animation-delay: .12s;
+    }
+
+    .anim-d3 {
+      animation-delay: .20s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="topbar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 18 18" fill="none">
+          <polyline points="1,13 6,7 10,10 17,3" stroke="#fff" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <polyline points="13,3 17,3 17,7" stroke="#fff" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </div>
+      <span class="logo-name">Trend<span>Sight</span></span>
+    </div>
+
+    <div class="topbar-center">
+      <button class="mode-btn active" id="btnRapido" onclick="setMode('rapido')">Ação Rápida</button>
+      <button class="mode-btn" id="btnLongo" onclick="setMode('longo')">Piloto Automático</button>
+      <button class="mode-btn" id="btnCarteira" onclick="setMode('carteira')">Raio-X da Carteira</button>
+    </div>
+
+    <div class="topbar-right">
+      <span class="date" id="dateDisplay"></span>
+      <span class="live-dot">Ao vivo</span>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <div class="intro-section anim">
+      <h1 class="intro-title">Inteligência de mercado simplificada para você.</h1>
+      <p class="intro-text">O TrendSight cruza milhares de dados financeiros para entregar recomendações claras do que
+        comprar, vender ou manter. Sem jargões complicados. Apenas siga os sinais e tome decisões baseadas em
+        probabilidade matemática.</p>
+    </div>
+
+    <!-- ══ MODO AÇÃO RÁPIDA ══ -->
+    <div id="view-rapido" class="view active">
+
+      <div class="verdict-hero anim">
+        <div class="verdict-eyebrow">Veredito do algoritmo — hoje</div>
+        <div class="verdict-heading">O que fazer agora?</div>
+        <div class="signals-grid" id="grid-sinais">
+          <div class="signal-card buy">
+            <div class="signal-header">
+              <div class="signal-icon">↑</div>
+              <span class="signal-action">Comprar</span>
+            </div>
+            <p class="signal-text">Tendência de alta forte. Nosso modelo detectou janela favorável para os próximos 5
+              dias.</p>
+            <div class="tickers">
+              <span class="ticker">PETR4</span>
+              <span class="ticker">VALE3</span>
+              <span class="ticker">ITUB4</span>
+            </div>
+            <div class="prob-row">
+              <span class="prob-label">Chance</span>
+              <div class="prob-track">
+                <div class="prob-fill" style="width:82%"></div>
+              </div>
+              <span class="prob-pct">82%</span>
+            </div>
+          </div>
+
+          <div class="signal-card sell">
+            <div class="signal-header">
+              <div class="signal-icon">↓</div>
+              <span class="signal-action">Vender</span>
+            </div>
+            <p class="signal-text">Sentimento do mercado deteriorou. Saia agora para evitar perdas maiores.</p>
+            <div class="tickers">
+              <span class="ticker">MGLU3</span>
+            </div>
+            <div class="prob-row">
+              <span class="prob-label">Queda</span>
+              <div class="prob-track">
+                <div class="prob-fill" style="width:73%"></div>
+              </div>
+              <span class="prob-pct">73%</span>
+            </div>
+          </div>
+
+          <div class="signal-card hold">
+            <div class="signal-header">
+              <div class="signal-icon" style="background:var(--amber);color:#fff">—</div>
+              <span class="signal-action" style="color:var(--amber-bright)">Esperar</span>
+            </div>
+            <p class="signal-text">Mercado indeciso. Não faça nada com ela hoje. Aguarde o próximo sinal.</p>
+            <div class="tickers">
+              <span class="ticker"
+                style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">BBDC4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col anim anim-d1">
+        <div class="card">
+          <div class="card-label">Operação de compra — PETR4</div>
+          <div class="op-header">
+            <span class="op-ticker-big">PETR4</span>
+            <span class="op-badge">82% de chance de alta</span>
+          </div>
+          <div class="levels">
+            <div class="level entry">
+              <div class="level-lbl">Compre por até</div>
+              <div class="level-val">R$ 38,00</div>
+              <div class="level-sub" style="color:var(--text-faint)">Entrada</div>
+            </div>
+            <div class="level target">
+              <div class="level-lbl">Alvo de lucro</div>
+              <div class="level-val">R$ 40,50</div>
+              <div class="level-sub">+6,6%</div>
+            </div>
+            <div class="level stop">
+              <div class="level-lbl">Trava de segurança</div>
+              <div class="level-val">R$ 36,50</div>
+              <div class="level-sub">−3,9%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Simulador "e se..."</div>
+          <div class="sim-wrap">
+            <div>
+              <div class="sim-input-row">
+                <span class="sim-prefix">R$</span>
+                <input class="sim-input" type="number" id="simVal" value="1000" min="100" step="100" oninput="calcSim()"
+                  placeholder="Valor" />
+              </div>
+            </div>
+            <div class="sim-result">
+              <div class="sim-result-lbl">Se tivesse seguido nossas dicas no último mês:</div>
+              <div class="sim-result-val" id="simResult">R$ 1.150,00</div>
+              <div class="sim-gain" id="simGain">+R$ 150,00 &nbsp;·&nbsp; +15,0%</div>
+              <div class="sim-note">Baseado nas 8 operações recomendadas no período.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-row anim anim-d2">
+        <button class="btn-ghost" onclick="alert('Em breve: alertas push por e-mail e SMS.')">🔔 Ativar alertas</button>
+      </div>
+    </div>
+
+    <div id="view-carteira" class="view">
+      <div class="intro-section anim">
+        <h1 class="intro-title">O Raio-X da sua Carteira</h1>
+        <p class="intro-text">Cruzamos os seus ativos com o nosso algoritmo para você saber exatamente o que manter,
+          comprar mais ou vender hoje.</p>
+      </div>
+
+      <div class="two-col anim anim-d1">
+        <div class="card" style="text-align: center; padding: 30px;">
+          <div class="card-label">Patrimônio Total</div>
+          <div class="op-ticker-big" id="patrimonio-total" style="font-size: 36px;">R$ 0,00</div>
+        </div>
+        <div class="card" style="text-align: center; padding: 30px;">
+          <div class="card-label">Lucro / Prejuízo Aberto</div>
+          <div class="op-ticker-big" id="lucro-total" style="font-size: 36px;">R$ 0,00</div>
+        </div>
+      </div>
+
+      <div class="verdict-heading anim anim-d2" style="margin-top: 40px;">Suas Posições</div>
+      <div class="signals-grid anim anim-d3" id="grid-carteira">
+      </div>
+    </div>
+
+    <!-- ══ MODO PILOTO AUTOMÁTICO ══ -->
+    <div id="view-longo" class="view">
+
+      <div class="verdict-hero anim">
+        <div class="verdict-eyebrow">Recomendação do mês — longo prazo</div>
+        <div class="verdict-heading">Onde colocar o dinheiro agora?</div>
+        <div class="signals-grid">
+          <div class="signal-card buy" style="grid-column: span 2;">
+            <div class="signal-header">
+              <div class="signal-icon">↑</div>
+              <span class="signal-action">Comprar e guardar</span>
+            </div>
+            <p class="signal-text">Empresas sólidas negociadas abaixo do valor justo. Nosso modelo projeta crescimento
+              consistente e bons dividendos para 1 a 3 anos.</p>
+            <div class="tickers">
+              <span class="ticker">ITUB4</span>
+              <span class="ticker">VALE3</span>
+            </div>
+            <div class="prob-row">
+              <span class="prob-label">Projeção</span>
+              <div class="prob-track">
+                <div class="prob-fill" style="width:78%"></div>
+              </div>
+              <span class="prob-pct">78%</span>
+            </div>
+          </div>
+          <div class="signal-card sell">
+            <div class="signal-header">
+              <div class="signal-icon">↓</div>
+              <span class="signal-action">Não recomendado</span>
+            </div>
+            <p class="signal-text">Setor enfrenta dificuldades estruturais persistentes. Evite aportes de longo prazo.
+            </p>
+            <div class="tickers">
+              <span class="ticker">MGLU3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col anim anim-d1">
+        <div class="card">
+          <div class="card-label">Por que essas ações?</div>
+          <div>
+            <div class="long-rec">
+              <div class="long-dot g"></div>
+              <div class="long-rec-body"><strong>ITUB4</strong> — Banco com lucros consistentes há 10 anos e dividend
+                yield atrativo. Momento de preço favorável este trimestre.</div>
+            </div>
+            <div class="long-rec">
+              <div class="long-dot g"></div>
+              <div class="long-rec-body"><strong>VALE3</strong> — Líder global em minério de ferro com caixa robusto.
+                Exportações em alta e dólar favorável ampliam margem.</div>
+            </div>
+            <div class="long-rec">
+              <div class="long-dot r"></div>
+              <div class="long-rec-body"><strong>MGLU3</strong> — Endividamento elevado, margens pressionadas.
+                Recuperação estrutural ainda não confirmada pelos fundamentos.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Quanto eu invisto?</div>
+          <input class="alloc-input" type="number" id="allocVal" value="500" min="100" step="100" oninput="calcAlloc()"
+            placeholder="Quanto você tem disponível (R$)" />
+          <div class="alloc-result" id="allocResult">
+            Compre <strong>9 cotas de ITUB4</strong> (~R$ 32/cota) e <strong>3 cotas de VALE3</strong> (~R$ 68/cota).
+            Divisão 60/40 recomendada pelo nosso modelo de risco.
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-row anim anim-d2">
+        <button class="btn-ghost" onclick="alert('Em breve: relatório mensal automático por e-mail.')">📄 Relatório
+          mensal</button>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      Os sinais são baseados em análise algorítmica probabilística e não constituem recomendação formal de investimento.
+      Rentabilidade passada não garante resultados futuros. Sujeito à regulamentação da CVM. TrendSight Analytics — uso
+      educacional e informativo.
+    </div>
+
+  </main>
+
+  <script>
+
+    // --- NOVA FUNÇÃO: Consumir a API da Carteira ---
+    async function carregarDadosCarteira() {
+      try {
+        const resposta = await fetch('http://localhost:5000/api/carteira');
+        const dados = await resposta.json();
+
+        if (dados.status === "sucesso") {
+          // 1. Atualiza o painel superior (Patrimônio e Lucro)
+          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+          const divLucro = document.getElementById('lucro-total');
+          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+
+          // 2. Monta os cards de cada ação da carteira
+          const grid = document.getElementById('grid-carteira');
+          let htmlCards = '';
+
+          dados.ativos.forEach(ativo => {
+            let classeCard = 'hold'; let icone = '—'; let acaoTxt = 'Manter';
+            let corAtivo = 'var(--amber-bright)'; let bgAtivo = 'rgba(239,159,39,.2)'; let bordaAtivo = 'var(--amber)';
+
+            // Pinta o card dependendo do conselho do algoritmo
+            if (ativo.Sinal === 'COMPRA') {
+              classeCard = 'buy'; icone = '↑'; acaoTxt = 'Comprar Mais';
+              corAtivo = 'var(--green-bright)'; bgAtivo = 'rgba(29,158,117,.25)'; bordaAtivo = 'var(--green)';
+            } else if (ativo.Sinal === 'VENDA') {
+              classeCard = 'sell'; icone = '↓'; acaoTxt = 'Vender Posição';
+              corAtivo = 'var(--red-bright)'; bgAtivo = 'rgba(192,57,43,.25)'; bordaAtivo = 'var(--red)';
+            }
+
+            let corRentabilidade = ativo['Rentabilidade_%'] >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+            let sinalLucro = ativo['Lucro_R$'] > 0 ? '+' : '';
+
+            htmlCards += `
+            <div class="signal-card ${classeCard}">
+              <div class="signal-header">
+                <div class="signal-icon" style="background:${bordaAtivo};color:#fff">${icone}</div>
+                <span class="signal-action" style="color:${corAtivo}">${acaoTxt}</span>
+              </div>
+              
+              <div class="levels" style="grid-template-columns: 1fr 1fr; margin-top: 16px; margin-bottom: 20px;">
+                <div class="level">
+                  <div class="level-lbl">Ativo na Carteira</div>
+                  <div class="level-val">${ativo.Ativo}</div>
+                  <div class="level-sub">${ativo.Quantidade} cotas</div>
+                </div>
+                <div class="level">
+                  <div class="level-lbl">Seu Retorno</div>
+                  <div class="level-val" style="color:${corRentabilidade}">${ativo['Rentabilidade_%']}%</div>
+                  <div class="level-sub" style="color:${corRentabilidade}">${sinalLucro}R$ ${ativo['Lucro_R$'].toLocaleString('pt-BR')}</div>
+                </div>
+              </div>
+              
+              <div class="prob-row">
+                <span class="prob-label">Preço Médio</span>
+                <span class="prob-pct" style="color:var(--text-muted)">R$ ${ativo.Preco_Medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div class="prob-row" style="margin-top:8px;">
+                <span class="prob-label">Preço Atual</span>
+                <span class="prob-pct" style="color:var(--text-muted)">R$ ${ativo.Preco_Atual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div class="prob-row" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border2)">
+                <span class="prob-label" style="color:#fff">Saldo Total</span>
+                <span class="prob-pct" style="color:#fff; font-size: 14px;">R$ ${ativo.Saldo_Total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+            </div>
+          `;
+          });
+
+          grid.innerHTML = htmlCards;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function setMode(m) {
+      document.getElementById('view-rapido').classList.toggle('active', m === 'rapido');
+      document.getElementById('view-longo').classList.toggle('active', m === 'longo');
+      document.getElementById('view-carteira').classList.toggle('active', m === 'carteira');
+
+      document.getElementById('btnRapido').classList.toggle('active', m === 'rapido');
+      document.getElementById('btnLongo').classList.toggle('active', m === 'longo');
+      document.getElementById('btnCarteira').classList.toggle('active', m === 'carteira');
+    }
+
+    function calcSim() {
+      const v = parseFloat(document.getElementById('simVal').value) || 0;
+      const gain = v * 0.15;
+      const total = v + gain;
+      document.getElementById('simResult').textContent = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('simGain').innerHTML = '+R$ ' + gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' &nbsp;·&nbsp; +15,0%';
+    }
+
+    function calcAlloc() {
+      const v = parseFloat(document.getElementById('allocVal').value) || 0;
+      const itub = Math.floor(v * 0.6 / 32);
+      const vale = Math.floor(v * 0.4 / 68);
+      const el = document.getElementById('allocResult');
+      if (itub > 0 || vale > 0) {
+        el.innerHTML = `Compre <strong>${itub} cota${itub !== 1 ? 's' : ''} de ITUB4</strong> (~R$ 32/cota) e <strong>${vale} cota${vale !== 1 ? 's' : ''} de VALE3</strong> (~R$ 68/cota). Divisão 60/40 recomendada pelo nosso modelo de risco.`;
+      } else {
+        el.innerHTML = 'Digite um valor acima de R$ 100 para ver a alocação sugerida.';
+      }
+    }
+
+    const now = new Date();
+    document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+
+    // --- NOVA FUNÇÃO: Consumir a API do Backend ---
+    // --- NOVA FUNÇÃO: Consumir a API do Backend ---
+    async function carregarDadosMercado() {
+      try {
+        const resposta = await fetch('http://localhost:5000/api/mercado');
+        const dados = await resposta.json();
+
+        if (dados.status === "sucesso") {
+          const grid = document.getElementById('grid-sinais');
+          let htmlCards = '';
+          let precoCompraChart = 0;
+          let precoVendaChart = 0;
+
+          // 1. Monta o Card de COMPRA
+          if (dados.compras.length > 0) {
+            const topCompra = dados.compras[0];
+            precoCompraChart = topCompra['Preço (R$)'];
+            htmlCards += `
+            <div class="signal-card buy">
+              <div class="signal-header">
+                <div class="signal-icon">↑</div>
+                <span class="signal-action">Comprar</span>
+              </div>
+              <p class="signal-text">Tendência de alta forte confirmada pelo algoritmo.</p>
+              
+              <div class="chart-container" style="position: relative; height: 60px;">
+                <canvas id="miniChartCompra"></canvas>
+              </div>
+
+              <div class="tickers">
+                <span class="ticker">${topCompra.Ativo} (R$ ${topCompra['Preço (R$)']})</span>
+              </div>
+              <div class="prob-row">
+                <span class="prob-label">Chance</span>
+                <div class="prob-track"><div class="prob-fill" style="width:${topCompra['Probabilidade (%)']}%"></div></div>
+                <span class="prob-pct">${topCompra['Probabilidade (%)']}%</span>
+              </div>
+            </div>
+          `;
+
+            document.querySelector('.op-ticker-big').textContent = topCompra.Ativo;
+            document.querySelector('.op-badge').textContent = `${topCompra['Probabilidade (%)']}% de chance de alta`;
+            document.querySelectorAll('.level-val')[0].textContent = `R$ ${topCompra['Preço (R$)']}`;
+            document.querySelectorAll('.level-val')[1].textContent = `R$ ${topCompra['Alvo (R$)']}`;
+            document.querySelectorAll('.level-val')[2].textContent = `R$ ${topCompra['Stop (R$)']}`;
+          }
+
+          // 2. Monta o Card de VENDA
+          if (dados.vendas.length > 0) {
+            const topVenda = dados.vendas[0];
+            precoVendaChart = topVenda['Preço (R$)'];
+            htmlCards += `
+            <div class="signal-card sell">
+              <div class="signal-header">
+                <div class="signal-icon">↓</div>
+                <span class="signal-action">Vender</span>
+              </div>
+              <p class="signal-text">Sentimento negativo. Risco de queda elevado, saia agora.</p>
+              
+              <div class="chart-container" style="position: relative; height: 60px;">
+                <canvas id="miniChartVenda"></canvas>
+              </div>
+
+              <div class="tickers">
+                <span class="ticker">${topVenda.Ativo} (R$ ${topVenda['Preço (R$)']})</span>
+              </div>
+              <div class="prob-row">
+                <span class="prob-label">Queda</span>
+                <div class="prob-track"><div class="prob-fill" style="width:${topVenda['Probabilidade (%)']}%"></div></div>
+                <span class="prob-pct">${topVenda['Probabilidade (%)']}%</span>
+              </div>
+            </div>
+          `;
+          }
+
+          // 3. Devolve o Card de ESPERAR
+          htmlCards += `
+            <div class="signal-card hold">
+              <div class="signal-header">
+                <div class="signal-icon" style="background:var(--amber);color:#fff">—</div>
+                <span class="signal-action" style="color:var(--amber-bright)">Esperar</span>
+              </div>
+              <p class="signal-text">Mercado indeciso. Não faça nada com ela hoje. Aguarde o próximo sinal.</p>
+              
+              <div class="chart-container" style="position: relative; height: 60px;">
+                <canvas id="miniChartEspera"></canvas>
+              </div>
+
+              <div class="tickers">
+                <span class="ticker" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">BBDC4</span>
+              </div>
+            </div>
+        `;
+
+          // 4. Injeta tudo na tela
+          grid.innerHTML = htmlCards;
+
+          // 5. Opções padrão dos gráficos (TOOLTIPS MENORES E AFASTADOS)
+          const chartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                enabled: true,
+                backgroundColor: '#15151f',
+                titleColor: '#7F77DD',
+                titleFont: { family: 'Syne', size: 10 }, /* Fonte do título menor */
+                bodyFont: { family: 'DM Sans', size: 11, weight: 'bold' }, /* Fonte do valor menor */
+                bodyColor: '#fff',
+                borderColor: 'rgba(255,255,255,0.1)',
+                borderWidth: 1,
+                padding: 6, /* Caixinha mais enxuta */
+                caretPadding: 10, /* ESTA É A MÁGICA: afasta a caixa da bolinha */
+                displayColors: false,
+                callbacks: {
+                  label: function (context) {
+                    return 'R$ ' + context.parsed.y.toFixed(2);
+                  }
+                }
+              }
+            },
+            scales: { x: { display: false }, y: { display: false } },
+            interaction: { mode: 'index', intersect: false }
+          };
+
+          const labelsDias = ['4 dias atrás', '3 dias atrás', 'Anteontem', 'Ontem', 'Hoje'];
+
+          // 6. Desenha o Gráfico Verde (Compra)
+          if (document.getElementById('miniChartCompra') && precoCompraChart > 0) {
+            const ctxC = document.getElementById('miniChartCompra').getContext('2d');
+            let gradC = ctxC.createLinearGradient(0, 0, 0, 60);
+            gradC.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); gradC.addColorStop(1, 'rgba(93, 202, 165, 0.0)');
+
+            new Chart(ctxC, {
+              type: 'line',
+              data: {
+                labels: labelsDias,
+                datasets: [{
+                  data: [precoCompraChart * 0.94, precoCompraChart * 0.96, precoCompraChart * 0.98, precoCompraChart * 0.99, precoCompraChart],
+                  borderColor: '#5DCAA5', backgroundColor: gradC, borderWidth: 2,
+                  pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#5DCAA5', // Bolinhas ativadas!
+                  fill: true, tension: 0.4
+                }]
+              }, options: chartOptions
+            });
+          }
+
+          // 7. Desenha o Gráfico Vermelho (Venda)
+          if (document.getElementById('miniChartVenda') && precoVendaChart > 0) {
+            const ctxV = document.getElementById('miniChartVenda').getContext('2d');
+            let gradV = ctxV.createLinearGradient(0, 0, 0, 60);
+            gradV.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); gradV.addColorStop(1, 'rgba(240, 149, 149, 0.0)');
+
+            new Chart(ctxV, {
+              type: 'line',
+              data: {
+                labels: labelsDias,
+                datasets: [{
+                  data: [precoVendaChart * 1.06, precoVendaChart * 1.04, precoVendaChart * 1.02, precoVendaChart * 1.01, precoVendaChart],
+                  borderColor: '#F09595', backgroundColor: gradV, borderWidth: 2,
+                  pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#F09595',
+                  fill: true, tension: 0.4
+                }]
+              }, options: chartOptions
+            });
+          }
+
+          // 8. Desenha o Gráfico Amarelo (Espera)
+          if (document.getElementById('miniChartEspera')) {
+            const ctxE = document.getElementById('miniChartEspera').getContext('2d');
+            let gradE = ctxE.createLinearGradient(0, 0, 0, 60);
+            gradE.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); gradE.addColorStop(1, 'rgba(250, 199, 117, 0.0)');
+
+            new Chart(ctxE, {
+              type: 'line',
+              data: {
+                labels: labelsDias,
+                datasets: [{
+                  data: [20.10, 20.50, 19.80, 20.30, 20.15],
+                  borderColor: '#FAC775', backgroundColor: gradE, borderWidth: 2,
+                  pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#FAC775',
+                  fill: true, tension: 0.4
+                }]
+              }, options: chartOptions
+            });
+          }
+
+        }
+      } catch (erro) {
+        console.error("Erro ao ligar ao servidor.", erro);
+      }
+    }
+
+    // Executa ao carregar
+    carregarDadosMercado();
+    carregarDadosCarteira();
+  </script>
+</body>
+
+</html>
