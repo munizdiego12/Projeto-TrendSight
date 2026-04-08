@@ -836,6 +836,19 @@
       border-color: var(--amber);
       color: var(--amber-bright);
     }
+
+    /* ── REMOVER SETAS PADRÃO DO INPUT NUMBER ── */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
   </style>
 </head>
 
@@ -885,29 +898,33 @@
       </div>
 
       <div class="two-col anim anim-d1">
-        <div class="card">
-          <div class="card-label">Operação de compra — DETALHES</div>
+        <div class="card" id="card-detalhes">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div class="card-label" id="detalhes-label" style="margin-bottom: 0;">Operação de compra — DETALHES</div>
+            <button onclick="alternarDetalhes()" style="background: transparent; border: 1px solid var(--border2); color: var(--text-muted); border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: 600;">⇄ Inverter</button>
+          </div>
           <div class="op-header">
-            <span class="op-ticker-big">--</span>
-            <span class="op-badge">0% de chance de alta</span>
+            <span class="op-ticker-big" id="detalhes-ticker">--</span>
+            <span class="op-badge" id="detalhes-badge">0% de chance</span>
           </div>
           <div class="levels">
             <div class="level entry">
-              <div class="level-lbl">Compre por até</div>
-              <div class="level-val">R$ 0,00</div>
+              <div class="level-lbl" id="detalhes-lbl-entrada">Compre por até</div>
+              <div class="level-val" id="detalhes-val-entrada">R$ 0,00</div>
               <div class="level-sub" style="color:var(--text-faint)">Entrada</div>
             </div>
             <div class="level target">
               <div class="level-lbl">Alvo de lucro</div>
-              <div class="level-val">R$ 0,00</div>
-              <div class="level-sub">+0,0%</div>
+              <div class="level-val" id="detalhes-val-alvo" style="color:var(--green-bright)">R$ 0,00</div>
+              <div class="level-sub" id="detalhes-sub-alvo" style="color:var(--green)">+0,0%</div>
             </div>
             <div class="level stop">
               <div class="level-lbl">Trava de segurança</div>
-              <div class="level-val">R$ 0,00</div>
-              <div class="level-sub">−0,0%</div>
+              <div class="level-val" id="detalhes-val-stop" style="color:var(--red-bright)">R$ 0,00</div>
+              <div class="level-sub" id="detalhes-sub-stop" style="color:var(--red)">−0,0%</div>
             </div>
           </div>
+        </div>
         </div>
 
         <div class="card">
@@ -1135,10 +1152,12 @@
       } catch (e) { console.error(e); }
     }
 
-
     // 2. DADOS DO MERCADO (ABAS DINÂMICAS)
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [] };
     let graficosAtuais = { compra: null, venda: null, espera: null };
+    let modoDetalhes = 'buy'; // Controla se o painel está mostrando Compra ou Venda
+    let acaoSelecionadaCompra = null;
+    let acaoSelecionadaVenda = null;
 
     async function carregarDadosMercado() {
       try {
@@ -1198,6 +1217,45 @@
       } catch (e) { console.error(e); }
     }
 
+    function alternarDetalhes() {
+      modoDetalhes = modoDetalhes === 'buy' ? 'sell' : 'buy';
+      renderizarDetalhes();
+    }
+
+    function renderizarDetalhes() {
+      const acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : acaoSelecionadaVenda;
+      if (!acao) return;
+
+      document.getElementById('detalhes-ticker').textContent = acao.Ativo;
+      document.getElementById('detalhes-val-entrada').textContent = `R$ ${acao['Preço (R$)']}`;
+      document.getElementById('detalhes-val-alvo').textContent = `R$ ${acao['Alvo (R$)']}`;
+      document.getElementById('detalhes-val-stop').textContent = `R$ ${acao['Stop (R$)']}`;
+
+      // Calcula a diferença percentual real para mostrar na tela
+      const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
+      const diffStop = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
+      document.getElementById('detalhes-sub-alvo').textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
+      document.getElementById('detalhes-sub-stop').textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
+
+      const badge = document.getElementById('detalhes-badge');
+      
+      if (modoDetalhes === 'buy') {
+        document.getElementById('detalhes-label').textContent = 'Operação de compra — DETALHES';
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até';
+        badge.textContent = `${acao['Probabilidade (%)']}% de chance de alta`;
+        badge.style.color = 'var(--green-bright)';
+        badge.style.borderColor = 'var(--green)';
+        badge.style.background = 'var(--green-dim)';
+      } else {
+        document.getElementById('detalhes-label').textContent = 'Operação de venda — DETALHES';
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Venda a descoberto por';
+        badge.textContent = `${acao['Probabilidade (%)']}% de risco de queda`;
+        badge.style.color = 'var(--red-bright)';
+        badge.style.borderColor = 'var(--red)';
+        badge.style.background = 'var(--red-dim)';
+      }
+    }
+    
     function mudarAcaoCard(tipoBotao, index) {
       const dicioChaves = { 'buy': 'compras', 'sell': 'vendas', 'hold': 'espera' };
       const chave = dicioChaves[tipoBotao];
@@ -1220,12 +1278,13 @@
         document.getElementById(`barra-${idSufixo}`).style.width = `${acao['Probabilidade (%)']}%`;
       }
 
-      if (tipoBotao === 'buy') {
-        document.querySelector('.op-ticker-big').textContent = acao.Ativo;
-        document.querySelector('.op-badge').textContent = `${acao['Probabilidade (%)']}% de chance de alta`;
-        document.querySelectorAll('.level-val')[0].textContent = `R$ ${acao['Preço (R$)']}`;
-        document.querySelectorAll('.level-val')[1].textContent = `R$ ${acao['Alvo (R$)']}`;
-        document.querySelectorAll('.level-val')[2].textContent = `R$ ${acao['Stop (R$)']}`;
+      // Salva qual ação está selecionada no momento para não perdermos ao inverter
+      if(tipoBotao === 'buy') acaoSelecionadaCompra = acao;
+      if(tipoBotao === 'sell') acaoSelecionadaVenda = acao;
+
+      // Se o botão que você clicou for o mesmo modo que o painel está exibindo, ele atualiza o painel
+      if (tipoBotao === modoDetalhes) {
+        renderizarDetalhes();
       }
 
       desenharGrafico(tipoBotao, idSufixo, acao['Preço (R$)']);
