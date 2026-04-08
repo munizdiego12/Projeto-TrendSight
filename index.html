@@ -965,8 +965,23 @@
       <div class="card anim anim-d1" style="margin-bottom: 30px;">
         <div class="card-label">Adicionar / Atualizar Ativo</div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <input class="alloc-input" type="text" id="nova-acao" placeholder="Ticker (ex: BBAS3)"
-            style="margin: 0; flex: 1; min-width: 150px; text-transform: uppercase;" />
+          <input class="alloc-input" list="tickers-b3" type="text" id="nova-acao" placeholder="Ticker (ex: BBAS3)" style="margin: 0; flex: 1; min-width: 150px; text-transform: uppercase;" autocomplete="off" />
+          <datalist id="tickers-b3">
+            <option value="PETR4">Petrobras PN</option>
+            <option value="VALE3">Vale ON</option>
+            <option value="ITUB4">Itaú Unibanco PN</option>
+            <option value="BBDC4">Bradesco PN</option>
+            <option value="BBAS3">Banco do Brasil ON</option>
+            <option value="WEGE3">WEG ON</option>
+            <option value="ABEV3">Ambev ON</option>
+            <option value="MGLU3">Magazine Luiza ON</option>
+            <option value="RENT3">Localiza ON</option>
+            <option value="B3SA3">B3 ON</option>
+            <option value="CPLE6">Copel PNB</option>
+            <option value="ELET3">Eletrobras ON</option>
+            <option value="RADL3">RaiaDrogasil ON</option>
+            <option value="SUZB3">Suzano ON</option>
+          </datalist>
           <input class="alloc-input" type="number" id="nova-qtd" placeholder="Quantidade"
             style="margin: 0; flex: 1; min-width: 120px;" />
           <input class="alloc-input" type="number" id="novo-preco" placeholder="Preço Pago (R$)"
