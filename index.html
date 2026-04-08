@@ -116,7 +116,7 @@
     .signal-card.sell:hover { box-shadow: 0 8px 24px rgba(192, 57, 43, 0.25); }
     .signal-card.hold { background: var(--amber-dim); border-color: var(--amber); }
 
-    .chart-container { height: 60px; width: 100%; margin-top: 10px; margin-bottom: 10px; }
+    .chart-container { height: 80px; width: 100%; margin-top: 10px; margin-bottom: 10px; }
     .signal-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .signal-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
     .buy .signal-icon { background: var(--green); color: #fff; }
@@ -487,11 +487,10 @@
     let modoDetalhes = 'buy';
     let acaoSelecionadaCompra = null;
     let acaoSelecionadaVenda = null;
-    let timeframeAtual = '10d'; // Começa mostrando 10 dias no gráfico
+    let timeframeAtual = '10d'; 
 
-    // --- NOVA FUNÇÃO DE FILTRO DE TEMPO (FASE 4) ---
+    // --- FILTRO DE TEMPO E GRÁFICOS ---
     function mudarTimeframe(tf, btn) {
-      // Muda a cor do botão clicado
       const seletor = btn.parentElement;
       seletor.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
       btn.classList.add('active');
@@ -499,12 +498,12 @@
       if (modoDetalhes === 'buy') btn.classList.add('buy');
       if (modoDetalhes === 'sell') btn.classList.add('sell');
 
-      // Salva o tempo escolhido e redesenha
       timeframeAtual = tf;
       
       const acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : acaoSelecionadaVenda;
       if (acao) {
-        desenharGrafico(modoDetalhes, modoDetalhes === 'buy' ? 'compra' : 'venda', acao['Preço (R$)'], acao.Historico);
+        // Agora passamos as Datas também!
+        desenharGrafico(modoDetalhes, modoDetalhes === 'buy' ? 'compra' : 'venda', acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
       }
     }
 
@@ -664,7 +663,7 @@
               <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
               <p class="signal-text">As 5 melhores oportunidades detectadas pelo algoritmo hoje.</p>
               <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
-              <div class="chart-container" style="position: relative; height: 60px;"><canvas id="chart-compra"></canvas></div>
+              <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-compra">--</span></div>
               <div class="prob-row"><span class="prob-label">Chance</span><div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div><span class="prob-pct" id="pct-compra">0%</span></div>
             </div>
@@ -673,7 +672,7 @@
               <div class="signal-header"><div class="signal-icon">↓</div><span class="signal-action">Vender</span></div>
               <p class="signal-text">Maior risco de queda no curto prazo. Fuja dessas ações.</p>
               <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
-              <div class="chart-container" style="position: relative; height: 60px;"><canvas id="chart-venda"></canvas></div>
+              <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-venda">--</span></div>
               <div class="prob-row"><span class="prob-label">Queda</span><div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div><span class="prob-pct" id="pct-venda">0%</span></div>
             </div>
@@ -682,7 +681,7 @@
               <div class="signal-header"><div class="signal-icon" style="background:var(--amber);color:#fff">—</div><span class="signal-action" style="color:var(--amber-bright)">Esperar</span></div>
               <p class="signal-text">Ativos consolidados sem tendência clara. Aguarde sinais.</p>
               <div class="pill-nav" id="nav-espera">${criarBotoes(dados.espera, 'hold')}</div>
-              <div class="chart-container" style="position: relative; height: 60px;"><canvas id="chart-espera"></canvas></div>
+              <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-espera"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
             </div>
           `;
@@ -700,7 +699,6 @@
     function alternarDetalhes() {
       modoDetalhes = modoDetalhes === 'buy' ? 'sell' : 'buy';
       
-      // Reseta os botões de tempo para a cor correta da aba (Comprar=Verde, Vender=Vermelho)
       const btnTempoAtivo = document.querySelector('.time-btn.active');
       if (btnTempoAtivo) {
          btnTempoAtivo.classList.remove('buy', 'sell');
@@ -774,11 +772,12 @@
         renderizarDetalhes();
       }
 
-      // NOVO: Passamos a coluna Historico para a função desenharGrafico
-      desenharGrafico(tipoBotao, idSufixo, acao['Preço (R$)'], acao.Historico);
+      // Agora passamos as DATAS também
+      desenharGrafico(tipoBotao, idSufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
     }
 
-    function desenharGrafico(tipo, sufixo, precoAtual, historicoStr) {
+    // --- A GRANDE MÁGICA: GRÁFICO COM DATAS E FILTRO REAL ---
+    function desenharGrafico(tipo, sufixo, precoAtual, historicoPrecosStr, historicoDatasStr) {
       const canvas = document.getElementById(`chart-${sufixo}`);
       if(!canvas) return;
 
@@ -787,42 +786,61 @@
       const ctx = canvas.getContext('2d');
       let cor, grad = ctx.createLinearGradient(0, 0, 0, 60);
       let historicoFinal = [];
+      let datasFinais = [];
 
-      if(tipo === 'buy') {
-        cor = '#5DCAA5'; grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); grad.addColorStop(1, 'rgba(93, 202, 165, 0.0)');
-      } else if(tipo === 'sell') {
-        cor = '#F09595'; grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); grad.addColorStop(1, 'rgba(240, 149, 149, 0.0)');
-      } else {
-        cor = '#FAC775'; grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); grad.addColorStop(1, 'rgba(250, 199, 117, 0.0)');
-      }
+      if(tipo === 'buy') { cor = '#5DCAA5'; grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); grad.addColorStop(1, 'rgba(93, 202, 165, 0.0)'); }
+      else if(tipo === 'sell') { cor = '#F09595'; grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); grad.addColorStop(1, 'rgba(240, 149, 149, 0.0)'); }
+      else { cor = '#FAC775'; grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); grad.addColorStop(1, 'rgba(250, 199, 117, 0.0)'); }
 
-      // LÓGICA DE TEMPO: Fatiando a string enviada pelo Python
-      if (historicoStr) {
-         let precos = historicoStr.split(',').map(Number);
-         if (timeframeAtual === '10d') { historicoFinal = precos.slice(-10); }
-         else if (timeframeAtual === '1m') { historicoFinal = precos.slice(-22); }
-         else if (timeframeAtual === '3m') { historicoFinal = precos.slice(-66); }
-         else { historicoFinal = precos; } // 1 ano inteiro
+      if (historicoPrecosStr && historicoDatasStr) {
+         let precos = historicoPrecosStr.split(',').map(Number);
+         let datas = historicoDatasStr.split(',');
+
+         // FATIANDO PREÇOS E DATAS JUNTOS!
+         if (timeframeAtual === '10d') { 
+            historicoFinal = precos.slice(-10); datasFinais = datas.slice(-10);
+         } else if (timeframeAtual === '1m') { 
+            historicoFinal = precos.slice(-22); datasFinais = datas.slice(-22);
+         } else if (timeframeAtual === '3m') { 
+            historicoFinal = precos.slice(-66); datasFinais = datas.slice(-66);
+         } else { 
+            historicoFinal = precos; datasFinais = datas; 
+         }
+
+         // FORMATANDO A DATA PARA O PADRÃO BRASILEIRO (DD/MM/AA)
+         datasFinais = datasFinais.map(d => {
+             const partes = d.split('-'); // 2026-04-01 -> [2026, 04, 01]
+             if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
+             return d;
+         });
       } else {
+         // Fallback de segurança se o Python ainda não rodou
          historicoFinal = [precoAtual*.88, precoAtual*.90, precoAtual*.89, precoAtual*.92, precoAtual*.94, precoAtual*.93, precoAtual*.95, precoAtual*.97, precoAtual*.98, precoAtual];
+         datasFinais = ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'D-1', 'Hoje'];
       }
-
-      const labels = historicoFinal.map((_, i) => i);
 
       graficosAtuais[sufixo] = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: labels,
+          labels: datasFinais, // <- AGORA USAMOS AS DATAS REAIS AQUI
           datasets: [{
             data: historicoFinal, borderColor: cor, backgroundColor: grad, borderWidth: 2, 
-            pointRadius: timeframeAtual === '10d' ? 2 : 0, // Tira as bolinhas se for muito tempo
+            pointRadius: timeframeAtual === '10d' ? 2 : 0, 
             pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4
           }]
         }, 
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } } },
-          scales: { x: { display: false }, y: { display: false } }, interaction: { mode: 'index', intersect: false }
+          plugins: { 
+              legend: { display: false }, 
+              tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } } 
+          },
+          scales: { 
+              // LIGAMOS O EIXO X PARA MOSTRAR AS DATAS!
+              x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } }, 
+              y: { display: false } 
+          }, 
+          interaction: { mode: 'index', intersect: false }
         }
       });
     }
