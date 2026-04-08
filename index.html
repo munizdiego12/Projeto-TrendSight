@@ -175,7 +175,8 @@
 
     /* ── LAYOUT ── */
     .main {
-      max-width: 1400px; /* Aumento para 1400px para dar espaço aos novos botões */
+      max-width: 1400px;
+      /* Aumento para 1400px para dar espaço aos novos botões */
       margin: 0 auto;
       padding: 20px;
       padding-top: 100px;
@@ -822,6 +823,64 @@
     .anim-d3 {
       animation-delay: .20s;
     }
+
+    /* ── NAVEGAÇÃO DE PÍLULAS (BOTÕES DAS AÇÕES NO CARD) ── */
+    .pill-nav {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      /* Permite rolar pro lado se não couber tudo */
+      padding-bottom: 4px;
+    }
+
+    .pill-nav::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .pill-nav::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    .pill-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      font-family: 'Syne', sans-serif;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--text);
+      color: #fff;
+    }
+
+    /* Cores quando o botão está Ativo */
+    .pill-btn.active.buy {
+      background: rgba(93, 202, 165, 0.15);
+      border-color: var(--green);
+      color: var(--green-bright);
+    }
+
+    .pill-btn.active.sell {
+      background: rgba(240, 149, 149, 0.15);
+      border-color: var(--red);
+      color: var(--red-bright);
+    }
+
+    .pill-btn.active.hold {
+      background: rgba(250, 199, 117, 0.15);
+      border-color: var(--amber);
+      color: var(--amber-bright);
+    }
   </style>
 </head>
 
@@ -1194,8 +1253,6 @@
     const now = new Date();
     document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
-    // --- NOVA FUNÇÃO: Consumir a API do Backend ---
-    // --- NOVA FUNÇÃO: Consumir a API do Backend ---
     async function carregarDadosMercado() {
       try {
         const resposta = await fetch('https://projeto-trendsight.onrender.com/api/mercado');
@@ -1387,8 +1444,10 @@
       }
     }
 
+
+
     // Executa ao carregar
-    carregarDadosMercado();
+
     carregarDadosCarteira();
   </script>
 </body>
