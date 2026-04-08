@@ -162,15 +162,8 @@
     }
 
     @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.3;
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
     /* ── LAYOUT ── */
@@ -245,32 +238,12 @@
       overflow: hidden;
     }
 
-    .signal-card:hover {
-      transform: translateY(-4px);
-    }
-
-    .signal-card.buy {
-      background: var(--green-dim);
-      border-color: var(--green);
-    }
-
-    .signal-card.buy:hover {
-      box-shadow: 0 8px 24px rgba(29, 158, 117, 0.25);
-    }
-
-    .signal-card.sell {
-      background: var(--red-dim);
-      border-color: var(--red);
-    }
-
-    .signal-card.sell:hover {
-      box-shadow: 0 8px 24px rgba(192, 57, 43, 0.25);
-    }
-
-    .signal-card.hold {
-      background: var(--amber-dim);
-      border-color: var(--amber);
-    }
+    .signal-card:hover { transform: translateY(-4px); }
+    .signal-card.buy { background: var(--green-dim); border-color: var(--green); }
+    .signal-card.buy:hover { box-shadow: 0 8px 24px rgba(29, 158, 117, 0.25); }
+    .signal-card.sell { background: var(--red-dim); border-color: var(--red); }
+    .signal-card.sell:hover { box-shadow: 0 8px 24px rgba(192, 57, 43, 0.25); }
+    .signal-card.hold { background: var(--amber-dim); border-color: var(--amber); }
 
     .chart-container {
       height: 60px;
@@ -297,20 +270,9 @@
       font-weight: 700;
     }
 
-    .buy .signal-icon {
-      background: var(--green);
-      color: #fff;
-    }
-
-    .sell .signal-icon {
-      background: var(--red);
-      color: #fff;
-    }
-
-    .hold .signal-icon {
-      background: var(--amber);
-      color: #fff;
-    }
+    .buy .signal-icon { background: var(--green); color: #fff; }
+    .sell .signal-icon { background: var(--red); color: #fff; }
+    .hold .signal-icon { background: var(--amber); color: #fff; }
 
     .signal-action {
       font-family: 'Syne', sans-serif;
@@ -320,17 +282,9 @@
       text-transform: uppercase;
     }
 
-    .buy .signal-action {
-      color: var(--green-bright);
-    }
-
-    .sell .signal-action {
-      color: var(--red-bright);
-    }
-
-    .hold .signal-action {
-      color: var(--amber-bright);
-    }
+    .buy .signal-action { color: var(--green-bright); }
+    .sell .signal-action { color: var(--red-bright); }
+    .hold .signal-action { color: var(--amber-bright); }
 
     .signal-text {
       font-size: 12px;
@@ -354,23 +308,9 @@
       font-family: 'Syne', sans-serif;
     }
 
-    .buy .ticker {
-      background: rgba(29, 158, 117, .25);
-      color: var(--green-bright);
-      border: 1px solid var(--green);
-    }
-
-    .sell .ticker {
-      background: rgba(192, 57, 43, .25);
-      color: var(--red-bright);
-      border: 1px solid var(--red);
-    }
-
-    .hold .ticker {
-      background: rgba(239, 159, 39, .2);
-      color: var(--amber-bright);
-      border: 1px solid var(--amber);
-    }
+    .buy .ticker { background: rgba(29, 158, 117, .25); color: var(--green-bright); border: 1px solid var(--green); }
+    .sell .ticker { background: rgba(192, 57, 43, .25); color: var(--red-bright); border: 1px solid var(--red); }
+    .hold .ticker { background: rgba(239, 159, 39, .2); color: var(--amber-bright); border: 1px solid var(--amber); }
 
     .prob-row {
       display: flex;
@@ -398,13 +338,8 @@
       transition: width 1s ease;
     }
 
-    .buy .prob-fill {
-      background: var(--green-bright);
-    }
-
-    .sell .prob-fill {
-      background: var(--red-bright);
-    }
+    .buy .prob-fill { background: var(--green-bright); }
+    .sell .prob-fill { background: var(--red-bright); }
 
     .prob-pct {
       font-size: 12px;
@@ -413,13 +348,8 @@
       text-align: right;
     }
 
-    .buy .prob-pct {
-      color: var(--green-bright);
-    }
-
-    .sell .prob-pct {
-      color: var(--red-bright);
-    }
+    .buy .prob-pct { color: var(--green-bright); }
+    .sell .prob-pct { color: var(--red-bright); }
 
     /* ── TWO-COL GRID ── */
     .two-col {
@@ -430,9 +360,7 @@
     }
 
     @media (max-width: 680px) {
-      .two-col {
-        grid-template-columns: 1fr;
-      }
+      .two-col { grid-template-columns: 1fr; }
     }
 
     /* ── OPERATION CARD ── */
@@ -502,30 +430,17 @@
       font-weight: 700;
     }
 
-    .level.entry .level-val {
-      color: #fff;
-    }
-
-    .level.target .level-val {
-      color: var(--green-bright);
-    }
-
-    .level.stop .level-val {
-      color: var(--red-bright);
-    }
+    .level.entry .level-val { color: #fff; }
+    .level.target .level-val { color: var(--green-bright); }
+    .level.stop .level-val { color: var(--red-bright); }
 
     .level-sub {
       font-size: 10px;
       margin-top: 3px;
     }
 
-    .level.target .level-sub {
-      color: var(--green);
-    }
-
-    .level.stop .level-sub {
-      color: var(--red);
-    }
+    .level.target .level-sub { color: var(--green); }
+    .level.stop .level-sub { color: var(--red); }
 
     /* ── SIMULATOR ── */
     .sim-wrap {
@@ -645,13 +560,8 @@
       flex-shrink: 0;
     }
 
-    .long-dot.g {
-      background: var(--green-bright);
-    }
-
-    .long-dot.r {
-      background: var(--red-bright);
-    }
+    .long-dot.g { background: var(--green-bright); }
+    .long-dot.r { background: var(--red-bright); }
 
     .long-rec-body {
       font-size: 13px;
@@ -680,9 +590,7 @@
       margin-bottom: 14px;
     }
 
-    .alloc-input:focus {
-      border-color: var(--purple);
-    }
+    .alloc-input:focus { border-color: var(--purple); }
 
     .alloc-result {
       background: var(--bg);
@@ -695,9 +603,7 @@
       min-height: 60px;
     }
 
-    .alloc-result strong {
-      color: #fff;
-    }
+    .alloc-result strong { color: #fff; }
 
     /* ── CTA ── */
     .cta-row {
@@ -743,42 +649,19 @@
     }
 
     /* ── VIEWS ── */
-    .view {
-      display: none;
-    }
-
-    .view.active {
-      display: block;
-    }
+    .view { display: none; }
+    .view.active { display: block; }
 
     /* ── ANIMATIONS ── */
     @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(16px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .anim {
-      animation: fadeUp .4s ease both;
-    }
-
-    .anim-d1 {
-      animation-delay: .05s;
-    }
-
-    .anim-d2 {
-      animation-delay: .12s;
-    }
-
-    .anim-d3 {
-      animation-delay: .20s;
-    }
+    .anim { animation: fadeUp .4s ease both; }
+    .anim-d1 { animation-delay: .05s; }
+    .anim-d2 { animation-delay: .12s; }
+    .anim-d3 { animation-delay: .20s; }
 
     /* ── NAVEGAÇÃO DE PÍLULAS (BOTÕES DAS AÇÕES NO CARD) ── */
     .pill-nav {
@@ -790,14 +673,8 @@
       padding-bottom: 4px;
     }
 
-    .pill-nav::-webkit-scrollbar {
-      height: 4px;
-    }
-
-    .pill-nav::-webkit-scrollbar-thumb {
-      background: var(--border2);
-      border-radius: 4px;
-    }
+    .pill-nav::-webkit-scrollbar { height: 4px; }
+    .pill-nav::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
     .pill-btn {
       background: var(--surface2);
@@ -813,29 +690,12 @@
       font-family: 'Syne', sans-serif;
     }
 
-    .pill-btn:hover {
-      border-color: var(--text);
-      color: #fff;
-    }
+    .pill-btn:hover { border-color: var(--text); color: #fff; }
 
     /* Cores quando o botão está Ativo */
-    .pill-btn.active.buy {
-      background: rgba(93, 202, 165, 0.15);
-      border-color: var(--green);
-      color: var(--green-bright);
-    }
-
-    .pill-btn.active.sell {
-      background: rgba(240, 149, 149, 0.15);
-      border-color: var(--red);
-      color: var(--red-bright);
-    }
-
-    .pill-btn.active.hold {
-      background: rgba(250, 199, 117, 0.15);
-      border-color: var(--amber);
-      color: var(--amber-bright);
-    }
+    .pill-btn.active.buy { background: rgba(93, 202, 165, 0.15); border-color: var(--green); color: var(--green-bright); }
+    .pill-btn.active.sell { background: rgba(240, 149, 149, 0.15); border-color: var(--red); color: var(--red-bright); }
+    .pill-btn.active.hold { background: rgba(250, 199, 117, 0.15); border-color: var(--amber); color: var(--amber-bright); }
 
     /* ── REMOVER SETAS PADRÃO DO INPUT NUMBER ── */
     input[type="number"]::-webkit-outer-spin-button,
@@ -848,7 +708,6 @@
       -moz-appearance: textfield;
       appearance: textfield;
     }
-
   </style>
 </head>
 
@@ -858,10 +717,8 @@
     <div class="logo">
       <div class="logo-mark">
         <svg viewBox="0 0 18 18" fill="none">
-          <polyline points="1,13 6,7 10,10 17,3" stroke="#fff" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round" />
-          <polyline points="13,3 17,3 17,7" stroke="#fff" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round" />
+          <polyline points="1,13 6,7 10,10 17,3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <polyline points="13,3 17,3 17,7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>
       <span class="logo-name">Trend<span>Sight</span></span>
@@ -883,8 +740,7 @@
 
     <div class="intro-section anim">
       <h1 class="intro-title">Inteligência de mercado simplificada para você.</h1>
-      <p class="intro-text">O TrendSight cruza milhares de dados financeiros para entregar recomendações claras do que
-        comprar, vender ou manter. Sem jargões complicados.</p>
+      <p class="intro-text">O TrendSight cruza milhares de dados financeiros para entregar recomendações claras do que comprar, vender ou manter. Sem jargões complicados.</p>
     </div>
 
     <div id="view-rapido" class="view active">
@@ -892,12 +748,13 @@
       <div class="verdict-hero anim">
         <div class="verdict-eyebrow">Veredito do algoritmo — hoje</div>
         <div class="verdict-heading">O que fazer agora?</div>
-
+        
         <div class="signals-grid" id="grid-sinais">
-        </div>
+          </div>
       </div>
 
       <div class="two-col anim anim-d1">
+        
         <div class="card" id="card-detalhes">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <div class="card-label" id="detalhes-label" style="margin-bottom: 0;">Operação de compra — DETALHES</div>
@@ -925,26 +782,25 @@
             </div>
           </div>
         </div>
-        </div>
 
         <div class="card">
-          <div class="card-label">Simulador "e se..."</div>
+          <div class="card-label">Simulador de Lucro Projetado</div>
           <div class="sim-wrap">
             <div>
               <div class="sim-input-row">
                 <span class="sim-prefix">R$</span>
-                <input class="sim-input" type="number" id="simVal" value="1000" min="100" step="100" oninput="calcSim()"
-                  placeholder="Valor" />
+                <input class="sim-input" type="number" id="simVal" value="1000" min="100" step="100" oninput="calcSim()" placeholder="Valor investido" />
               </div>
             </div>
             <div class="sim-result">
-              <div class="sim-result-lbl">Se tivesse seguido nossas dicas no último mês:</div>
-              <div class="sim-result-val" id="simResult">R$ 1.150,00</div>
-              <div class="sim-gain" id="simGain">+R$ 150,00 &nbsp;·&nbsp; +15,0%</div>
-              <div class="sim-note">Baseado nas operações recomendadas no período.</div>
+              <div class="sim-result-lbl">Se a ação atingir o Alvo, você terá:</div>
+              <div class="sim-result-val" id="simResult">R$ 0,00</div>
+              <div class="sim-gain" id="simGain">+R$ 0,00 &nbsp;·&nbsp; +0,0%</div>
+              <div class="sim-note">Cálculo dinâmico baseado no alvo da operação ao lado.</div>
             </div>
           </div>
         </div>
+
       </div>
 
       <div class="cta-row anim anim-d2">
@@ -955,8 +811,7 @@
     <div id="view-carteira" class="view">
       <div class="intro-section anim">
         <h1 class="intro-title">O Raio-X da sua Carteira</h1>
-        <p class="intro-text">Cruzamos os seus ativos com o nosso algoritmo para você saber exatamente o que manter,
-          comprar mais ou vender hoje.</p>
+        <p class="intro-text">Cruzamos os seus ativos com o nosso algoritmo para você saber exatamente o que manter, comprar mais ou vender hoje.</p>
       </div>
 
       <div class="two-col anim anim-d1">
@@ -991,9 +846,7 @@
             </div>
             <div class="prob-row">
               <span class="prob-label">Projeção</span>
-              <div class="prob-track">
-                <div class="prob-fill" style="width:78%"></div>
-              </div>
+              <div class="prob-track"><div class="prob-fill" style="width:78%"></div></div>
               <span class="prob-pct">78%</span>
             </div>
           </div>
@@ -1014,13 +867,11 @@
           <div>
             <div class="long-rec">
               <div class="long-dot g"></div>
-              <div class="long-rec-body"><strong>ITUB4</strong> — Banco com lucros consistentes e dividend yield
-                atrativo.</div>
+              <div class="long-rec-body"><strong>ITUB4</strong> — Banco com lucros consistentes e dividend yield atrativo.</div>
             </div>
             <div class="long-rec">
               <div class="long-dot g"></div>
-              <div class="long-rec-body"><strong>VALE3</strong> — Líder global em minério de ferro com caixa robusto.
-              </div>
+              <div class="long-rec-body"><strong>VALE3</strong> — Líder global em minério de ferro com caixa robusto.</div>
             </div>
             <div class="long-rec">
               <div class="long-dot r"></div>
@@ -1031,19 +882,16 @@
 
         <div class="card">
           <div class="card-label">Quanto eu invisto?</div>
-          <input class="alloc-input" type="number" id="allocVal" value="500" min="100" step="100" oninput="calcAlloc()"
-            placeholder="Quanto você tem disponível (R$)" />
+          <input class="alloc-input" type="number" id="allocVal" value="500" min="100" step="100" oninput="calcAlloc()" placeholder="Quanto você tem disponível (R$)" />
           <div class="alloc-result" id="allocResult">
-            Compre <strong>9 cotas de ITUB4</strong> (~R$ 32/cota) e <strong>3 cotas de VALE3</strong> (~R$ 68/cota).
-            Divisão 60/40 recomendada.
+            Compre <strong>9 cotas de ITUB4</strong> (~R$ 32/cota) e <strong>3 cotas de VALE3</strong> (~R$ 68/cota). Divisão 60/40 recomendada.
           </div>
         </div>
       </div>
     </div>
 
     <div class="disclaimer">
-      Os sinais são baseados em análise algorítmica probabilística e não constituem recomendação formal de investimento.
-      TrendSight Analytics — uso educacional.
+      Os sinais são baseados em análise algorítmica probabilística e não constituem recomendação formal de investimento. TrendSight Analytics — uso educacional.
     </div>
 
   </main>
@@ -1061,10 +909,23 @@
 
     function calcSim() {
       const v = parseFloat(document.getElementById('simVal').value) || 0;
-      const gain = v * 0.15;
+      
+      // Descobre qual ação está na tela agora
+      const acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : acaoSelecionadaVenda;
+      let percentualReal = 0;
+
+      if (acao) {
+        // Calcula a diferença percentual do alvo
+        const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1);
+        // Usamos Math.abs porque na venda a descoberto (short), a queda é o nosso lucro!
+        percentualReal = Math.abs(diffAlvo);
+      }
+
+      const gain = v * percentualReal;
       const total = v + gain;
+
       document.getElementById('simResult').textContent = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('simGain').innerHTML = '+R$ ' + gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' &nbsp;·&nbsp; +15,0%';
+      document.getElementById('simGain').innerHTML = '+R$ ' + gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' &nbsp;·&nbsp; +' + (percentualReal * 100).toFixed(1) + '%';
     }
 
     function calcAlloc() {
@@ -1152,10 +1013,11 @@
       } catch (e) { console.error(e); }
     }
 
+
     // 2. DADOS DO MERCADO (ABAS DINÂMICAS)
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [] };
     let graficosAtuais = { compra: null, venda: null, espera: null };
-    let modoDetalhes = 'buy'; // Controla se o painel está mostrando Compra ou Venda
+    let modoDetalhes = 'buy';
     let acaoSelecionadaCompra = null;
     let acaoSelecionadaVenda = null;
 
@@ -1167,9 +1029,9 @@
         if (dados.status === "sucesso") {
           dadosMercadoGlobais = dados;
           const grid = document.getElementById('grid-sinais');
-
+          
           const criarBotoes = (lista, tipoCss) => {
-            return lista.map((acao, idx) =>
+            return lista.map((acao, idx) => 
               `<button class="pill-btn ${idx === 0 ? 'active ' + tipoCss : ''}" onclick="mudarAcaoCard('${tipoCss}', ${idx})">${acao.Ativo}</button>`
             ).join('');
           };
@@ -1210,9 +1072,9 @@
             </div>
           `;
 
-          if (dados.compras.length > 0) mudarAcaoCard('buy', 0);
-          if (dados.vendas.length > 0) mudarAcaoCard('sell', 0);
-          if (dados.espera.length > 0) mudarAcaoCard('hold', 0);
+          if(dados.compras.length > 0) mudarAcaoCard('buy', 0);
+          if(dados.vendas.length > 0) mudarAcaoCard('sell', 0);
+          if(dados.espera.length > 0) mudarAcaoCard('hold', 0);
         }
       } catch (e) { console.error(e); }
     }
@@ -1254,35 +1116,35 @@
         badge.style.borderColor = 'var(--red)';
         badge.style.background = 'var(--red-dim)';
       }
+
+      calcSim();
     }
-    
+
     function mudarAcaoCard(tipoBotao, index) {
       const dicioChaves = { 'buy': 'compras', 'sell': 'vendas', 'hold': 'espera' };
       const chave = dicioChaves[tipoBotao];
       const acao = dadosMercadoGlobais[chave][index];
-      if (!acao) return;
+      if(!acao) return;
 
       const navDiv = document.getElementById(`nav-${chave}`);
-      if (navDiv) {
+      if(navDiv) {
         navDiv.querySelectorAll('.pill-btn').forEach((btn, i) => {
           btn.classList.remove('active', 'buy', 'sell', 'hold');
-          if (i === index) btn.classList.add('active', tipoBotao);
+          if(i === index) btn.classList.add('active', tipoBotao);
         });
       }
 
       const idSufixo = tipoBotao === 'buy' ? 'compra' : tipoBotao === 'sell' ? 'venda' : 'espera';
       document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
-
-      if (tipoBotao !== 'hold') {
+      
+      if(tipoBotao !== 'hold') {
         document.getElementById(`pct-${idSufixo}`).textContent = `${acao['Probabilidade (%)']}%`;
         document.getElementById(`barra-${idSufixo}`).style.width = `${acao['Probabilidade (%)']}%`;
       }
 
-      // Salva qual ação está selecionada no momento para não perdermos ao inverter
       if(tipoBotao === 'buy') acaoSelecionadaCompra = acao;
       if(tipoBotao === 'sell') acaoSelecionadaVenda = acao;
 
-      // Se o botão que você clicou for o mesmo modo que o painel está exibindo, ele atualiza o painel
       if (tipoBotao === modoDetalhes) {
         renderizarDetalhes();
       }
@@ -1292,34 +1154,34 @@
 
     function desenharGrafico(tipo, sufixo, precoAtual) {
       const canvas = document.getElementById(`chart-${sufixo}`);
-      if (!canvas) return;
+      if(!canvas) return;
 
-      if (graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
+      if(graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
 
       const ctx = canvas.getContext('2d');
       let cor, grad = ctx.createLinearGradient(0, 0, 0, 60);
       let historico10Dias = [];
 
-      if (tipo === 'buy') {
+      if(tipo === 'buy') {
         cor = '#5DCAA5'; grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); grad.addColorStop(1, 'rgba(93, 202, 165, 0.0)');
-        historico10Dias = [precoAtual * .88, precoAtual * .90, precoAtual * .89, precoAtual * .92, precoAtual * .94, precoAtual * .93, precoAtual * .95, precoAtual * .97, precoAtual * .98, precoAtual];
-      } else if (tipo === 'sell') {
+        historico10Dias = [precoAtual*.88, precoAtual*.90, precoAtual*.89, precoAtual*.92, precoAtual*.94, precoAtual*.93, precoAtual*.95, precoAtual*.97, precoAtual*.98, precoAtual];
+      } else if(tipo === 'sell') {
         cor = '#F09595'; grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); grad.addColorStop(1, 'rgba(240, 149, 149, 0.0)');
-        historico10Dias = [precoAtual * 1.12, precoAtual * 1.10, precoAtual * 1.08, precoAtual * 1.09, precoAtual * 1.06, precoAtual * 1.07, precoAtual * 1.05, precoAtual * 1.03, precoAtual * 1.01, precoAtual];
+        historico10Dias = [precoAtual*1.12, precoAtual*1.10, precoAtual*1.08, precoAtual*1.09, precoAtual*1.06, precoAtual*1.07, precoAtual*1.05, precoAtual*1.03, precoAtual*1.01, precoAtual];
       } else {
         cor = '#FAC775'; grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); grad.addColorStop(1, 'rgba(250, 199, 117, 0.0)');
-        historico10Dias = [precoAtual * .99, precoAtual * 1.01, precoAtual * 1.00, precoAtual * .98, precoAtual * 1.02, precoAtual * .99, precoAtual * 1.01, precoAtual * .98, precoAtual * 1.00, precoAtual];
+        historico10Dias = [precoAtual*.99, precoAtual*1.01, precoAtual*1.00, precoAtual*.98, precoAtual*1.02, precoAtual*.99, precoAtual*1.01, precoAtual*.98, precoAtual*1.00, precoAtual];
       }
 
       const chartOptions = {
         responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
+        plugins: { 
+          legend: { display: false }, 
+          tooltip: { 
             enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', titleFont: { family: 'Syne', size: 10 },
-            bodyFont: { family: 'DM Sans', size: 11, weight: 'bold' }, bodyColor: '#fff', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 6, caretPadding: 10, displayColors: false,
-            callbacks: { label: function (c) { return 'R$ ' + c.parsed.y.toFixed(2); } }
-          }
+            bodyFont: { family: 'DM Sans', size: 11, weight: 'bold' }, bodyColor: '#fff', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 6, caretPadding: 10, displayColors: false, 
+            callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } }
+          } 
         },
         scales: { x: { display: false }, y: { display: false } }, interaction: { mode: 'index', intersect: false }
       };
@@ -1329,7 +1191,7 @@
         data: {
           labels: ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'Anteontem', 'Ontem', 'Hoje'],
           datasets: [{
-            data: historico10Dias, borderColor: cor, backgroundColor: grad, borderWidth: 2,
+            data: historico10Dias, borderColor: cor, backgroundColor: grad, borderWidth: 2, 
             pointRadius: 2, pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4
           }]
         }, options: chartOptions
@@ -1337,11 +1199,9 @@
     }
 
     // --- INICIALIZAÇÃO ---
-    // Ligando os dois motores ao carregar a página
     carregarDadosMercado();
     carregarDadosCarteira();
 
   </script>
 </body>
-
 </html>
