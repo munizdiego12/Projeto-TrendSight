@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, send_file
 from flask_cors import CORS
-import sqlite3
+from sqlalchemy import create_engine, text
 import pandas as pd
 
 app = Flask(__name__)
@@ -11,21 +11,23 @@ CORS(app)
 def home():
     return send_file('index.html')
 
-# --- ROTA 1: Visão Geral do Mercado (Agora com Top 5 Dinâmico) ---
+# Variável de conexão com a Nuvem
+DATABASE_URL = "postgresql://neondb_owner:npg_esUo6BKpL4Ib@ep-crimson-lab-amurwrao.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
+
+# --- ROTA 1: Visão Geral do Mercado ---
 @app.route('/api/mercado', methods=['GET'])
 def obter_dados_mercado():
     try:
-        conexao = sqlite3.connect('trendsight.db')
-        # Puxando tudo do banco ordenado da maior probabilidade para a menor
-        df = pd.read_sql_query("SELECT * FROM analise_mercado ORDER BY `Probabilidade (%)` DESC", conexao)
-        conexao.close()
+        engine = create_engine(DATABASE_URL)
+        # Consulta protegida com text()
+        query = text('SELECT * FROM analise_mercado ORDER BY "Probabilidade (%)" DESC')
+        df = pd.read_sql_query(query, engine)
         
         dados = df.to_dict(orient='records')
         
-        # O Filtro Inteligente:
-        top_compras = [acao for acao in dados if acao['Sinal'] == 'COMPRA'][:5]  # Top 5 Melhores
-        top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:5]    # Top 5 Piores
-        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:3]  # 3 Neutras
+        top_compras = [acao for acao in dados if acao['Sinal'] == 'COMPRA'][:5]
+        top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:5]
+        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:3]
         
         return jsonify({
             "status": "sucesso",
@@ -40,35 +42,30 @@ def obter_dados_mercado():
 @app.route('/api/carteira', methods=['GET'])
 def obter_dados_carteira():
     try:
-        conexao = sqlite3.connect('trendsight.db')
+        engine = create_engine(DATABASE_URL)
         
-        # Juntando a carteira com o preço e sinal de hoje
-        query = """
+        # Consulta protegida com text()
+        query = text("""
             SELECT 
-                c.Ativo, 
-                c.Quantidade, 
-                c.Preco_Medio, 
-                m.[Preço (R$)] as Preco_Atual,
-                m.Sinal
+                c."Ativo", 
+                c."Quantidade", 
+                c."Preco_Medio", 
+                m."Preço (R$)" as "Preco_Atual",
+                m."Sinal"
             FROM minha_carteira c
-            LEFT JOIN analise_mercado m ON c.Ativo = m.Ativo
-        """
-        df_carteira = pd.read_sql_query(query, conexao)
-        conexao.close()
+            LEFT JOIN analise_mercado m ON c."Ativo" = m."Ativo"
+        """)
+        df_carteira = pd.read_sql_query(query, engine)
 
-        # Calculando o Lucro ou Prejuízo em Reais e em Porcentagem
-        # Se a ação não estiver no radar do mercado hoje, preenchemos com 0 para não dar erro
         df_carteira['Preco_Atual'] = df_carteira['Preco_Atual'].fillna(df_carteira['Preco_Medio'])
         
         df_carteira['Saldo_Total'] = round(df_carteira['Quantidade'] * df_carteira['Preco_Atual'], 2)
         df_carteira['Lucro_R$'] = round((df_carteira['Preco_Atual'] - df_carteira['Preco_Medio']) * df_carteira['Quantidade'], 2)
         df_carteira['Rentabilidade_%'] = round(((df_carteira['Preco_Atual'] / df_carteira['Preco_Medio']) - 1) * 100, 2)
         
-        # Somatório Geral da Carteira
         patrimonio_total = round(df_carteira['Saldo_Total'].sum(), 2)
         lucro_total = round(df_carteira['Lucro_R$'].sum(), 2)
 
-        # Prepara a entrega para o site
         return jsonify({
             "status": "sucesso",
             "resumo": {

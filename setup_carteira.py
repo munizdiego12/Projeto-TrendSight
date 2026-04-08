@@ -1,44 +1,29 @@
-import sqlite3
 import pandas as pd
+from sqlalchemy import create_engine, text
 
 def criar_carteira_usuario():
-    print("⚙️ Conectando ao banco de dados...")
-    conexao = sqlite3.connect('trendsight.db')
-    cursor = conexao.cursor()
+    print("⚙️ Conectando ao banco de dados na Nuvem (Neon)...")
+    DATABASE_URL = "postgresql://neondb_owner:npg_esUo6BKpL4Ib@ep-crimson-lab-amurwrao.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
+    engine = create_engine(DATABASE_URL)
 
-    # 1. Cria a tabela da carteira (se não existir)
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS minha_carteira (
-        Ativo TEXT PRIMARY KEY,
-        Quantidade INTEGER,
-        Preco_Medio REAL
-    )
-    ''')
-
-    # 2. Limpa os dados antigos para não duplicar se rodarmos o script duas vezes
-    cursor.execute('DELETE FROM minha_carteira')
-
-    # 3. Insere as ações fictícias que o usuário já tem na corretora
-    # Formato: (Ticker, Quantidade de ações, Preço médio que pagou)
-    acoes_compradas = [
-        ('PETR4', 100, 36.50), # Está no lucro (preço atual é maior)
-        ('VALE3', 50, 85.20),  # Está no prejuízo (preço atual é menor)
-        ('MGLU3', 1000, 15.00) # Prejuízo extremo para testarmos o alerta de venda
+    # 1. Cria a lista de ações da sua carteira
+    dados = [
+        {'Ativo': 'PETR4', 'Quantidade': 100, 'Preco_Medio': 36.50},
+        {'Ativo': 'VALE3', 'Quantidade': 50, 'Preco_Medio': 85.20},
+        {'Ativo': 'MGLU3', 'Quantidade': 1000, 'Preco_Medio': 15.00}
     ]
+    df_carteira = pd.DataFrame(dados)
 
-    cursor.executemany('''
-    INSERT INTO minha_carteira (Ativo, Quantidade, Preco_Medio)
-    VALUES (?, ?, ?)
-    ''', acoes_compradas)
+    # 2. Salva direto no PostgreSQL (Substitui se já existir, evitando duplicidade)
+    print("Enviando dados...")
+    df_carteira.to_sql('minha_carteira', engine, if_exists='replace', index=False)
 
-    conexao.commit()
-
-    # 4. Lê o banco para confirmar se deu certo
-    df_carteira = pd.read_sql_query("SELECT * FROM minha_carteira", conexao)
-    print("\n✅ Tabela 'minha_carteira' criada e populada com sucesso!")
-    print(df_carteira.to_string(index=False))
-
-    conexao.close()
+    # 3. Lê o banco na nuvem para confirmar se deu certo (AGORA COM O TEXT)
+    query_confirmacao = text('SELECT * FROM minha_carteira')
+    df_confirmacao = pd.read_sql_query(query_confirmacao, engine)
+    
+    print("\n✅ Tabela 'minha_carteira' criada e populada no PostgreSQL com sucesso!")
+    print(df_confirmacao.to_string(index=False))
 
 if __name__ == "__main__":
     criar_carteira_usuario()
