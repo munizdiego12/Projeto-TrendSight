@@ -176,7 +176,6 @@
     /* ── LAYOUT ── */
     .main {
       max-width: 1400px;
-      /* Aumento para 1400px para dar espaço aos novos botões */
       margin: 0 auto;
       padding: 20px;
       padding-top: 100px;
@@ -235,7 +234,7 @@
       }
     }
 
-    /* ── ATUALIZAÇÃO DOS CARDS (GLOW E HOVER) ── */
+    /* ── ATUALIZAÇÃO DOS CARDS ── */
     .signal-card {
       border-radius: var(--radius);
       padding: 18px;
@@ -246,12 +245,10 @@
       overflow: hidden;
     }
 
-    /* Efeito de flutuar ao passar o mouse */
     .signal-card:hover {
       transform: translateY(-4px);
     }
 
-    /* Cores e Brilho (Glow) para o card de COMPRA */
     .signal-card.buy {
       background: var(--green-dim);
       border-color: var(--green);
@@ -261,7 +258,6 @@
       box-shadow: 0 8px 24px rgba(29, 158, 117, 0.25);
     }
 
-    /* Cores e Brilho (Glow) para o card de VENDA */
     .signal-card.sell {
       background: var(--red-dim);
       border-color: var(--red);
@@ -271,13 +267,11 @@
       box-shadow: 0 8px 24px rgba(192, 57, 43, 0.25);
     }
 
-    /* Cores para o card de ESPERA */
     .signal-card.hold {
       background: var(--amber-dim);
       border-color: var(--amber);
     }
 
-    /* Container que vai receber o mini gráfico depois */
     .chart-container {
       height: 60px;
       width: 100%;
@@ -713,31 +707,6 @@
       flex-wrap: wrap;
     }
 
-    .btn-primary {
-      background: var(--purple);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      padding: 12px 24px;
-      font-size: 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background .15s, transform .1s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-primary:hover {
-      background: var(--purple-dim);
-    }
-
-    .btn-primary:active {
-      transform: scale(0.98);
-    }
-
     .btn-ghost {
       background: transparent;
       color: var(--text-muted);
@@ -771,19 +740,6 @@
       color: var(--text-faint);
       line-height: 1.6;
       text-align: center;
-    }
-
-    /* ── REMOVER SETAS PADRÃO DO INPUT NUMBER ── */
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      appearance: none;
-      margin: 0;
-    }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-      appearance: textfield;
     }
 
     /* ── VIEWS ── */
@@ -831,7 +787,6 @@
       margin-top: 16px;
       margin-bottom: 16px;
       overflow-x: auto;
-      /* Permite rolar pro lado se não couber tudo */
       padding-bottom: 4px;
     }
 
@@ -916,92 +871,41 @@
     <div class="intro-section anim">
       <h1 class="intro-title">Inteligência de mercado simplificada para você.</h1>
       <p class="intro-text">O TrendSight cruza milhares de dados financeiros para entregar recomendações claras do que
-        comprar, vender ou manter. Sem jargões complicados. Apenas siga os sinais e tome decisões baseadas em
-        probabilidade matemática.</p>
+        comprar, vender ou manter. Sem jargões complicados.</p>
     </div>
 
-    <!-- ══ MODO AÇÃO RÁPIDA ══ -->
     <div id="view-rapido" class="view active">
 
       <div class="verdict-hero anim">
         <div class="verdict-eyebrow">Veredito do algoritmo — hoje</div>
         <div class="verdict-heading">O que fazer agora?</div>
+
         <div class="signals-grid" id="grid-sinais">
-          <div class="signal-card buy">
-            <div class="signal-header">
-              <div class="signal-icon">↑</div>
-              <span class="signal-action">Comprar</span>
-            </div>
-            <p class="signal-text">Tendência de alta forte. Nosso modelo detectou janela favorável para os próximos 5
-              dias.</p>
-            <div class="tickers">
-              <span class="ticker">PETR4</span>
-              <span class="ticker">VALE3</span>
-              <span class="ticker">ITUB4</span>
-            </div>
-            <div class="prob-row">
-              <span class="prob-label">Chance</span>
-              <div class="prob-track">
-                <div class="prob-fill" style="width:82%"></div>
-              </div>
-              <span class="prob-pct">82%</span>
-            </div>
-          </div>
-
-          <div class="signal-card sell">
-            <div class="signal-header">
-              <div class="signal-icon">↓</div>
-              <span class="signal-action">Vender</span>
-            </div>
-            <p class="signal-text">Sentimento do mercado deteriorou. Saia agora para evitar perdas maiores.</p>
-            <div class="tickers">
-              <span class="ticker">MGLU3</span>
-            </div>
-            <div class="prob-row">
-              <span class="prob-label">Queda</span>
-              <div class="prob-track">
-                <div class="prob-fill" style="width:73%"></div>
-              </div>
-              <span class="prob-pct">73%</span>
-            </div>
-          </div>
-
-          <div class="signal-card hold">
-            <div class="signal-header">
-              <div class="signal-icon" style="background:var(--amber);color:#fff">—</div>
-              <span class="signal-action" style="color:var(--amber-bright)">Esperar</span>
-            </div>
-            <p class="signal-text">Mercado indeciso. Não faça nada com ela hoje. Aguarde o próximo sinal.</p>
-            <div class="tickers">
-              <span class="ticker"
-                style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">BBDC4</span>
-            </div>
-          </div>
         </div>
       </div>
 
       <div class="two-col anim anim-d1">
         <div class="card">
-          <div class="card-label">Operação de compra — PETR4</div>
+          <div class="card-label">Operação de compra — DETALHES</div>
           <div class="op-header">
-            <span class="op-ticker-big">PETR4</span>
-            <span class="op-badge">82% de chance de alta</span>
+            <span class="op-ticker-big">--</span>
+            <span class="op-badge">0% de chance de alta</span>
           </div>
           <div class="levels">
             <div class="level entry">
               <div class="level-lbl">Compre por até</div>
-              <div class="level-val">R$ 38,00</div>
+              <div class="level-val">R$ 0,00</div>
               <div class="level-sub" style="color:var(--text-faint)">Entrada</div>
             </div>
             <div class="level target">
               <div class="level-lbl">Alvo de lucro</div>
-              <div class="level-val">R$ 40,50</div>
-              <div class="level-sub">+6,6%</div>
+              <div class="level-val">R$ 0,00</div>
+              <div class="level-sub">+0,0%</div>
             </div>
             <div class="level stop">
               <div class="level-lbl">Trava de segurança</div>
-              <div class="level-val">R$ 36,50</div>
-              <div class="level-sub">−3,9%</div>
+              <div class="level-val">R$ 0,00</div>
+              <div class="level-sub">−0,0%</div>
             </div>
           </div>
         </div>
@@ -1020,7 +924,7 @@
               <div class="sim-result-lbl">Se tivesse seguido nossas dicas no último mês:</div>
               <div class="sim-result-val" id="simResult">R$ 1.150,00</div>
               <div class="sim-gain" id="simGain">+R$ 150,00 &nbsp;·&nbsp; +15,0%</div>
-              <div class="sim-note">Baseado nas 8 operações recomendadas no período.</div>
+              <div class="sim-note">Baseado nas operações recomendadas no período.</div>
             </div>
           </div>
         </div>
@@ -1050,13 +954,10 @@
       </div>
 
       <div class="verdict-heading anim anim-d2" style="margin-top: 40px;">Suas Posições</div>
-      <div class="signals-grid anim anim-d3" id="grid-carteira">
-      </div>
+      <div class="signals-grid anim anim-d3" id="grid-carteira"></div>
     </div>
 
-    <!-- ══ MODO PILOTO AUTOMÁTICO ══ -->
     <div id="view-longo" class="view">
-
       <div class="verdict-hero anim">
         <div class="verdict-eyebrow">Recomendação do mês — longo prazo</div>
         <div class="verdict-heading">Onde colocar o dinheiro agora?</div>
@@ -1066,8 +967,7 @@
               <div class="signal-icon">↑</div>
               <span class="signal-action">Comprar e guardar</span>
             </div>
-            <p class="signal-text">Empresas sólidas negociadas abaixo do valor justo. Nosso modelo projeta crescimento
-              consistente e bons dividendos para 1 a 3 anos.</p>
+            <p class="signal-text">Empresas sólidas negociadas abaixo do valor justo.</p>
             <div class="tickers">
               <span class="ticker">ITUB4</span>
               <span class="ticker">VALE3</span>
@@ -1085,11 +985,8 @@
               <div class="signal-icon">↓</div>
               <span class="signal-action">Não recomendado</span>
             </div>
-            <p class="signal-text">Setor enfrenta dificuldades estruturais persistentes. Evite aportes de longo prazo.
-            </p>
-            <div class="tickers">
-              <span class="ticker">MGLU3</span>
-            </div>
+            <p class="signal-text">Setor enfrenta dificuldades estruturais persistentes.</p>
+            <div class="tickers"><span class="ticker">MGLU3</span></div>
           </div>
         </div>
       </div>
@@ -1100,18 +997,17 @@
           <div>
             <div class="long-rec">
               <div class="long-dot g"></div>
-              <div class="long-rec-body"><strong>ITUB4</strong> — Banco com lucros consistentes há 10 anos e dividend
-                yield atrativo. Momento de preço favorável este trimestre.</div>
+              <div class="long-rec-body"><strong>ITUB4</strong> — Banco com lucros consistentes e dividend yield
+                atrativo.</div>
             </div>
             <div class="long-rec">
               <div class="long-dot g"></div>
               <div class="long-rec-body"><strong>VALE3</strong> — Líder global em minério de ferro com caixa robusto.
-                Exportações em alta e dólar favorável ampliam margem.</div>
+              </div>
             </div>
             <div class="long-rec">
               <div class="long-dot r"></div>
-              <div class="long-rec-body"><strong>MGLU3</strong> — Endividamento elevado, margens pressionadas.
-                Recuperação estrutural ainda não confirmada pelos fundamentos.</div>
+              <div class="long-rec-body"><strong>MGLU3</strong> — Endividamento elevado, margens pressionadas.</div>
             </div>
           </div>
         </div>
@@ -1122,109 +1018,25 @@
             placeholder="Quanto você tem disponível (R$)" />
           <div class="alloc-result" id="allocResult">
             Compre <strong>9 cotas de ITUB4</strong> (~R$ 32/cota) e <strong>3 cotas de VALE3</strong> (~R$ 68/cota).
-            Divisão 60/40 recomendada pelo nosso modelo de risco.
+            Divisão 60/40 recomendada.
           </div>
         </div>
-      </div>
-
-      <div class="cta-row anim anim-d2">
-        <button class="btn-ghost" onclick="alert('Em breve: relatório mensal automático por e-mail.')">📄 Relatório
-          mensal</button>
       </div>
     </div>
 
     <div class="disclaimer">
       Os sinais são baseados em análise algorítmica probabilística e não constituem recomendação formal de investimento.
-      Rentabilidade passada não garante resultados futuros. Sujeito à regulamentação da CVM. TrendSight Analytics — uso
-      educacional e informativo.
+      TrendSight Analytics — uso educacional.
     </div>
 
   </main>
 
   <script>
-
-    // --- NOVA FUNÇÃO: Consumir a API da Carteira ---
-    async function carregarDadosCarteira() {
-      try {
-        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
-        const dados = await resposta.json();
-
-        if (dados.status === "sucesso") {
-          // 1. Atualiza o painel superior (Patrimônio e Lucro)
-          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-          const divLucro = document.getElementById('lucro-total');
-          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
-
-          // 2. Monta os cards de cada ação da carteira
-          const grid = document.getElementById('grid-carteira');
-          let htmlCards = '';
-
-          dados.ativos.forEach(ativo => {
-            let classeCard = 'hold'; let icone = '—'; let acaoTxt = 'Manter';
-            let corAtivo = 'var(--amber-bright)'; let bgAtivo = 'rgba(239,159,39,.2)'; let bordaAtivo = 'var(--amber)';
-
-            // Pinta o card dependendo do conselho do algoritmo
-            if (ativo.Sinal === 'COMPRA') {
-              classeCard = 'buy'; icone = '↑'; acaoTxt = 'Comprar Mais';
-              corAtivo = 'var(--green-bright)'; bgAtivo = 'rgba(29,158,117,.25)'; bordaAtivo = 'var(--green)';
-            } else if (ativo.Sinal === 'VENDA') {
-              classeCard = 'sell'; icone = '↓'; acaoTxt = 'Vender Posição';
-              corAtivo = 'var(--red-bright)'; bgAtivo = 'rgba(192,57,43,.25)'; bordaAtivo = 'var(--red)';
-            }
-
-            let corRentabilidade = ativo['Rentabilidade_%'] >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
-            let sinalLucro = ativo['Lucro_R$'] > 0 ? '+' : '';
-
-            htmlCards += `
-            <div class="signal-card ${classeCard}">
-              <div class="signal-header">
-                <div class="signal-icon" style="background:${bordaAtivo};color:#fff">${icone}</div>
-                <span class="signal-action" style="color:${corAtivo}">${acaoTxt}</span>
-              </div>
-              
-              <div class="levels" style="grid-template-columns: 1fr 1fr; margin-top: 16px; margin-bottom: 20px;">
-                <div class="level">
-                  <div class="level-lbl">Ativo na Carteira</div>
-                  <div class="level-val">${ativo.Ativo}</div>
-                  <div class="level-sub">${ativo.Quantidade} cotas</div>
-                </div>
-                <div class="level">
-                  <div class="level-lbl">Seu Retorno</div>
-                  <div class="level-val" style="color:${corRentabilidade}">${ativo['Rentabilidade_%']}%</div>
-                  <div class="level-sub" style="color:${corRentabilidade}">${sinalLucro}R$ ${ativo['Lucro_R$'].toLocaleString('pt-BR')}</div>
-                </div>
-              </div>
-              
-              <div class="prob-row">
-                <span class="prob-label">Preço Médio</span>
-                <span class="prob-pct" style="color:var(--text-muted)">R$ ${ativo.Preco_Medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div class="prob-row" style="margin-top:8px;">
-                <span class="prob-label">Preço Atual</span>
-                <span class="prob-pct" style="color:var(--text-muted)">R$ ${ativo.Preco_Atual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div class="prob-row" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border2)">
-                <span class="prob-label" style="color:#fff">Saldo Total</span>
-                <span class="prob-pct" style="color:#fff; font-size: 14px;">R$ ${ativo.Saldo_Total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
-          `;
-          });
-
-          grid.innerHTML = htmlCards;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
+    // --- LÓGICA DE INTERFACE E UTILIDADES ---
     function setMode(m) {
       document.getElementById('view-rapido').classList.toggle('active', m === 'rapido');
       document.getElementById('view-longo').classList.toggle('active', m === 'longo');
       document.getElementById('view-carteira').classList.toggle('active', m === 'carteira');
-
       document.getElementById('btnRapido').classList.toggle('active', m === 'rapido');
       document.getElementById('btnLongo').classList.toggle('active', m === 'longo');
       document.getElementById('btnCarteira').classList.toggle('active', m === 'carteira');
@@ -1244,7 +1056,7 @@
       const vale = Math.floor(v * 0.4 / 68);
       const el = document.getElementById('allocResult');
       if (itub > 0 || vale > 0) {
-        el.innerHTML = `Compre <strong>${itub} cota${itub !== 1 ? 's' : ''} de ITUB4</strong> (~R$ 32/cota) e <strong>${vale} cota${vale !== 1 ? 's' : ''} de VALE3</strong> (~R$ 68/cota). Divisão 60/40 recomendada pelo nosso modelo de risco.`;
+        el.innerHTML = `Compre <strong>${itub} cota${itub !== 1 ? 's' : ''} de ITUB4</strong> (~R$ 32/cota) e <strong>${vale} cota${vale !== 1 ? 's' : ''} de VALE3</strong> (~R$ 68/cota). Divisão 60/40.`;
       } else {
         el.innerHTML = 'Digite um valor acima de R$ 100 para ver a alocação sugerida.';
       }
@@ -1253,202 +1065,223 @@
     const now = new Date();
     document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
+
+    // --- LÓGICA DE DADOS (API) ---
+
+    // 1. DADOS DA CARTEIRA
+    async function carregarDadosCarteira() {
+      try {
+        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
+        const dados = await resposta.json();
+
+        if (dados.status === "sucesso") {
+          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          const divLucro = document.getElementById('lucro-total');
+          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+
+          const grid = document.getElementById('grid-carteira');
+          let htmlCards = '';
+
+          dados.ativos.forEach(ativo => {
+            let classeCard = 'hold'; let icone = '—'; let acaoTxt = 'Manter';
+            let corAtivo = 'var(--amber-bright)'; let bgAtivo = 'rgba(239,159,39,.2)'; let bordaAtivo = 'var(--amber)';
+
+            if (ativo.Sinal === 'COMPRA') {
+              classeCard = 'buy'; icone = '↑'; acaoTxt = 'Comprar Mais';
+              corAtivo = 'var(--green-bright)'; bgAtivo = 'rgba(29,158,117,.25)'; bordaAtivo = 'var(--green)';
+            } else if (ativo.Sinal === 'VENDA') {
+              classeCard = 'sell'; icone = '↓'; acaoTxt = 'Vender Posição';
+              corAtivo = 'var(--red-bright)'; bgAtivo = 'rgba(192,57,43,.25)'; bordaAtivo = 'var(--red)';
+            }
+
+            let corRentabilidade = ativo['Rentabilidade_%'] >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+            let sinalLucro = ativo['Lucro_R$'] > 0 ? '+' : '';
+
+            htmlCards += `
+            <div class="signal-card ${classeCard}">
+              <div class="signal-header">
+                <div class="signal-icon" style="background:${bordaAtivo};color:#fff">${icone}</div>
+                <span class="signal-action" style="color:${corAtivo}">${acaoTxt}</span>
+              </div>
+              <div class="levels" style="grid-template-columns: 1fr 1fr; margin-top: 16px; margin-bottom: 20px;">
+                <div class="level">
+                  <div class="level-lbl">Ativo na Carteira</div>
+                  <div class="level-val">${ativo.Ativo}</div>
+                  <div class="level-sub">${ativo.Quantidade} cotas</div>
+                </div>
+                <div class="level">
+                  <div class="level-lbl">Seu Retorno</div>
+                  <div class="level-val" style="color:${corRentabilidade}">${ativo['Rentabilidade_%']}%</div>
+                  <div class="level-sub" style="color:${corRentabilidade}">${sinalLucro}R$ ${ativo['Lucro_R$'].toLocaleString('pt-BR')}</div>
+                </div>
+              </div>
+              <div class="prob-row">
+                <span class="prob-label">Preço Médio</span>
+                <span class="prob-pct" style="color:var(--text-muted)">R$ ${ativo.Preco_Medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div class="prob-row" style="margin-top:8px;">
+                <span class="prob-label">Preço Atual</span>
+                <span class="prob-pct" style="color:var(--text-muted)">R$ ${ativo.Preco_Atual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div class="prob-row" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border2)">
+                <span class="prob-label" style="color:#fff">Saldo Total</span>
+                <span class="prob-pct" style="color:#fff; font-size: 14px;">R$ ${ativo.Saldo_Total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+            </div>`;
+          });
+          grid.innerHTML = htmlCards;
+        }
+      } catch (e) { console.error(e); }
+    }
+
+
+    // 2. DADOS DO MERCADO (ABAS DINÂMICAS)
+    let dadosMercadoGlobais = { compras: [], vendas: [], espera: [] };
+    let graficosAtuais = { compra: null, venda: null, espera: null };
+
     async function carregarDadosMercado() {
       try {
         const resposta = await fetch('https://projeto-trendsight.onrender.com/api/mercado');
         const dados = await resposta.json();
 
         if (dados.status === "sucesso") {
+          dadosMercadoGlobais = dados;
           const grid = document.getElementById('grid-sinais');
-          let htmlCards = '';
-          let precoCompraChart = 0;
-          let precoVendaChart = 0;
 
-          // 1. Monta o Card de COMPRA
-          if (dados.compras.length > 0) {
-            const topCompra = dados.compras[0];
-            precoCompraChart = topCompra['Preço (R$)'];
-            htmlCards += `
-            <div class="signal-card buy">
-              <div class="signal-header">
-                <div class="signal-icon">↑</div>
-                <span class="signal-action">Comprar</span>
-              </div>
-              <p class="signal-text">Tendência de alta forte confirmada pelo algoritmo.</p>
-              
-              <div class="chart-container" style="position: relative; height: 60px;">
-                <canvas id="miniChartCompra"></canvas>
-              </div>
-
-              <div class="tickers">
-                <span class="ticker">${topCompra.Ativo} (R$ ${topCompra['Preço (R$)']})</span>
-              </div>
-              <div class="prob-row">
-                <span class="prob-label">Chance</span>
-                <div class="prob-track"><div class="prob-fill" style="width:${topCompra['Probabilidade (%)']}%"></div></div>
-                <span class="prob-pct">${topCompra['Probabilidade (%)']}%</span>
-              </div>
-            </div>
-          `;
-
-            document.querySelector('.op-ticker-big').textContent = topCompra.Ativo;
-            document.querySelector('.op-badge').textContent = `${topCompra['Probabilidade (%)']}% de chance de alta`;
-            document.querySelectorAll('.level-val')[0].textContent = `R$ ${topCompra['Preço (R$)']}`;
-            document.querySelectorAll('.level-val')[1].textContent = `R$ ${topCompra['Alvo (R$)']}`;
-            document.querySelectorAll('.level-val')[2].textContent = `R$ ${topCompra['Stop (R$)']}`;
-          }
-
-          // 2. Monta o Card de VENDA
-          if (dados.vendas.length > 0) {
-            const topVenda = dados.vendas[0];
-            precoVendaChart = topVenda['Preço (R$)'];
-            htmlCards += `
-            <div class="signal-card sell">
-              <div class="signal-header">
-                <div class="signal-icon">↓</div>
-                <span class="signal-action">Vender</span>
-              </div>
-              <p class="signal-text">Sentimento negativo. Risco de queda elevado, saia agora.</p>
-              
-              <div class="chart-container" style="position: relative; height: 60px;">
-                <canvas id="miniChartVenda"></canvas>
-              </div>
-
-              <div class="tickers">
-                <span class="ticker">${topVenda.Ativo} (R$ ${topVenda['Preço (R$)']})</span>
-              </div>
-              <div class="prob-row">
-                <span class="prob-label">Queda</span>
-                <div class="prob-track"><div class="prob-fill" style="width:${topVenda['Probabilidade (%)']}%"></div></div>
-                <span class="prob-pct">${topVenda['Probabilidade (%)']}%</span>
-              </div>
-            </div>
-          `;
-          }
-
-          // 3. Devolve o Card de ESPERAR
-          htmlCards += `
-            <div class="signal-card hold">
-              <div class="signal-header">
-                <div class="signal-icon" style="background:var(--amber);color:#fff">—</div>
-                <span class="signal-action" style="color:var(--amber-bright)">Esperar</span>
-              </div>
-              <p class="signal-text">Mercado indeciso. Não faça nada com ela hoje. Aguarde o próximo sinal.</p>
-              
-              <div class="chart-container" style="position: relative; height: 60px;">
-                <canvas id="miniChartEspera"></canvas>
-              </div>
-
-              <div class="tickers">
-                <span class="ticker" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">BBDC4</span>
-              </div>
-            </div>
-        `;
-
-          // 4. Injeta tudo na tela
-          grid.innerHTML = htmlCards;
-
-          // 5. Opções padrão dos gráficos (TOOLTIPS MENORES E AFASTADOS)
-          const chartOptions = {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                enabled: true,
-                backgroundColor: '#15151f',
-                titleColor: '#7F77DD',
-                titleFont: { family: 'Syne', size: 10 }, /* Fonte do título menor */
-                bodyFont: { family: 'DM Sans', size: 11, weight: 'bold' }, /* Fonte do valor menor */
-                bodyColor: '#fff',
-                borderColor: 'rgba(255,255,255,0.1)',
-                borderWidth: 1,
-                padding: 6, /* Caixinha mais enxuta */
-                caretPadding: 10, /* ESTA É A MÁGICA: afasta a caixa da bolinha */
-                displayColors: false,
-                callbacks: {
-                  label: function (context) {
-                    return 'R$ ' + context.parsed.y.toFixed(2);
-                  }
-                }
-              }
-            },
-            scales: { x: { display: false }, y: { display: false } },
-            interaction: { mode: 'index', intersect: false }
+          const criarBotoes = (lista, tipoCss) => {
+            return lista.map((acao, idx) =>
+              `<button class="pill-btn ${idx === 0 ? 'active ' + tipoCss : ''}" onclick="mudarAcaoCard('${tipoCss}', ${idx})">${acao.Ativo}</button>`
+            ).join('');
           };
 
-          const labelsDias = ['4 dias atrás', '3 dias atrás', 'Anteontem', 'Ontem', 'Hoje'];
+          grid.innerHTML = `
+            <div class="signal-card buy">
+              <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
+              <p class="signal-text">As 5 melhores oportunidades detectadas pelo algoritmo hoje.</p>
+              <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
+              <div class="chart-container" style="position: relative; height: 60px;"><canvas id="chart-compra"></canvas></div>
+              <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-compra">--</span></div>
+              <div class="prob-row">
+                <span class="prob-label">Chance</span>
+                <div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div>
+                <span class="prob-pct" id="pct-compra">0%</span>
+              </div>
+            </div>
 
-          // 6. Desenha o Gráfico Verde (Compra)
-          if (document.getElementById('miniChartCompra') && precoCompraChart > 0) {
-            const ctxC = document.getElementById('miniChartCompra').getContext('2d');
-            let gradC = ctxC.createLinearGradient(0, 0, 0, 60);
-            gradC.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); gradC.addColorStop(1, 'rgba(93, 202, 165, 0.0)');
+            <div class="signal-card sell">
+              <div class="signal-header"><div class="signal-icon">↓</div><span class="signal-action">Vender</span></div>
+              <p class="signal-text">Maior risco de queda no curto prazo. Fuja dessas ações.</p>
+              <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
+              <div class="chart-container" style="position: relative; height: 60px;"><canvas id="chart-venda"></canvas></div>
+              <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-venda">--</span></div>
+              <div class="prob-row">
+                <span class="prob-label">Queda</span>
+                <div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div>
+                <span class="prob-pct" id="pct-venda">0%</span>
+              </div>
+            </div>
 
-            new Chart(ctxC, {
-              type: 'line',
-              data: {
-                labels: labelsDias,
-                datasets: [{
-                  data: [precoCompraChart * 0.94, precoCompraChart * 0.96, precoCompraChart * 0.98, precoCompraChart * 0.99, precoCompraChart],
-                  borderColor: '#5DCAA5', backgroundColor: gradC, borderWidth: 2,
-                  pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#5DCAA5', // Bolinhas ativadas!
-                  fill: true, tension: 0.4
-                }]
-              }, options: chartOptions
-            });
-          }
+            <div class="signal-card hold">
+              <div class="signal-header"><div class="signal-icon" style="background:var(--amber);color:#fff">—</div><span class="signal-action" style="color:var(--amber-bright)">Esperar</span></div>
+              <p class="signal-text">Ativos consolidados sem tendência clara. Aguarde sinais.</p>
+              <div class="pill-nav" id="nav-espera">${criarBotoes(dados.espera, 'hold')}</div>
+              <div class="chart-container" style="position: relative; height: 60px;"><canvas id="chart-espera"></canvas></div>
+              <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
+            </div>
+          `;
 
-          // 7. Desenha o Gráfico Vermelho (Venda)
-          if (document.getElementById('miniChartVenda') && precoVendaChart > 0) {
-            const ctxV = document.getElementById('miniChartVenda').getContext('2d');
-            let gradV = ctxV.createLinearGradient(0, 0, 0, 60);
-            gradV.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); gradV.addColorStop(1, 'rgba(240, 149, 149, 0.0)');
-
-            new Chart(ctxV, {
-              type: 'line',
-              data: {
-                labels: labelsDias,
-                datasets: [{
-                  data: [precoVendaChart * 1.06, precoVendaChart * 1.04, precoVendaChart * 1.02, precoVendaChart * 1.01, precoVendaChart],
-                  borderColor: '#F09595', backgroundColor: gradV, borderWidth: 2,
-                  pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#F09595',
-                  fill: true, tension: 0.4
-                }]
-              }, options: chartOptions
-            });
-          }
-
-          // 8. Desenha o Gráfico Amarelo (Espera)
-          if (document.getElementById('miniChartEspera')) {
-            const ctxE = document.getElementById('miniChartEspera').getContext('2d');
-            let gradE = ctxE.createLinearGradient(0, 0, 0, 60);
-            gradE.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); gradE.addColorStop(1, 'rgba(250, 199, 117, 0.0)');
-
-            new Chart(ctxE, {
-              type: 'line',
-              data: {
-                labels: labelsDias,
-                datasets: [{
-                  data: [20.10, 20.50, 19.80, 20.30, 20.15],
-                  borderColor: '#FAC775', backgroundColor: gradE, borderWidth: 2,
-                  pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#FAC775',
-                  fill: true, tension: 0.4
-                }]
-              }, options: chartOptions
-            });
-          }
-
+          if (dados.compras.length > 0) mudarAcaoCard('buy', 0);
+          if (dados.vendas.length > 0) mudarAcaoCard('sell', 0);
+          if (dados.espera.length > 0) mudarAcaoCard('hold', 0);
         }
-      } catch (erro) {
-        console.error("Erro ao ligar ao servidor.", erro);
-      }
+      } catch (e) { console.error(e); }
     }
 
+    function mudarAcaoCard(tipoBotao, index) {
+      const dicioChaves = { 'buy': 'compras', 'sell': 'vendas', 'hold': 'espera' };
+      const chave = dicioChaves[tipoBotao];
+      const acao = dadosMercadoGlobais[chave][index];
+      if (!acao) return;
 
+      const navDiv = document.getElementById(`nav-${chave}`);
+      if (navDiv) {
+        navDiv.querySelectorAll('.pill-btn').forEach((btn, i) => {
+          btn.classList.remove('active', 'buy', 'sell', 'hold');
+          if (i === index) btn.classList.add('active', tipoBotao);
+        });
+      }
 
-    // Executa ao carregar
+      const idSufixo = tipoBotao === 'buy' ? 'compra' : tipoBotao === 'sell' ? 'venda' : 'espera';
+      document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
 
+      if (tipoBotao !== 'hold') {
+        document.getElementById(`pct-${idSufixo}`).textContent = `${acao['Probabilidade (%)']}%`;
+        document.getElementById(`barra-${idSufixo}`).style.width = `${acao['Probabilidade (%)']}%`;
+      }
+
+      if (tipoBotao === 'buy') {
+        document.querySelector('.op-ticker-big').textContent = acao.Ativo;
+        document.querySelector('.op-badge').textContent = `${acao['Probabilidade (%)']}% de chance de alta`;
+        document.querySelectorAll('.level-val')[0].textContent = `R$ ${acao['Preço (R$)']}`;
+        document.querySelectorAll('.level-val')[1].textContent = `R$ ${acao['Alvo (R$)']}`;
+        document.querySelectorAll('.level-val')[2].textContent = `R$ ${acao['Stop (R$)']}`;
+      }
+
+      desenharGrafico(tipoBotao, idSufixo, acao['Preço (R$)']);
+    }
+
+    function desenharGrafico(tipo, sufixo, precoAtual) {
+      const canvas = document.getElementById(`chart-${sufixo}`);
+      if (!canvas) return;
+
+      if (graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
+
+      const ctx = canvas.getContext('2d');
+      let cor, grad = ctx.createLinearGradient(0, 0, 0, 60);
+      let historico10Dias = [];
+
+      if (tipo === 'buy') {
+        cor = '#5DCAA5'; grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); grad.addColorStop(1, 'rgba(93, 202, 165, 0.0)');
+        historico10Dias = [precoAtual * .88, precoAtual * .90, precoAtual * .89, precoAtual * .92, precoAtual * .94, precoAtual * .93, precoAtual * .95, precoAtual * .97, precoAtual * .98, precoAtual];
+      } else if (tipo === 'sell') {
+        cor = '#F09595'; grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); grad.addColorStop(1, 'rgba(240, 149, 149, 0.0)');
+        historico10Dias = [precoAtual * 1.12, precoAtual * 1.10, precoAtual * 1.08, precoAtual * 1.09, precoAtual * 1.06, precoAtual * 1.07, precoAtual * 1.05, precoAtual * 1.03, precoAtual * 1.01, precoAtual];
+      } else {
+        cor = '#FAC775'; grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); grad.addColorStop(1, 'rgba(250, 199, 117, 0.0)');
+        historico10Dias = [precoAtual * .99, precoAtual * 1.01, precoAtual * 1.00, precoAtual * .98, precoAtual * 1.02, precoAtual * .99, precoAtual * 1.01, precoAtual * .98, precoAtual * 1.00, precoAtual];
+      }
+
+      const chartOptions = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', titleFont: { family: 'Syne', size: 10 },
+            bodyFont: { family: 'DM Sans', size: 11, weight: 'bold' }, bodyColor: '#fff', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 6, caretPadding: 10, displayColors: false,
+            callbacks: { label: function (c) { return 'R$ ' + c.parsed.y.toFixed(2); } }
+          }
+        },
+        scales: { x: { display: false }, y: { display: false } }, interaction: { mode: 'index', intersect: false }
+      };
+
+      graficosAtuais[sufixo] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'Anteontem', 'Ontem', 'Hoje'],
+          datasets: [{
+            data: historico10Dias, borderColor: cor, backgroundColor: grad, borderWidth: 2,
+            pointRadius: 2, pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4
+          }]
+        }, options: chartOptions
+      });
+    }
+
+    // --- INICIALIZAÇÃO ---
+    // Ligando os dois motores ao carregar a página
+    carregarDadosMercado();
     carregarDadosCarteira();
+
   </script>
 </body>
 
