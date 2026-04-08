@@ -6,15 +6,12 @@ import pandas as pd
 app = Flask(__name__)
 CORS(app) 
 
-# --- ROTA PRINCIPAL: HTML ---
 @app.route('/')
 def home():
     return send_file('index.html')
 
-# Variável de conexão com a Nuvem Neon (COLE SUA URL AQUI)
-DATABASE_URL = "postgresql://neondb_owner:npg_esUo6BKpL4Ib@ep-crimson-lab-amurwrao.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL = "SUA_URL_AQUI"
 
-# --- ROTA 1: Visão Geral do Mercado ---
 @app.route('/api/mercado', methods=['GET'])
 def obter_dados_mercado():
     try:
@@ -28,11 +25,16 @@ def obter_dados_mercado():
         top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:5]
         top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:3]
         
-        return jsonify({"status": "sucesso", "compras": top_compras, "vendas": top_vendas, "espera": top_espera})
+        return jsonify({
+            "status": "sucesso",
+            "todos": dados,  # <- NOVO: Enviando todas as ações para a Fita de Cotações
+            "compras": top_compras,
+            "vendas": top_vendas,
+            "espera": top_espera
+        })
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)})
 
-# --- ROTA 2: Ler Carteira ---
 @app.route('/api/carteira', methods=['GET'])
 def obter_dados_carteira():
     try:
@@ -55,7 +57,6 @@ def obter_dados_carteira():
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)})
 
-# --- ROTA 3: Adicionar Ativo (NOVO) ---
 @app.route('/api/carteira/adicionar', methods=['POST'])
 def adicionar_ativo():
     dados = request.json
@@ -66,7 +67,6 @@ def adicionar_ativo():
     try:
         engine = create_engine(DATABASE_URL)
         with engine.begin() as conn:
-            # Apaga se já existir para não dar erro, e insere os dados novos
             conn.execute(text('DELETE FROM minha_carteira WHERE "Ativo" = :ativo'), {"ativo": ativo})
             conn.execute(text('INSERT INTO minha_carteira ("Ativo", "Quantidade", "Preco_Medio") VALUES (:ativo, :qtd, :preco)'), 
                          {"ativo": ativo, "qtd": quantidade, "preco": preco})
@@ -74,7 +74,6 @@ def adicionar_ativo():
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)})
 
-# --- ROTA 4: Remover Ativo (NOVO) ---
 @app.route('/api/carteira/remover/<ativo>', methods=['DELETE'])
 def remover_ativo(ativo):
     try:
