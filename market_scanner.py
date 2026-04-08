@@ -60,7 +60,7 @@ def analisar_mercado(tickers):
 
 def salvar_no_banco(df):
     print("\n💾 Salvando dados no PostgreSQL (Neon)...")
-    DATABASE_URL = "SUA_URL_AQUI"
+    DATABASE_URL = "postgresql://neondb_owner:npg_esUo6BKpL4Ib@ep-crimson-lab-amurwrao.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
     engine = create_engine(DATABASE_URL)
     
     df.to_sql('analise_mercado', engine, if_exists='replace', index=False)

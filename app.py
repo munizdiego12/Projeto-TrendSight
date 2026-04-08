@@ -10,7 +10,7 @@ CORS(app)
 def home():
     return send_file('index.html')
 
-DATABASE_URL = "SUA_URL_AQUI"
+DATABASE_URL = "postgresql://neondb_owner:npg_esUo6BKpL4Ib@ep-crimson-lab-amurwrao.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
 @app.route('/api/mercado', methods=['GET'])
 def obter_dados_mercado():
