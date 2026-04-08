@@ -11,22 +11,27 @@ CORS(app)
 def home():
     return send_file('index.html')
 
-# --- ROTA 1: Visão Geral do Mercado ---
+# --- ROTA 1: Visão Geral do Mercado (Agora com Top 5 Dinâmico) ---
 @app.route('/api/mercado', methods=['GET'])
 def obter_dados_mercado():
     try:
         conexao = sqlite3.connect('trendsight.db')
+        # Puxando tudo do banco ordenado da maior probabilidade para a menor
         df = pd.read_sql_query("SELECT * FROM analise_mercado ORDER BY `Probabilidade (%)` DESC", conexao)
         conexao.close()
         
         dados = df.to_dict(orient='records')
-        top_compras = [acao for acao in dados if acao['Sinal'] == 'COMPRA'][:3]
-        top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:3]
+        
+        # O Filtro Inteligente:
+        top_compras = [acao for acao in dados if acao['Sinal'] == 'COMPRA'][:5]  # Top 5 Melhores
+        top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:5]    # Top 5 Piores
+        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:3]  # 3 Neutras
         
         return jsonify({
             "status": "sucesso",
             "compras": top_compras,
-            "vendas": top_vendas
+            "vendas": top_vendas,
+            "espera": top_espera
         })
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)})
