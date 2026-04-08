@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_file
 from flask_cors import CORS
 import sqlite3
 import pandas as pd
@@ -6,7 +6,12 @@ import pandas as pd
 app = Flask(__name__)
 CORS(app) 
 
-# --- ROTA 1: Visão Geral do Mercado (A que já tínhamos) ---
+# --- ROTA PRINCIPAL: Mostra o site visual (HTML) ---
+@app.route('/')
+def home():
+    return send_file('index.html')
+
+# --- ROTA 1: Visão Geral do Mercado ---
 @app.route('/api/mercado', methods=['GET'])
 def obter_dados_mercado():
     try:
@@ -26,13 +31,13 @@ def obter_dados_mercado():
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)})
 
-# --- ROTA 2: NOVO! O Raio-X da Carteira do Usuário ---
+# --- ROTA 2: O Raio-X da Carteira do Usuário ---
 @app.route('/api/carteira', methods=['GET'])
 def obter_dados_carteira():
     try:
         conexao = sqlite3.connect('trendsight.db')
         
-        # A Mágica do SQL JOIN: Juntando a carteira com o preço e sinal de hoje
+        # Juntando a carteira com o preço e sinal de hoje
         query = """
             SELECT 
                 c.Ativo, 
@@ -46,7 +51,7 @@ def obter_dados_carteira():
         df_carteira = pd.read_sql_query(query, conexao)
         conexao.close()
 
-        # Transformação: Calculando o Lucro ou Prejuízo em Reais e em Porcentagem
+        # Calculando o Lucro ou Prejuízo em Reais e em Porcentagem
         # Se a ação não estiver no radar do mercado hoje, preenchemos com 0 para não dar erro
         df_carteira['Preco_Atual'] = df_carteira['Preco_Atual'].fillna(df_carteira['Preco_Medio'])
         
