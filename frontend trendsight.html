@@ -1086,7 +1086,7 @@
     // --- NOVA FUNÇÃO: Consumir a API da Carteira ---
     async function carregarDadosCarteira() {
       try {
-        const resposta = await fetch('http://localhost:5000/api/carteira');
+        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
         const dados = await resposta.json();
 
         if (dados.status === "sucesso") {
@@ -1197,7 +1197,7 @@
     // --- NOVA FUNÇÃO: Consumir a API do Backend ---
     async function carregarDadosMercado() {
       try {
-        const resposta = await fetch('http://localhost:5000/api/mercado');
+        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/mercado');
         const dados = await resposta.json();
 
         if (dados.status === "sucesso") {
