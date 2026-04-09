@@ -2062,7 +2062,7 @@
               <p class="signal-text">Ativos aprovados pelo Ensemble Scoring hoje.</p>
               <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
-              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-compra">--</span></div>
+              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-compra" style="background: rgba(93, 202, 165, 0.15); color: var(--green-bright); border: 1px solid var(--green);">--</span></div>
               <div class="prob-row">
                   <span class="prob-label">Score</span>
                   <div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div>
@@ -2075,7 +2075,7 @@
               <p class="signal-text">Maior risco de queda ou reversão.</p>
               <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
-              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-venda">--</span></div>
+              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-venda" style="background: rgba(240, 149, 149, 0.15); color: var(--red-bright); border: 1px solid var(--red);">--</span></div>
               <div class="prob-row">
                   <span class="prob-label">Risco</span>
                   <div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div>
