@@ -163,14 +163,21 @@
     .level.target .level-sub { color: var(--green); }
     .level.stop .level-sub { color: var(--red); }
 
-    /* CSS DO NOVO SCORECARD RADAR */
+    /* CSS DO NOVO SCORECARD RADAR OTIMIZADO */
     .scorecard { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border2); display: none; }
-    .scorecard-layout { display: grid; grid-template-columns: 1fr 150px; gap: 16px; align-items: center; }
-    .score-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-    .score-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* A mágica do Grid: 1fr pra espremer as caixas, 220px fixos para dar um super destaque ao gráfico */
+    .scorecard-layout { display: grid; grid-template-columns: 1fr 220px; gap: 20px; align-items: center; }
+    
+    /* Mudei as caixas para um Grid 2x2 para ficarem curtinhas e num quadrado perfeito */
+    .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    
+    .score-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; }
     .score-lbl { font-size: 11px; color: var(--text-muted); }
-    .score-val { font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif; }
-    .radar-container { width: 100%; height: 150px; position: relative; }
+    .score-val { font-size: 13px; font-weight: 600; font-family: 'Syne', sans-serif; }
+    
+    /* Gráfico agora é gigante e vistoso! */
+    .radar-container { width: 100%; height: 180px; position: relative; }
 
     .sim-wrap { display: flex; flex-direction: column; gap: 16px; }
     .sim-input-row { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius-sm); overflow: hidden; }
@@ -853,7 +860,6 @@
       if (acao.Score !== undefined) {
           scorecardEl.style.display = 'block';
           
-          // ATUALIZAÇÃO PARA 6 PONTOS (MÁXIMO)
           document.getElementById('score-num').textContent = acao.Score;
           
           const rsiEl = document.getElementById('ind-rsi');
@@ -876,23 +882,22 @@
           if (acao.MM50 > acao.MM200) { mmEl.textContent = 'Alta'; mmEl.style.color = 'var(--green-bright)'; }
           else { mmEl.textContent = 'Baixa'; mmEl.style.color = 'var(--red-bright)'; }
 
-          // --- NOVO: LÓGICA DO GRÁFICO RADAR (CHART.JS) ---
+          // --- CONFIGURAÇÃO OTIMIZADA DO RADAR CHART ---
           const canvasRadar = document.getElementById('radar-chart');
           if (canvasRadar) {
               if (radarChartObj) { radarChartObj.destroy(); }
               const ctxRadar = canvasRadar.getContext('2d');
               
-              // Conversão dos valores para o Gráfico Radar (0 ou 1)
               let valRSI = acao.RSI < 45 ? 1 : (acao.RSI > 60 ? 0.2 : 0.5);
               let valMACD = acao.MACD_Hist > 0 ? 1 : 0.2;
               let valBB = acao.BB_Posicao < 0.3 ? 1 : (acao.BB_Posicao > 0.7 ? 0.2 : 0.5);
               let valMM = acao.MM50 > acao.MM200 ? 1 : 0.2;
-              let valScoreGeral = acao.Score / 6; // Representa o resto dos indicadores (Volume, IBOV, Divergencia)
+              let valScoreGeral = acao.Score / 6;
 
               radarChartObj = new Chart(ctxRadar, {
                   type: 'radar',
                   data: {
-                      labels: ['RSI', 'MACD', 'Bollinger', 'Tendência', 'Vol / Diverg.'],
+                      labels: ['RSI', 'MACD', 'Bollinger', 'Tendência', 'Outros'],
                       datasets: [{
                           data: [valRSI, valMACD, valBB, valMM, valScoreGeral],
                           backgroundColor: 'rgba(127, 119, 221, 0.25)',
@@ -912,8 +917,8 @@
                           r: {
                               angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
                               grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                              pointLabels: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 9, family: 'Syne' } },
-                              ticks: { display: false, min: 0, max: 1 }
+                              pointLabels: { color: 'rgba(255, 255, 255, 0.8)', font: { size: 10, family: 'Syne' } },
+                              ticks: { display: false, min: 0, max: 1, stepSize: 0.2 }
                           }
                       }
                   }
