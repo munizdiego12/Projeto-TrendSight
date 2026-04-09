@@ -49,15 +49,22 @@ def analisar_mercado(tickers):
             macd_hist = df['MACD_Hist'].iloc[-1]
 
             # --- LÓGICA DO ALGORITMO (Cérebro Quantitativo) ---
+
             if rsi_atual < 45 and macd_hist > 0:
                 sinal = "COMPRA"
-                probabilidade = min(95.0, 100 - rsi_atual + 10) 
+                probabilidade = min(95.0, 100 - rsi_atual + 10)
+                alvo = round(preco_atual * 1.06, 2) # Compra: Alvo é 6% ACIMA
+                stop = round(preco_atual * 0.94, 2) # Compra: Stop é 6% ABAIXO
             elif rsi_atual > 60 and macd_hist < 0:
                 sinal = "VENDA"
                 probabilidade = min(95.0, rsi_atual + 10)
+                alvo = round(preco_atual * 0.94, 2) # Venda: Alvo é 6% ABAIXO (queremos que caia)
+                stop = round(preco_atual * 1.06, 2) # Venda: Stop é 6% ACIMA (se subir, perdemos)
             else:
                 sinal = "ESPERAR"
                 probabilidade = 50.0
+                alvo = preco_atual
+                stop = preco_atual
 
             # Prepara os dados do gráfico do site
             df_historico = df.tail(250)
@@ -71,8 +78,8 @@ def analisar_mercado(tickers):
                 'Volume': volume,
                 'Sinal': sinal,
                 'Probabilidade (%)': round(probabilidade, 1),
-                'Alvo (R$)': round(preco_atual * 1.06, 2),
-                'Stop (R$)': round(preco_atual * 0.94, 2),
+                'Alvo (R$)': alvo,
+                'Stop (R$)': stop, 
                 'Historico_Precos': historico_precos,
                 'Historico_Datas': historico_datas
             })
