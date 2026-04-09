@@ -149,7 +149,6 @@
     .op-ticker-big { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #fff; }
     .op-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
 
-    /* NOVO: Classe unificada e independente para os botões de tempo */
     .time-btn { background: transparent; border: 1px solid var(--border2); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; font-family: 'Syne', sans-serif; letter-spacing: 0.05em; }
     .time-btn:hover { border-color: var(--purple); color: #fff; }
     .time-btn.active { background: var(--purple-glow); border-color: var(--purple); color: #fff; }
@@ -164,6 +163,13 @@
     .level-sub { font-size: 10px; margin-top: 3px; }
     .level.target .level-sub { color: var(--green); }
     .level.stop .level-sub { color: var(--red); }
+
+    /* NOVO: CSS DO SCORECARD */
+    .scorecard { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border2); display: none; }
+    .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .score-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; }
+    .score-lbl { font-size: 11px; color: var(--text-muted); }
+    .score-val { font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif; }
 
     .sim-wrap { display: flex; flex-direction: column; gap: 16px; }
     .sim-input-row { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius-sm); overflow: hidden; }
@@ -303,6 +309,31 @@
               <div class="level-sub" id="detalhes-sub-stop" style="color:var(--red)">−0,0%</div>
             </div>
           </div>
+
+          <div class="scorecard" id="detalhes-scorecard">
+            <div style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700;">
+              Raio-X do Algoritmo (Score: <span id="score-num">0</span>/5)
+            </div>
+            <div class="score-grid">
+              <div class="score-item">
+                <span class="score-lbl">RSI (14d)</span>
+                <span class="score-val" id="ind-rsi">--</span>
+              </div>
+              <div class="score-item">
+                <span class="score-lbl">MACD Hist.</span>
+                <span class="score-val" id="ind-macd">--</span>
+              </div>
+              <div class="score-item">
+                <span class="score-lbl">Bollinger</span>
+                <span class="score-val" id="ind-bb">--</span>
+              </div>
+              <div class="score-item">
+                <span class="score-lbl">Tendência</span>
+                <span class="score-val" id="ind-mm">--</span>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <div class="card">
@@ -333,10 +364,8 @@
             <button class="pill-btn" onclick="mudarAbaRanking('volume', this)">📊 Mais Negociadas</button>
           </div>
         </div>
-        
         <div id="ranking-content" style="margin-top: 10px;"></div>
       </div>
-
     </div>
 
     <div id="view-carteira" class="view">
@@ -424,7 +453,6 @@
             </div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-label">Quanto eu invisto?</div>
           <input class="alloc-input" type="number" id="allocVal" value="500" min="100" step="100" oninput="calcAlloc()" placeholder="Quanto você tem disponível (R$)" />
@@ -442,7 +470,6 @@
   </main>
 
   <script>
-    // --- LÓGICA DE INTERFACE E NAVEGAÇÃO ---
     function setMode(m) {
       document.getElementById('view-rapido').classList.toggle('active', m === 'rapido');
       document.getElementById('view-longo').classList.toggle('active', m === 'longo');
@@ -492,7 +519,6 @@
     const now = new Date();
     document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
-    // --- VARIÁVEIS GLOBAIS ---
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
     let graficosAtuais = { compra: null, venda: null, espera: null };
     
@@ -502,12 +528,10 @@
     let acaoSelecionadaEspera = null; 
     let timeframeAtual = '10d'; 
 
-    // --- FILTRO DE TEMPO E GRÁFICOS (Atualizado para não mudar de cor) ---
     function mudarTimeframe(tf, btn) {
       const seletor = btn.parentElement;
       seletor.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active'); // Fica roxo padrão, não herda buy/sell
-      
+      btn.classList.add('active'); 
       timeframeAtual = tf;
       
       let acao = null;
@@ -521,7 +545,6 @@
       }
     }
 
-    // --- CARTEIRA ---
     async function carregarDadosCarteira() {
       try {
         const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
@@ -612,7 +635,6 @@
         } catch(e) { console.error(e); }
     }
 
-    // --- MERCADO E GRÁFICOS ---
     function mudarAbaRanking(tipo, btn) {
       btn.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
       if(tipo === 'altas') btn.classList.add('active', 'buy');
@@ -674,25 +696,25 @@
           grid.innerHTML = `
             <div class="signal-card buy">
               <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
-              <p class="signal-text">Oportunidades de Força Relativa detectadas hoje.</p>
+              <p class="signal-text">Ativos aprovados pelo Ensemble Scoring hoje.</p>
               <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-compra">--</span></div>
-              <div class="prob-row"><span class="prob-label">Chance</span><div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div><span class="prob-pct" id="pct-compra">0%</span></div>
+              <div class="prob-row"><span class="prob-label">Score</span><div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div><span class="prob-pct" id="pct-compra">0%</span></div>
             </div>
 
             <div class="signal-card sell">
               <div class="signal-header"><div class="signal-icon">↓</div><span class="signal-action">Vender</span></div>
-              <p class="signal-text">Maior risco de queda no curto prazo. Fuja dessas ações.</p>
+              <p class="signal-text">Maior risco de queda ou reversão de tendência.</p>
               <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-venda">--</span></div>
-              <div class="prob-row"><span class="prob-label">Queda</span><div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div><span class="prob-pct" id="pct-venda">0%</span></div>
+              <div class="prob-row"><span class="prob-label">Risco</span><div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div><span class="prob-pct" id="pct-venda">0%</span></div>
             </div>
 
             <div class="signal-card hold">
               <div class="signal-header"><div class="signal-icon" style="background:var(--amber);color:#fff">—</div><span class="signal-action" style="color:var(--amber-bright)">Esperar</span></div>
-              <p class="signal-text">Ativos consolidados sem tendência clara de Compra ou Venda.</p>
+              <p class="signal-text">Ativos em consolidação sem score suficiente.</p>
               <div class="pill-nav" id="nav-espera">${criarBotoes(dados.espera, 'hold')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-espera"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
@@ -713,7 +735,6 @@
       } catch (e) { console.error(e); }
     }
 
-    // --- CARROSSEL E LÓGICA VISUAL MANTENDO CORES NO ESTADO VAZIO ---
     function alternarDetalhes() {
       if (modoDetalhes === 'buy') modoDetalhes = 'sell';
       else if (modoDetalhes === 'sell') modoDetalhes = 'hold';
@@ -740,7 +761,6 @@
       const lblAcao = document.getElementById('sim-lbl-acao');
       const noteAbaixo = document.getElementById('sim-note-abaixo');
 
-      // 1. Configuração VISUAL (Aplica a cor certa mesmo se a aba estiver vazia)
       if (modoDetalhes === 'buy') {
         document.getElementById('detalhes-label').textContent = acao ? 'Operação de compra — DETALHES' : 'Operação de Compra - Sem Ativos Hoje';
         lblEntrada.textContent = 'Compre por até';
@@ -785,7 +805,9 @@
         noteAbaixo.textContent = 'O algoritmo não projeta lucros para ativos sem tendência de força relativa.';
       }
 
-      // 2. Preenchimento dos DADOS (Se estiver vazio, zera os números)
+      // NOVO: LÓGICA DO SCORECARD
+      const scorecardEl = document.getElementById('detalhes-scorecard');
+      
       if (!acao) {
           document.getElementById('detalhes-ticker').textContent = "--";
           valEntrada.textContent = `--`;
@@ -794,14 +816,14 @@
           subAlvo.textContent = modoDetalhes === 'hold' ? 'Consolidado' : `0,0%`;
           subStop.textContent = modoDetalhes === 'hold' ? 'Consolidado' : `0,0%`;
           badge.textContent = `0%`; 
+          scorecardEl.style.display = 'none'; // Esconde se não tem ativo
           
           calcSim();
           let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
-          desenharGrafico(modoDetalhes, sufixo, 0, "", ""); // Desenha o gráfico liso/vazio
+          desenharGrafico(modoDetalhes, sufixo, 0, "", ""); 
           return;
       }
 
-      // 3. Preenchimento normal quando houver uma ação
       document.getElementById('detalhes-ticker').textContent = acao.Ativo;
       valEntrada.textContent = `R$ ${acao['Preço (R$)']}`;
       
@@ -813,13 +835,46 @@
           subAlvo.textContent = `Consolidado`;
           valStop.textContent = `--`;
           subStop.textContent = `Consolidado`;
-          badge.textContent = `Aguardando cruzamento de MACD / RSI`;
+          badge.textContent = `Aguardando sinais`;
       } else {
           valAlvo.textContent = `R$ ${acao['Alvo (R$)']}`;
           valStop.textContent = `R$ ${acao['Stop (R$)']}`;
           subAlvo.textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
           subStop.textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
           badge.textContent = `${acao['Probabilidade (%)']}% de ${modoDetalhes === 'buy' ? 'chance de alta' : 'risco de queda'}`;
+      }
+
+      // EXIBE O SCORECARD SE OS DADOS EXISTIREM NO BANCO
+      if (acao.Score !== undefined) {
+          scorecardEl.style.display = 'block';
+          document.getElementById('score-num').textContent = acao.Score;
+          
+          // Formatação do RSI
+          const rsiEl = document.getElementById('ind-rsi');
+          rsiEl.textContent = acao.RSI;
+          if(acao.RSI < 45) { rsiEl.style.color = 'var(--green-bright)'; rsiEl.textContent += ' (Bom)'; }
+          else if(acao.RSI > 60) { rsiEl.style.color = 'var(--red-bright)'; rsiEl.textContent += ' (Caro)'; }
+          else { rsiEl.style.color = 'var(--text-muted)'; }
+
+          // Formatação do MACD
+          const macdEl = document.getElementById('ind-macd');
+          macdEl.textContent = acao.MACD_Hist > 0 ? `+${acao.MACD_Hist}` : acao.MACD_Hist;
+          macdEl.style.color = acao.MACD_Hist > 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+
+          // Formatação do Bollinger
+          const bbEl = document.getElementById('ind-bb');
+          bbEl.textContent = acao.BB_Posicao;
+          if(acao.BB_Posicao < 0.3) { bbEl.style.color = 'var(--green-bright)'; bbEl.textContent += ' (Base)'; }
+          else if(acao.BB_Posicao > 0.7) { bbEl.style.color = 'var(--red-bright)'; bbEl.textContent += ' (Topo)'; }
+          else { bbEl.style.color = 'var(--text-muted)'; }
+
+          // Formatação da Média Móvel
+          const mmEl = document.getElementById('ind-mm');
+          if (acao.MM50 > acao.MM200) { mmEl.textContent = 'Alta'; mmEl.style.color = 'var(--green-bright)'; }
+          else { mmEl.textContent = 'Baixa'; mmEl.style.color = 'var(--red-bright)'; }
+
+      } else {
+          scorecardEl.style.display = 'none';
       }
 
       calcSim();
@@ -894,7 +949,6 @@
              return d;
          });
       } else {
-         // Lógica para desenhar um gráfico liso caso não exista nenhum ativo
          if (precoAtual === 0) {
              historicoFinal = [0, 0, 0, 0, 0];
              datasFinais = ['','','','',''];
