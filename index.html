@@ -149,6 +149,11 @@
     .op-ticker-big { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #fff; }
     .op-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
 
+    /* NOVO: Classe unificada e independente para os botões de tempo */
+    .time-btn { background: transparent; border: 1px solid var(--border2); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; font-family: 'Syne', sans-serif; letter-spacing: 0.05em; }
+    .time-btn:hover { border-color: var(--purple); color: #fff; }
+    .time-btn.active { background: var(--purple-glow); border-color: var(--purple); color: #fff; }
+
     .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .level { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; border: 1px solid var(--border); }
     .level-lbl { font-size: 10px; color: var(--text-muted); margin-bottom: 5px; }
@@ -271,15 +276,15 @@
           </div>
 
           <div style="display: flex; gap: 6px; margin-bottom: 16px; justify-content: flex-end;">
-            <button class="pill-btn active" style="padding: 4px 10px; font-size: 10px;" onclick="mudarTimeframe('10d', this)">10D</button>
-            <button class="pill-btn" style="padding: 4px 10px; font-size: 10px;" onclick="mudarTimeframe('1m', this)">1M</button>
-            <button class="pill-btn" style="padding: 4px 10px; font-size: 10px;" onclick="mudarTimeframe('3m', this)">3M</button>
-            <button class="pill-btn" style="padding: 4px 10px; font-size: 10px;" onclick="mudarTimeframe('1y', this)">1A</button>
+            <button class="time-btn active" onclick="mudarTimeframe('10d', this)">10D</button>
+            <button class="time-btn" onclick="mudarTimeframe('1m', this)">1M</button>
+            <button class="time-btn" onclick="mudarTimeframe('3m', this)">3M</button>
+            <button class="time-btn" onclick="mudarTimeframe('1y', this)">1A</button>
           </div>
 
           <div class="op-header">
             <span class="op-ticker-big" id="detalhes-ticker">--</span>
-            <span class="op-badge" id="detalhes-badge">0% de chance</span>
+            <span class="op-badge" id="detalhes-badge">0%</span>
           </div>
           <div class="levels">
             <div class="level entry">
@@ -457,7 +462,6 @@
       if (!acao) return;
 
       if (modoDetalhes === 'hold') {
-         // Na espera, o alvo não existe para simular lucro
          document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
          document.getElementById('simGain').innerHTML = 'Ativo em Consolidação';
          document.getElementById('simGain').style.color = 'var(--text-muted)';
@@ -492,23 +496,18 @@
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
     let graficosAtuais = { compra: null, venda: null, espera: null };
     
-    // O sistema agora começa na aba de COMPRA (ou passa pra VENDA/ESPERA)
     let modoDetalhes = 'buy'; 
     let acaoSelecionadaCompra = null;
     let acaoSelecionadaVenda = null;
-    let acaoSelecionadaEspera = null; // <- NOVA VARIÁVEL
+    let acaoSelecionadaEspera = null; 
     let timeframeAtual = '10d'; 
 
-    // --- FILTRO DE TEMPO E GRÁFICOS ---
+    // --- FILTRO DE TEMPO E GRÁFICOS (Atualizado para não mudar de cor) ---
     function mudarTimeframe(tf, btn) {
       const seletor = btn.parentElement;
-      seletor.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active', 'buy', 'sell', 'hold'));
-      btn.classList.add('active');
+      seletor.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active'); // Fica roxo padrão, não herda buy/sell
       
-      if (modoDetalhes === 'buy') btn.classList.add('buy');
-      else if (modoDetalhes === 'sell') btn.classList.add('sell');
-      else btn.classList.add('hold');
-
       timeframeAtual = tf;
       
       let acao = null;
@@ -707,7 +706,6 @@
           const btnAltas = document.getElementById('btn-rank-altas');
           if (btnAltas) mudarAbaRanking('altas', btnAltas);
           
-          // Inicia o painel na compra por padrão se tiver, senao vai passando pra quem tiver
           if(dados.compras.length > 0) { modoDetalhes = 'buy'; renderizarDetalhes(); }
           else if(dados.vendas.length > 0) { modoDetalhes = 'sell'; renderizarDetalhes(); }
           else if(dados.espera.length > 0) { modoDetalhes = 'hold'; renderizarDetalhes(); }
@@ -715,23 +713,12 @@
       } catch (e) { console.error(e); }
     }
 
-    // --- NOVO CARROSSEL DE 3 ESTADOS ---
+    // --- CARROSSEL E LÓGICA VISUAL MANTENDO CORES NO ESTADO VAZIO ---
     function alternarDetalhes() {
-      // Ciclo: buy -> sell -> hold -> buy...
-      if (modoDetalhes === 'buy') {
-          modoDetalhes = 'sell';
-      } else if (modoDetalhes === 'sell') {
-          modoDetalhes = 'hold';
-      } else {
-          modoDetalhes = 'buy';
-      }
+      if (modoDetalhes === 'buy') modoDetalhes = 'sell';
+      else if (modoDetalhes === 'sell') modoDetalhes = 'hold';
+      else modoDetalhes = 'buy';
       
-      const btnTempoAtivo = document.querySelector('.time-btn.active');
-      if (btnTempoAtivo) {
-         btnTempoAtivo.classList.remove('buy', 'sell', 'hold');
-         btnTempoAtivo.classList.add(modoDetalhes);
-      }
-
       renderizarDetalhes();
     }
 
@@ -741,96 +728,101 @@
       else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
       else acao = acaoSelecionadaEspera;
 
-      // Se a aba estiver vazia (ex: nada pra comprar hoje), pula pro próximo estado
-      if (!acao) {
-          document.getElementById('detalhes-ticker').textContent = "--";
-          document.getElementById('detalhes-label').textContent = `OPERAÇÃO SEM ATIVOS HOJE`;
-          document.getElementById('detalhes-badge').textContent = `0%`;
-          return;
-      }
-
-      document.getElementById('detalhes-ticker').textContent = acao.Ativo;
-      document.getElementById('detalhes-val-entrada').textContent = `R$ ${acao['Preço (R$)']}`;
-      
-      const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
-      const diffStop = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
-
       const badge = document.getElementById('detalhes-badge');
-      
-      if (modoDetalhes === 'buy') {
-        document.getElementById('detalhes-label').textContent = 'Operação de compra — DETALHES';
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até';
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo de lucro';
-        document.getElementById('detalhes-lbl-stop').textContent = 'Trava de segurança';
-        
-        document.getElementById('detalhes-val-alvo').textContent = `R$ ${acao['Alvo (R$)']}`;
-        document.getElementById('detalhes-val-stop').textContent = `R$ ${acao['Stop (R$)']}`;
-        document.getElementById('detalhes-sub-alvo').textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
-        document.getElementById('detalhes-sub-stop').textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
-        
-        document.getElementById('detalhes-val-alvo').style.color = 'var(--green-bright)';
-        document.getElementById('detalhes-sub-alvo').style.color = 'var(--green)';
-        document.getElementById('detalhes-val-stop').style.color = 'var(--red-bright)';
-        document.getElementById('detalhes-sub-stop').style.color = 'var(--red)';
+      const lblEntrada = document.getElementById('detalhes-lbl-entrada');
+      const lblAlvo = document.getElementById('detalhes-lbl-alvo');
+      const lblStop = document.getElementById('detalhes-lbl-stop');
+      const valEntrada = document.getElementById('detalhes-val-entrada');
+      const valAlvo = document.getElementById('detalhes-val-alvo');
+      const subAlvo = document.getElementById('detalhes-sub-alvo');
+      const valStop = document.getElementById('detalhes-val-stop');
+      const subStop = document.getElementById('detalhes-sub-stop');
+      const lblAcao = document.getElementById('sim-lbl-acao');
+      const noteAbaixo = document.getElementById('sim-note-abaixo');
 
-        badge.textContent = `${acao['Probabilidade (%)']}% de chance de alta`;
+      // 1. Configuração VISUAL (Aplica a cor certa mesmo se a aba estiver vazia)
+      if (modoDetalhes === 'buy') {
+        document.getElementById('detalhes-label').textContent = acao ? 'Operação de compra — DETALHES' : 'Operação de Compra - Sem Ativos Hoje';
+        lblEntrada.textContent = 'Compre por até';
+        lblAlvo.textContent = 'Alvo de lucro';
+        lblStop.textContent = 'Trava de segurança';
         badge.style.color = 'var(--green-bright)';
         badge.style.borderColor = 'var(--green)';
         badge.style.background = 'var(--green-dim)';
-        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo, você terá:';
-        document.getElementById('sim-note-abaixo').textContent = 'Cálculo dinâmico baseado no alvo da operação ao lado.';
-
+        valAlvo.style.color = 'var(--green-bright)';
+        subAlvo.style.color = 'var(--green)';
+        valStop.style.color = 'var(--red-bright)';
+        subStop.style.color = 'var(--red)';
+        lblAcao.textContent = 'Se a ação atingir o Alvo, você terá:';
+        noteAbaixo.textContent = 'Cálculo dinâmico baseado no alvo da operação ao lado.';
       } else if (modoDetalhes === 'sell') {
-        document.getElementById('detalhes-label').textContent = 'Operação de venda — DETALHES';
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Venda a descoberto por';
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo de lucro (Queda)';
-        document.getElementById('detalhes-lbl-stop').textContent = 'Trava de segurança';
-        
-        document.getElementById('detalhes-val-alvo').textContent = `R$ ${acao['Alvo (R$)']}`;
-        document.getElementById('detalhes-val-stop').textContent = `R$ ${acao['Stop (R$)']}`;
-        document.getElementById('detalhes-sub-alvo').textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
-        document.getElementById('detalhes-sub-stop').textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
-
-        document.getElementById('detalhes-val-alvo').style.color = 'var(--green-bright)';
-        document.getElementById('detalhes-sub-alvo').style.color = 'var(--green)';
-        document.getElementById('detalhes-val-stop').style.color = 'var(--red-bright)';
-        document.getElementById('detalhes-sub-stop').style.color = 'var(--red)';
-
-        badge.textContent = `${acao['Probabilidade (%)']}% de risco de queda`;
+        document.getElementById('detalhes-label').textContent = acao ? 'Operação de venda — DETALHES' : 'Operação de Venda - Sem Ativos Hoje';
+        lblEntrada.textContent = 'Venda a descoberto por';
+        lblAlvo.textContent = 'Alvo de lucro (Queda)';
+        lblStop.textContent = 'Trava de segurança';
         badge.style.color = 'var(--red-bright)';
         badge.style.borderColor = 'var(--red)';
         badge.style.background = 'var(--red-dim)';
-        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo (cair), seu lucro será:';
-        document.getElementById('sim-note-abaixo').textContent = 'Cálculo dinâmico operando vendido (short).';
-
+        valAlvo.style.color = 'var(--green-bright)';
+        subAlvo.style.color = 'var(--green)';
+        valStop.style.color = 'var(--red-bright)';
+        subStop.style.color = 'var(--red)';
+        lblAcao.textContent = 'Se a ação atingir o Alvo (cair), seu lucro será:';
+        noteAbaixo.textContent = 'Cálculo dinâmico operando vendido (short).';
       } else if (modoDetalhes === 'hold') {
-        // --- O NOVO ESTADO DE ESPERA NO PAINEL ---
-        document.getElementById('detalhes-label').textContent = 'Operação em Observação — DETALHES';
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Preço Atual na B3';
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo definido';
-        document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava definida';
-        
-        document.getElementById('detalhes-val-alvo').textContent = `--`;
-        document.getElementById('detalhes-sub-alvo').textContent = `Consolidado`;
-        document.getElementById('detalhes-val-stop').textContent = `--`;
-        document.getElementById('detalhes-sub-stop').textContent = `Consolidado`;
-
-        document.getElementById('detalhes-val-alvo').style.color = 'var(--text-muted)';
-        document.getElementById('detalhes-sub-alvo').style.color = 'var(--text-faint)';
-        document.getElementById('detalhes-val-stop').style.color = 'var(--text-muted)';
-        document.getElementById('detalhes-sub-stop').style.color = 'var(--text-faint)';
-
-        badge.textContent = `Aguardando cruzamento de MACD / RSI`;
+        document.getElementById('detalhes-label').textContent = acao ? 'Operação em Observação — DETALHES' : 'Operação em Observação - Sem Ativos Hoje';
+        lblEntrada.textContent = 'Preço Atual na B3';
+        lblAlvo.textContent = 'Sem alvo definido';
+        lblStop.textContent = 'Sem trava definida';
         badge.style.color = 'var(--amber-bright)';
         badge.style.borderColor = 'var(--amber)';
         badge.style.background = 'rgba(239, 159, 39, 0.1)';
-        
-        document.getElementById('sim-lbl-acao').textContent = 'Simulação Indisponível';
-        document.getElementById('sim-note-abaixo').textContent = 'O algoritmo não projeta lucros para ativos sem tendência de força relativa.';
+        valAlvo.style.color = 'var(--text-muted)';
+        subAlvo.style.color = 'var(--text-faint)';
+        valStop.style.color = 'var(--text-muted)';
+        subStop.style.color = 'var(--text-faint)';
+        lblAcao.textContent = 'Simulação Indisponível';
+        noteAbaixo.textContent = 'O algoritmo não projeta lucros para ativos sem tendência de força relativa.';
+      }
+
+      // 2. Preenchimento dos DADOS (Se estiver vazio, zera os números)
+      if (!acao) {
+          document.getElementById('detalhes-ticker').textContent = "--";
+          valEntrada.textContent = `--`;
+          valAlvo.textContent = `--`;
+          valStop.textContent = `--`;
+          subAlvo.textContent = modoDetalhes === 'hold' ? 'Consolidado' : `0,0%`;
+          subStop.textContent = modoDetalhes === 'hold' ? 'Consolidado' : `0,0%`;
+          badge.textContent = `0%`; 
+          
+          calcSim();
+          let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+          desenharGrafico(modoDetalhes, sufixo, 0, "", ""); // Desenha o gráfico liso/vazio
+          return;
+      }
+
+      // 3. Preenchimento normal quando houver uma ação
+      document.getElementById('detalhes-ticker').textContent = acao.Ativo;
+      valEntrada.textContent = `R$ ${acao['Preço (R$)']}`;
+      
+      const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
+      const diffStop = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
+      
+      if (modoDetalhes === 'hold') {
+          valAlvo.textContent = `--`;
+          subAlvo.textContent = `Consolidado`;
+          valStop.textContent = `--`;
+          subStop.textContent = `Consolidado`;
+          badge.textContent = `Aguardando cruzamento de MACD / RSI`;
+      } else {
+          valAlvo.textContent = `R$ ${acao['Alvo (R$)']}`;
+          valStop.textContent = `R$ ${acao['Stop (R$)']}`;
+          subAlvo.textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
+          subStop.textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
+          badge.textContent = `${acao['Probabilidade (%)']}% de ${modoDetalhes === 'buy' ? 'chance de alta' : 'risco de queda'}`;
       }
 
       calcSim();
-      // Sempre que renderizar o painel, recarrega o gráfico dele também
       let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
       desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
     }
@@ -857,27 +849,17 @@
         document.getElementById(`barra-${idSufixo}`).style.width = `${acao['Probabilidade (%)']}%`;
       }
 
-      // Atualiza a variável global que armazena a ação clicada
       if(tipoBotao === 'buy') acaoSelecionadaCompra = acao;
       else if(tipoBotao === 'sell') acaoSelecionadaVenda = acao;
-      else if(tipoBotao === 'hold') acaoSelecionadaEspera = acao; // <- AGORA SALVAMOS A ESPERA
+      else if(tipoBotao === 'hold') acaoSelecionadaEspera = acao;
 
-      // Se o usuário clicou numa ação da aba que já está aberta nos detalhes, atualiza os detalhes.
-      // E melhor ainda: se o usuário clicar numa pílula de ESPERAR, a caixa de detalhes vira ESPERAR automaticamente!
       if (tipoBotao !== modoDetalhes) {
           modoDetalhes = tipoBotao;
-          
-          const btnTempoAtivo = document.querySelector('.time-btn.active');
-          if (btnTempoAtivo) {
-             btnTempoAtivo.classList.remove('buy', 'sell', 'hold');
-             btnTempoAtivo.classList.add(modoDetalhes);
-          }
       }
       renderizarDetalhes();
     }
 
     function desenharGrafico(tipo, sufixo, precoAtual, historicoPrecosStr, historicoDatasStr) {
-      // Ignora gráficos que não estão na tela
       const canvas = document.getElementById(`chart-${sufixo}`);
       if(!canvas) return;
 
@@ -912,8 +894,14 @@
              return d;
          });
       } else {
-         historicoFinal = [precoAtual*.88, precoAtual*.90, precoAtual*.89, precoAtual*.92, precoAtual*.94, precoAtual*.93, precoAtual*.95, precoAtual*.97, precoAtual*.98, precoAtual];
-         datasFinais = ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'D-1', 'Hoje'];
+         // Lógica para desenhar um gráfico liso caso não exista nenhum ativo
+         if (precoAtual === 0) {
+             historicoFinal = [0, 0, 0, 0, 0];
+             datasFinais = ['','','','',''];
+         } else {
+             historicoFinal = [precoAtual*.88, precoAtual*.90, precoAtual*.89, precoAtual*.92, precoAtual*.94, precoAtual*.93, precoAtual*.95, precoAtual*.97, precoAtual*.98, precoAtual];
+             datasFinais = ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'D-1', 'Hoje'];
+         }
       }
 
       graficosAtuais[sufixo] = new Chart(ctx, {
