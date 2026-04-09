@@ -270,6 +270,8 @@
       background-color: var(--surface);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .signal-card.buy { background: var(--green-dim); border-color: var(--green); }
@@ -343,6 +345,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-top: auto;
     }
 
     .prob-label {
@@ -609,6 +612,7 @@
       color: var(--text-faint);
     }
 
+    /* HEATMAP STYLES */
     .heatmap-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
@@ -679,6 +683,7 @@
       transition: max-height 0.6s ease-in-out, opacity 0.5s ease 0.1s, margin-top 0.4s ease, padding-top 0.4s ease;
     }
 
+    /* TABLE STYLES */
     .table-wrap {
       width: 100%;
       overflow-x: auto;
@@ -731,6 +736,7 @@
       border: 1px solid var(--red);
     }
 
+    /* NAVIGATION VIEWS */
     .view {
       display: none;
     }
@@ -776,35 +782,9 @@
       color: #fff;
     }
 
-    .pill-btn.active.buy {
-      background: rgba(93, 202, 165, 0.15);
-      border-color: var(--green);
-      color: var(--green-bright);
-    }
-
-    .pill-btn.active.sell {
-      background: rgba(240, 149, 149, 0.15);
-      border-color: var(--red);
-      color: var(--red-bright);
-    }
-
-    .pill-btn.active.hold {
-      background: rgba(250, 199, 117, 0.15);
-      border-color: var(--amber);
-      color: var(--amber-bright);
-    }
-
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      appearance: none;
-      margin: 0;
-    }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-      appearance: textfield;
-    }
+    .pill-btn.active.buy { background: rgba(93, 202, 165, 0.15); border-color: var(--green); color: var(--green-bright); }
+    .pill-btn.active.sell { background: rgba(240, 149, 149, 0.15); border-color: var(--red); color: var(--red-bright); }
+    .pill-btn.active.hold { background: rgba(250, 199, 117, 0.15); border-color: var(--amber); color: var(--amber-bright); }
 
     .rank-row {
       display: flex;
@@ -940,6 +920,7 @@
   </div>
 
   <main class="main">
+
     <div id="view-rapido" class="view active">
 
       <div class="verdict-hero">
@@ -1017,6 +998,7 @@
               </div>
             </div>
           </div>
+          
           <div class="scorecard" id="sim-risk-box" style="display: block; margin-top: 0; padding-top: 0; border-top: none;">
             <div style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700; border-top: 1px solid var(--border2); padding-top: 20px;">Gestão de Risco (Stop Loss)</div>
             <div class="score-grid">
@@ -1052,14 +1034,49 @@
       </div>
     </div>
 
+
     <div id="view-backtest" class="view">
       <div style="text-align: center; margin-bottom: 40px; padding: 0 20px;">
-        <h1 style="font-family: 'Syne', sans-serif; font-size: 32px; color: #fff; margin-bottom: 14px;">Livro Razão e Backtesting</h1>
-        <p style="color: var(--text-muted); font-size: 16px; max-width: 750px; margin: 0 auto; line-height: 1.6;">Registro imutável das últimas recomendações quantitativas do algoritmo para auditoria e cálculo de taxa de acerto.</p>
+        <h1 style="font-family: 'Syne', sans-serif; font-size: 32px; color: #fff; margin-bottom: 14px;">Marcação a Mercado (Backtest)</h1>
+        <p style="color: var(--text-muted); font-size: 16px; max-width: 750px; margin: 0 auto; line-height: 1.6;">O algoritmo cruza os registros imutáveis do passado com a fita de preços de hoje para validar matematicamente os resultados reais.</p>
       </div>
+
+      <div class="two-col" style="margin-bottom: 20px;">
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+           <div class="card-label">Taxa de Acerto (Win Rate)</div>
+           <div style="font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 700; color: #fff;" id="hit-rate-text">--%</div>
+           <div style="width: 200px; height: 200px; margin-top: 10px; position: relative;">
+              <canvas id="backtest-chart"></canvas>
+           </div>
+        </div>
+        
+        <div class="card">
+           <div class="card-label">Resumo do Algoritmo</div>
+           <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Auditoria automática baseada nas últimas 50 recomendações geradas pelo motor quantitativo.</div>
+           
+           <div class="score-grid" style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="score-item" style="flex-direction: row; justify-content: space-between;">
+                 <span class="score-lbl">Total de Sinais Auditados</span>
+                 <span class="score-val" id="bt-total" style="font-size: 18px;">0</span>
+              </div>
+              <div class="score-item" style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--green-bright);">
+                 <span class="score-lbl">Alvos Atingidos (Gain)</span>
+                 <span class="score-val" id="bt-gain" style="color: var(--green-bright); font-size: 18px;">0</span>
+              </div>
+              <div class="score-item" style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--red-bright);">
+                 <span class="score-lbl">Stops Acionados (Loss)</span>
+                 <span class="score-val" id="bt-loss" style="color: var(--red-bright); font-size: 18px;">0</span>
+              </div>
+              <div class="score-item" style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--amber-bright);">
+                 <span class="score-lbl">Aguardando Desfecho</span>
+                 <span class="score-val" id="bt-running" style="color: var(--amber-bright); font-size: 18px;">0</span>
+              </div>
+           </div>
+        </div>
+     </div>
       
       <div class="card" style="margin-bottom: 20px;">
-        <div class="card-label">Últimos Sinais Emitidos (Banco de Dados)</div>
+        <div class="card-label">Livro Razão (Banco de Dados)</div>
         <div class="table-wrap">
           <table class="data-table">
             <thead>
@@ -1067,19 +1084,20 @@
                 <th>Data da Leitura</th>
                 <th>Ticker (Ativo)</th>
                 <th>Sinal Emitido</th>
-                <th>Nota (Score)</th>
                 <th>Preço Base</th>
                 <th>Alvo Projetado</th>
                 <th>Stop (Trava)</th>
+                <th>Resultado Atual</th>
               </tr>
             </thead>
             <tbody id="tb-historico">
-              <tr><td colspan="7" style="text-align:center; color:var(--text-faint);">Carregando histórico do servidor...</td></tr>
+              <tr><td colspan="7" style="text-align:center; color:var(--text-faint);">Carregando validação do servidor...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
 
     <div id="view-carteira" class="view">
       <div class="card" style="margin-bottom: 30px;">
@@ -1106,6 +1124,7 @@
       <div class="signals-grid" id="grid-carteira"></div>
     </div>
 
+
     <div id="view-longo" class="view">
       <div class="verdict-hero">
         <div class="verdict-eyebrow">Recomendação do mês — longo prazo</div>
@@ -1125,14 +1144,41 @@
         </div>
       </div>
     </div>
+
   </main>
 
   <script>
+    // ==============================================
+    // VARIÁVEIS GLOBAIS DE ESTADO
+    // ==============================================
+    const now = new Date(); 
+    document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+
+    let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
+    let graficosAtuais = { compra: null, venda: null, espera: null };
+    
+    let radarChartObj = null;
+    let backtestChartObj = null; 
+    let heatmapChartObj = null;
+    
+    let modoDetalhes = 'buy'; 
+    let acaoSelecionadaCompra = null;
+    let acaoSelecionadaVenda = null;
+    let acaoSelecionadaEspera = null; 
+    let acaoSelecionadaHeatmap = null;
+    
+    let timeframeAtual = '10d'; 
+
+    // ==============================================
+    // NAVEGAÇÃO E UI GERAL
+    // ==============================================
     function setMode(m) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      
       document.getElementById('view-' + m).classList.add('active');
       document.getElementById('btn' + m.charAt(0).toUpperCase() + m.slice(1)).classList.add('active');
+      
       if(m === 'backtest') carregarHistorico();
     }
 
@@ -1145,7 +1191,9 @@
 
     function dispararNotificacao(acoes) {
       if (!("Notification" in window) || Notification.permission !== "granted") return;
+      
       const fortes = acoes.filter(a => a.Score >= 5 && a.Sinal === 'COMPRA');
+      
       if(fortes.length > 0 && !window.notificacaoEnviadaHoje) {
         new Notification('TrendSight Analytics', { 
           body: `Oportunidade Forte: ${fortes[0].Ativo} está com Score ${fortes[0].Score}/6 para Compra!`, 
@@ -1155,9 +1203,17 @@
       }
     }
 
+    // ==============================================
+    // SIMULADOR DE LUCRO PROJETADO E GESTÃO DE RISCO
+    // ==============================================
     function calcSim() {
       const v = parseFloat(document.getElementById('simVal').value) || 0;
-      let acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : (modoDetalhes === 'sell' ? acaoSelecionadaVenda : acaoSelecionadaEspera);
+      let acao = null;
+      
+      if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
+      else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
+      else acao = acaoSelecionadaEspera;
+
       const riskBox = document.getElementById('sim-risk-box');
       const cotasEl = document.getElementById('sim-qtd-cotas');
       const perdaEl = document.getElementById('sim-perda-stop');
@@ -1169,6 +1225,7 @@
             document.getElementById('simGain').style.color = 'var(--text-muted)'; 
             document.getElementById('sim-lbl-acao').textContent = 'Simulação Indisponível';
          }
+         
          if(riskBox) riskBox.style.display = modoDetalhes === 'hold' ? 'block' : 'none';
          if(cotasEl) cotasEl.textContent = '--';
          if(perdaEl) { 
@@ -1187,6 +1244,7 @@
 
       if(riskBox) riskBox.style.display = 'block';
       if(cotasEl) cotasEl.textContent = `${Math.floor(v / acao['Preço (R$)'])} cotas`;
+      
       if(perdaEl) { 
           const diffStop = Math.abs((acao['Stop (R$)'] / acao['Preço (R$)']) - 1);
           perdaEl.textContent = `- R$ ${(v * diffStop).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; 
@@ -1194,6 +1252,9 @@
       }
     }
 
+    // ==============================================
+    // PILOTO AUTOMÁTICO DINÂMICO
+    // ==============================================
     function calcAlloc() {
       const v = parseFloat(document.getElementById('allocVal').value) || 0;
       const el = document.getElementById('allocResult');
@@ -1209,6 +1270,7 @@
       }
 
       const orcamentoPorAcao = v / compras.length;
+      
       const strAlocacao = compras.map(a => {
           const qtd = Math.floor(orcamentoPorAcao / a['Preço (R$)']);
           return `<strong>${qtd} cota${qtd !== 1 ? 's' : ''} de ${a.Ativo}</strong>`;
@@ -1223,34 +1285,59 @@
     function renderizarPilotoAutomatico() {
       const containerCards = document.getElementById('piloto-cards');
       const containerReasons = document.getElementById('piloto-reasons');
+      
       if(!containerCards || !containerReasons) return;
 
-      let buysHTML = '', sellsHTML = '', reasonsHTML = '';
+      let buysHTML = '';
+      let sellsHTML = '';
+      let reasonsHTML = '';
 
       if (dadosMercadoGlobais.compras.length > 0) {
           let tickersBuy = dadosMercadoGlobais.compras.map(a => `<span class="ticker">${a.Ativo}</span>`).join('');
+          
           buysHTML = `
           <div class="signal-card buy" style="grid-column: span 2;">
-            <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar e guardar</span></div>
+            <div class="signal-header">
+                <div class="signal-icon">↑</div>
+                <span class="signal-action">Comprar e guardar</span>
+            </div>
             <p class="signal-text">Ativos aprovados pelo Ensemble Scoring para acumulação de capital.</p>
             <div class="tickers">${tickersBuy}</div>
-            <div class="prob-row"><span class="prob-label">Recomendação</span><div class="prob-track"><div class="prob-fill" style="width:100%"></div></div><span class="prob-pct">Forte</span></div>
+            <div class="prob-row">
+                <span class="prob-label">Recomendação</span>
+                <div class="prob-track"><div class="prob-fill" style="width:100%"></div></div>
+                <span class="prob-pct">Forte</span>
+            </div>
           </div>`;
+          
           dadosMercadoGlobais.compras.forEach(a => { 
-              reasonsHTML += `<div class="long-rec"><div class="long-dot g"></div><div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Alvo projetado em R$ ${a['Alvo (R$)']}.</div></div>`; 
+              reasonsHTML += `
+              <div class="long-rec">
+                  <div class="long-dot g"></div>
+                  <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Alvo projetado em R$ ${a['Alvo (R$)']}.</div>
+              </div>`; 
           });
       }
 
       if (dadosMercadoGlobais.vendas.length > 0) {
           let tickersSell = dadosMercadoGlobais.vendas.map(a => `<span class="ticker">${a.Ativo}</span>`).join('');
+          
           sellsHTML = `
           <div class="signal-card sell">
-            <div class="signal-header"><div class="signal-icon">↓</div><span class="signal-action">Não recomendado</span></div>
+            <div class="signal-header">
+                <div class="signal-icon">↓</div>
+                <span class="signal-action">Não recomendado</span>
+            </div>
             <p class="signal-text">Risco elevado detectado pelos indicadores matemáticos hoje.</p>
             <div class="tickers">${tickersSell}</div>
           </div>`;
+          
           dadosMercadoGlobais.vendas.forEach(a => { 
-              reasonsHTML += `<div class="long-rec"><div class="long-dot r"></div><div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Risco de correção até R$ ${a['Alvo (R$)']}.</div></div>`; 
+              reasonsHTML += `
+              <div class="long-rec">
+                  <div class="long-dot r"></div>
+                  <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Risco de correção até R$ ${a['Alvo (R$)']}.</div>
+              </div>`; 
           });
       }
 
@@ -1261,71 +1348,319 @@
           containerCards.innerHTML = buysHTML + sellsHTML;
           containerReasons.innerHTML = reasonsHTML;
       }
+      
       calcAlloc();
     }
 
-    const now = new Date(); 
-    document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
-
-    let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
-    let graficosAtuais = { compra: null, venda: null, espera: null };
-    let radarChartObj = null;
-    let modoDetalhes = 'buy'; 
-    let acaoSelecionadaCompra = null, acaoSelecionadaVenda = null, acaoSelecionadaEspera = null; 
-    let timeframeAtual = '10d'; 
-    let acaoSelecionadaHeatmap = null;
-    let heatmapChartObj = null;
-
+    // ==============================================
+    // AÇÃO RÁPIDA (CARDS, GRÁFICOS E DETALHES)
+    // ==============================================
     function mudarTimeframe(tf, btn) {
       btn.parentElement.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active')); 
       btn.classList.add('active'); 
+      
       timeframeAtual = tf;
-      let acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : (modoDetalhes === 'sell' ? acaoSelecionadaVenda : acaoSelecionadaEspera);
-      if (acao) desenharGrafico(modoDetalhes, modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera'), acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
+      
+      let acao = null;
+      if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
+      else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
+      else acao = acaoSelecionadaEspera;
+
+      if (acao) {
+          let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+          desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
+      }
     }
 
-    async function carregarDadosCarteira() {
-      try {
-        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira'); 
-        const dados = await resposta.json();
-        if (dados.status === "sucesso") {
-          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          const divLucro = document.getElementById('lucro-total'); 
-          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
-          divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+    function alternarDetalhes() { 
+      if (modoDetalhes === 'buy') modoDetalhes = 'sell';
+      else if (modoDetalhes === 'sell') modoDetalhes = 'hold';
+      else modoDetalhes = 'buy';
+      
+      renderizarDetalhes(); 
+    }
+
+    function renderizarDetalhes() {
+      let acao = null;
+      if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
+      else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
+      else acao = acaoSelecionadaEspera;
+
+      const badge = document.getElementById('detalhes-badge');
+      const valAlvo = document.getElementById('detalhes-val-alvo');
+      const subAlvo = document.getElementById('detalhes-sub-alvo');
+      const valStop = document.getElementById('detalhes-val-stop');
+      const subStop = document.getElementById('detalhes-sub-stop');
+
+      if (modoDetalhes === 'buy') {
+        document.getElementById('detalhes-label').textContent = acao ? 'Operação de compra — DETALHES' : 'Sem Ativos'; 
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até'; 
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo'; 
+        document.getElementById('detalhes-lbl-stop').textContent = 'Stop'; 
+        
+        badge.style.color = 'var(--green-bright)'; 
+        badge.style.borderColor = 'var(--green)'; 
+        badge.style.background = 'var(--green-dim)'; 
+        
+        valAlvo.style.color = 'var(--green-bright)'; 
+        subAlvo.style.color = 'var(--green)'; 
+        valStop.style.color = 'var(--red-bright)'; 
+        subStop.style.color = 'var(--red)'; 
+        
+        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo, você terá:';
+      
+      } else if (modoDetalhes === 'sell') {
+        document.getElementById('detalhes-label').textContent = acao ? 'Operação de venda — DETALHES' : 'Sem Ativos'; 
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Short por'; 
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo (Queda)'; 
+        document.getElementById('detalhes-lbl-stop').textContent = 'Trava'; 
+        
+        badge.style.color = 'var(--red-bright)'; 
+        badge.style.borderColor = 'var(--red)'; 
+        badge.style.background = 'var(--red-dim)'; 
+        
+        valAlvo.style.color = 'var(--green-bright)'; 
+        subAlvo.style.color = 'var(--green)'; 
+        valStop.style.color = 'var(--red-bright)'; 
+        subStop.style.color = 'var(--red)'; 
+        
+        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo (queda), seu lucro será:';
+      
+      } else {
+        document.getElementById('detalhes-label').textContent = acao ? 'Em Observação' : 'Sem Ativos'; 
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Atual'; 
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo'; 
+        document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava'; 
+        
+        badge.style.color = 'var(--amber-bright)'; 
+        badge.style.borderColor = 'var(--amber)'; 
+        badge.style.background = 'rgba(239, 159, 39, 0.1)'; 
+        
+        valAlvo.style.color = 'var(--text-muted)'; 
+        subAlvo.style.color = 'var(--text-faint)'; 
+        valStop.style.color = 'var(--text-muted)'; 
+        subStop.style.color = 'var(--text-faint)';
+      }
+
+      if (!acao) {
+          document.getElementById('detalhes-ticker').textContent = "--"; 
+          document.getElementById('detalhes-val-entrada').textContent = `--`; 
+          valAlvo.textContent = `--`; 
+          valStop.textContent = `--`; 
+          subAlvo.textContent = `0,0%`; 
+          subStop.textContent = `0,0%`; 
+          badge.textContent = `0%`; 
           
-          document.getElementById('grid-carteira').innerHTML = dados.ativos.map(ativo => {
-            let cl = 'hold', ic = '—', txt = 'Manter', cor = 'var(--amber-bright)', bd = 'var(--amber)';
-            if (ativo.Sinal === 'COMPRA') { cl = 'buy'; ic = '↑'; txt = 'Comprar Mais'; cor = 'var(--green-bright)'; bd = 'var(--green)'; } 
-            else if (ativo.Sinal === 'VENDA') { cl = 'sell'; ic = '↓'; txt = 'Vender Posição'; cor = 'var(--red-bright)'; bd = 'var(--red)'; }
-            let cRent = ativo['Rentabilidade_%'] >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
-            return `<div class="signal-card ${cl}"><div class="signal-header"><div class="signal-icon" style="background:${bd};color:#fff">${ic}</div><span class="signal-action" style="color:${cor}">${txt}</span></div><div class="levels" style="grid-template-columns: 1fr 1fr; margin-top: 16px; margin-bottom: 20px;"><div class="level"><div class="level-lbl">Ativo</div><div class="level-val">${ativo.Ativo}</div><div class="level-sub">${ativo.Quantidade} cotas</div></div><div class="level"><div class="level-lbl">Retorno</div><div class="level-val" style="color:${cRent}">${ativo['Rentabilidade_%']}%</div><div class="level-sub" style="color:${cRent}">R$ ${ativo['Lucro_R$']}</div></div></div><button onclick="removerAcao('${ativo.Ativo}')" class="btn-ghost" style="width:100%;font-size:12px;border-color:var(--border2);">Encerrar Posição</button></div>`;
-          }).join('');
-        }
-      } catch (e) { console.error(e); }
+          document.getElementById('detalhes-scorecard').style.display = 'none'; 
+          calcSim(); 
+          
+          let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+          desenharGrafico(modoDetalhes, sufixo, 0, "", ""); 
+          return;
+      }
+
+      document.getElementById('detalhes-ticker').textContent = acao.Ativo; 
+      document.getElementById('detalhes-val-entrada').textContent = `R$ ${acao['Preço (R$)']}`;
+      
+      if (modoDetalhes === 'hold') { 
+          valAlvo.textContent = `--`; 
+          subAlvo.textContent = `Consolidado`; 
+          valStop.textContent = `--`; 
+          subStop.textContent = `Consolidado`; 
+          badge.textContent = `Aguardando sinais`; 
+      } else {
+          valAlvo.textContent = `R$ ${acao['Alvo (R$)']}`; 
+          valStop.textContent = `R$ ${acao['Stop (R$)']}`;
+          
+          const diffAlvoPct = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
+          const diffStopPct = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
+          
+          subAlvo.textContent = (diffAlvoPct > 0 ? '+' : '') + diffAlvoPct.toFixed(1) + '%'; 
+          subStop.textContent = (diffStopPct > 0 ? '+' : '') + diffStopPct.toFixed(1) + '%'; 
+          badge.textContent = `Score ${acao.Score}/6`;
+      }
+
+      if (acao.Score !== undefined) {
+          document.getElementById('detalhes-scorecard').style.display = 'block'; 
+          document.getElementById('score-num').textContent = acao.Score;
+          
+          const rsiEl = document.getElementById('ind-rsi');
+          rsiEl.textContent = acao.RSI; 
+          rsiEl.style.color = acao.RSI < 45 ? 'var(--green-bright)' : (acao.RSI > 60 ? 'var(--red-bright)' : 'var(--text-muted)'); 
+          
+          const macdEl = document.getElementById('ind-macd');
+          macdEl.textContent = acao.MACD_Hist; 
+          macdEl.style.color = acao.MACD_Hist > 0 ? 'var(--green-bright)' : 'var(--red-bright)'; 
+          
+          const bbEl = document.getElementById('ind-bb');
+          bbEl.textContent = acao.BB_Posicao; 
+          bbEl.style.color = acao.BB_Posicao < 0.3 ? 'var(--green-bright)' : (acao.BB_Posicao > 0.7 ? 'var(--red-bright)' : 'var(--text-muted)'); 
+          
+          const mmEl = document.getElementById('ind-mm');
+          mmEl.textContent = acao.MM50 > acao.MM200 ? 'Alta' : 'Baixa'; 
+          mmEl.style.color = acao.MM50 > acao.MM200 ? 'var(--green-bright)' : 'var(--red-bright)';
+          
+          const cv = document.getElementById('radar-chart');
+          if (cv) { 
+              if (radarChartObj) radarChartObj.destroy(); 
+              radarChartObj = new Chart(cv.getContext('2d'), { 
+                  type: 'radar', 
+                  data: { 
+                      labels: ['RSI', 'MACD', 'Bands', 'Tendência', 'Outros'], 
+                      datasets: [{ 
+                          data: [
+                              acao.RSI < 45 ? 1 : 0.3, 
+                              acao.MACD_Hist > 0 ? 1 : 0.3, 
+                              acao.BB_Posicao < 0.3 ? 1 : 0.3, 
+                              acao.MM50 > acao.MM200 ? 1 : 0.3, 
+                              acao.Score / 6
+                          ], 
+                          backgroundColor: 'rgba(127, 119, 221, 0.25)', 
+                          borderColor: '#7F77DD', 
+                          borderWidth: 2 
+                      }] 
+                  }, 
+                  options: { 
+                      responsive: true, 
+                      maintainAspectRatio: false, 
+                      plugins: { legend: { display: false } }, 
+                      scales: { 
+                          r: { 
+                              angleLines: { color: 'rgba(255,255,255,0.1)' }, 
+                              grid: { color: 'rgba(255,255,255,0.1)' }, 
+                              pointLabels: { color: 'rgba(255,255,255,0.8)', font: { size: 9, family: 'Syne' } }, 
+                              ticks: { display: false, min: 0, max: 1 } 
+                          } 
+                      } 
+                  } 
+              }); 
+          }
+      }
+      
+      calcSim(); 
+      let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+      desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
     }
 
-    async function adicionarAcao() { 
-      const a = document.getElementById('nova-acao').value, q = document.getElementById('nova-qtd').value, p = document.getElementById('novo-preco').value; 
-      if(!a||!q||!p) return alert('Preencha todos os campos.'); 
-      await fetch('https://projeto-trendsight.onrender.com/api/carteira/adicionar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Ativo: a, Quantidade: q, Preco_Medio: p }) }); 
-      carregarDadosCarteira(); 
+    function mudarAcaoCard(tipoBotao, index) {
+      const chave = tipoBotao === 'buy' ? 'compras' : (tipoBotao === 'sell' ? 'vendas' : 'espera');
+      const acao = dadosMercadoGlobais[chave][index]; 
+      
+      if(!acao) return;
+
+      document.getElementById(`nav-${chave}`).querySelectorAll('.pill-btn').forEach((btn, i) => { 
+          btn.className = `pill-btn ${i === index ? 'active ' + tipoBotao : ''}`; 
+      });
+      
+      const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera'); 
+      document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
+      
+      if(tipoBotao !== 'hold') {
+          const pctEl = document.getElementById(`pct-${idSufixo}`);
+          const barraEl = document.getElementById(`barra-${idSufixo}`);
+          if (pctEl && barraEl) { 
+              pctEl.textContent = `${acao['Probabilidade (%)']}%`; 
+              barraEl.style.width = `${acao['Probabilidade (%)']}%`; 
+          }
+      }
+
+      if(tipoBotao === 'buy') acaoSelecionadaCompra = acao; 
+      else if(tipoBotao === 'sell') acaoSelecionadaVenda = acao; 
+      else acaoSelecionadaEspera = acao;
+      
+      if (tipoBotao !== modoDetalhes) {
+          modoDetalhes = tipoBotao; 
+      }
+      
+      renderizarDetalhes();
     }
 
-    async function removerAcao(a) { 
-      if(!confirm(`Remover ${a}?`)) return; 
-      await fetch(`https://projeto-trendsight.onrender.com/api/carteira/remover/${a}`, { method: 'DELETE' }); 
-      carregarDadosCarteira(); 
+    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) {
+      const cv = document.getElementById(`chart-${sufixo}`); 
+      if(!cv) return; 
+      
+      if(graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
+      
+      const ctx = cv.getContext('2d'); 
+      let cor = tipo === 'buy' ? '#5DCAA5' : (tipo === 'sell' ? '#F09595' : '#FAC775');
+      let grad = ctx.createLinearGradient(0, 0, 0, 60);
+      
+      if (tipo === 'buy') {
+          grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)');
+      } else if (tipo === 'sell') {
+          grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)');
+      } else {
+          grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)');
+      }
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+      let hist = precosStr ? precosStr.split(',').map(Number) : [0,0,0];
+      let dts = datasStr ? datasStr.split(',') : ['','',''];
+      
+      if(timeframeAtual === '10d') { 
+          hist = hist.slice(-10); dts = dts.slice(-10); 
+      } else if(timeframeAtual === '1m') { 
+          hist = hist.slice(-22); dts = dts.slice(-22); 
+      }
+      
+      graficosAtuais[sufixo] = new Chart(ctx, { 
+          type: 'line', 
+          data: { 
+              labels: dts.map(d => d.substring(5)), 
+              datasets: [{ 
+                  data: hist, 
+                  borderColor: cor, 
+                  backgroundColor: grad, 
+                  borderWidth: 2, 
+                  pointRadius: timeframeAtual === '10d' ? 2 : 0, 
+                  pointHoverRadius: 6, 
+                  pointBackgroundColor: cor, 
+                  fill: true, 
+                  tension: 0.4 
+              }] 
+          }, 
+          options: { 
+              responsive: true, 
+              maintainAspectRatio: false, 
+              plugins: { 
+                  legend: { display: false }, 
+                  tooltip: { 
+                      enabled: true, 
+                      backgroundColor: '#15151f', 
+                      titleColor: '#7F77DD', 
+                      bodyColor: '#fff', 
+                      displayColors: false, 
+                      callbacks: { 
+                          label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } 
+                      } 
+                  } 
+              }, 
+              scales: { 
+                  x: { 
+                      display: true, 
+                      grid: { display: false, drawBorder: false }, 
+                      ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } 
+                  }, 
+                  y: { display: false } 
+              }, 
+              interaction: { mode: 'index', intersect: false } 
+          } 
+      });
     }
 
+    // ==============================================
+    // HEATMAP GLOBAL (B3)
+    // ==============================================
     window.selecionarHeatmap = function(ticker) {
         const wrapper = document.getElementById('heatmap-chart-wrapper');
+        
         if (acaoSelecionadaHeatmap === ticker) { 
             acaoSelecionadaHeatmap = null; 
             wrapper.classList.remove('open'); 
         } else { 
             acaoSelecionadaHeatmap = ticker; 
             wrapper.classList.add('open'); 
+            
             const acao = dadosMercadoGlobais.todos.find(a => a.Ativo === ticker); 
             if (acao) { 
                 document.getElementById('hm-chart-ticker').textContent = acao.Ativo; 
@@ -1339,23 +1674,58 @@
     function desenharGraficoHeatmap(acao) {
         const canvas = document.getElementById(`chart-heatmap`); 
         if(!canvas) return; 
+        
         if(heatmapChartObj) heatmapChartObj.destroy();
         
         const ctx = canvas.getContext('2d'); 
-        let cor = '#7F77DD', grad = ctx.createLinearGradient(0, 0, 0, 250); 
+        let cor = '#7F77DD';
+        let grad = ctx.createLinearGradient(0, 0, 0, 250); 
         grad.addColorStop(0, 'rgba(127, 119, 221, 0.4)'); 
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         
+        let precos = acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0,0,0];
+        let datas = acao.Historico_Datas ? acao.Historico_Datas.split(',') : ['','',''];
+
+        let datasFinais = datas.map(d => {
+             const partes = d.split('-');
+             if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
+             return d;
+        });
+
         heatmapChartObj = new Chart(ctx, { 
             type: 'line', 
             data: { 
-                labels: (acao.Historico_Datas ? acao.Historico_Datas.split(',') : ['','','']).map(d => { const partes = d.split('-'); return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0].substring(2)}` : d; }), 
-                datasets: [{ data: acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0,0,0], borderColor: cor, backgroundColor: grad, borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4 }] 
+                labels: datasFinais, 
+                datasets: [{ 
+                    data: precos, 
+                    borderColor: cor, 
+                    backgroundColor: grad, 
+                    borderWidth: 2, 
+                    pointRadius: 0, 
+                    pointHoverRadius: 6, 
+                    pointBackgroundColor: cor, 
+                    fill: true, 
+                    tension: 0.4 
+                }] 
             }, 
             options: { 
-                responsive: true, maintainAspectRatio: false, 
-                plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } } }, 
-                scales: { x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 12, maxRotation: 0 } }, y: { display: false } }, 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { 
+                        enabled: true, 
+                        backgroundColor: '#15151f', 
+                        titleColor: '#7F77DD', 
+                        bodyColor: '#fff', 
+                        displayColors: false, 
+                        callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } 
+                    } 
+                }, 
+                scales: { 
+                    x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 12, maxRotation: 0 } }, 
+                    y: { display: false } 
+                }, 
                 interaction: { mode: 'index', intersect: false } 
             } 
         });
@@ -1364,34 +1734,213 @@
     function renderizarHeatmap(lista) {
         const grid = document.getElementById('heatmap-container'); 
         if(!grid) return; 
-        let html = '<div class="heatmap-grid">';
         
-        [...lista].sort((a,b) => b['Variação (%)'] - a['Variação (%)']).forEach(acao => { 
+        let html = '<div class="heatmap-grid">';
+        let listaSort = [...lista].sort((a,b) => b['Variação (%)'] - a['Variação (%)']);
+        
+        listaSort.forEach(acao => { 
             const v = acao['Variação (%)'] || 0; 
             let bg = 'rgba(255,255,255,0.05)'; 
+            
             if (v >= 2.5) bg = 'rgba(29, 158, 117, 0.9)'; 
             else if (v > 0.5) bg = 'rgba(29, 158, 117, 0.4)'; 
             else if (v <= -2.5) bg = 'rgba(192, 57, 43, 0.9)'; 
             else if (v < -0.5) bg = 'rgba(192, 57, 43, 0.4)'; 
+
+            const selClass = acaoSelecionadaHeatmap === acao.Ativo ? 'selected' : '';
             
-            html += `<div class="heatmap-cell ${acaoSelecionadaHeatmap === acao.Ativo ? 'selected' : ''}" style="background: ${bg};" title="Score: ${acao.Score||0}/6" onclick="selecionarHeatmap('${acao.Ativo}')"><span class="hm-ticker">${acao.Ativo}</span><span class="hm-var">${v > 0 ? '+'+v : v}%</span></div>`; 
+            html += `
+            <div class="heatmap-cell ${selClass}" style="background: ${bg};" title="Score: ${acao.Score||0}/6" onclick="selecionarHeatmap('${acao.Ativo}')">
+                <span class="hm-ticker">${acao.Ativo}</span>
+                <span class="hm-var">${v > 0 ? '+'+v : v}%</span>
+            </div>`; 
         });
+        
         grid.innerHTML = html + '</div>';
     }
 
+    // ==============================================
+    // BACKTESTING CROSS-REFERENCE
+    // ==============================================
     async function carregarHistorico() {
-        try {
-            const res = await fetch('https://projeto-trendsight.onrender.com/api/historico'); 
-            const dados = await res.json(); 
-            const tb = document.getElementById('tb-historico');
-            if (dados.status === 'sucesso' && dados.sinais.length > 0) { 
-                tb.innerHTML = dados.sinais.map(s => { 
-                    return `<tr><td style="color:var(--text-muted);">${s.Data}</td><td style="font-weight:700; font-family:'Syne', sans-serif;">${s.Ativo}</td><td><span class="badge ${s.Sinal === 'COMPRA' ? 'b-buy' : (s.Sinal === 'VENDA' ? 'b-sell' : '')}">${s.Sinal}</span></td><td>${s.Score}/6</td><td>R$ ${s['Preço (R$)']}</td><td style="color:var(--green-bright)">R$ ${s['Alvo (R$)']}</td><td style="color:var(--red-bright)">R$ ${s['Stop (R$)']}</td></tr>`; 
-                }).join(''); 
-            } else { 
-                tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint);">Nenhum histórico encontrado no banco.</td></tr>`; 
+      try {
+        const res = await fetch('https://projeto-trendsight.onrender.com/api/historico');
+        const dados = await res.json();
+        const tb = document.getElementById('tb-historico');
+
+        if (dados.status === 'sucesso' && dados.sinais.length > 0) {
+          let acertos = 0;
+          let erros = 0;
+          let andamento = 0;
+
+          const htmlRows = dados.sinais.map(s => {
+            const badgeClass = s.Sinal === 'COMPRA' ? 'b-buy' : (s.Sinal === 'VENDA' ? 'b-sell' : '');
+            let statusTxt = '⏳ Em andamento';
+            let statusColor = 'var(--amber-bright)';
+
+            const ativoHoje = dadosMercadoGlobais.todos.find(a => a.Ativo === s.Ativo);
+
+            if (ativoHoje) {
+              const precoHoje = ativoHoje['Preço (R$)'];
+
+              if (s.Sinal === 'COMPRA') {
+                if (precoHoje >= s['Alvo (R$)']) {
+                  acertos++;
+                  statusTxt = '✅ GAIN';
+                  statusColor = 'var(--green-bright)';
+                } else if (precoHoje <= s['Stop (R$)']) {
+                  erros++;
+                  statusTxt = '❌ LOSS';
+                  statusColor = 'var(--red-bright)';
+                } else {
+                  andamento++;
+                }
+              } else if (s.Sinal === 'VENDA') {
+                if (precoHoje <= s['Alvo (R$)']) {
+                  acertos++;
+                  statusTxt = '✅ GAIN';
+                  statusColor = 'var(--green-bright)';
+                } else if (precoHoje >= s['Stop (R$)']) {
+                  erros++;
+                  statusTxt = '❌ LOSS';
+                  statusColor = 'var(--red-bright)';
+                } else {
+                  andamento++;
+                }
+              }
+            } else {
+              andamento++;
             }
-        } catch(e) { console.error(e); }
+
+            return `
+              <tr>
+                <td style="color:var(--text-muted);">${s.Data}</td>
+                <td style="font-weight:700; font-family:'Syne', sans-serif;">${s.Ativo}</td>
+                <td><span class="badge ${badgeClass}">${s.Sinal}</span></td>
+                <td>R$ ${s['Preço (R$)'].toFixed(2)}</td>
+                <td style="color:var(--green-bright)">R$ ${s['Alvo (R$)'].toFixed(2)}</td>
+                <td style="color:var(--red-bright)">R$ ${s['Stop (R$)'].toFixed(2)}</td>
+                <td style="color:${statusColor}; font-weight: 600;">${statusTxt}</td>
+              </tr>
+            `;
+          }).join('');
+
+          tb.innerHTML = htmlRows;
+
+          const totalResolvidos = acertos + erros;
+          const winRate = totalResolvidos > 0 ? ((acertos / totalResolvidos) * 100).toFixed(1) : 0;
+
+          document.getElementById('hit-rate-text').textContent = winRate + '%';
+          document.getElementById('bt-total').textContent = dados.sinais.length;
+          document.getElementById('bt-gain').textContent = acertos;
+          document.getElementById('bt-loss').textContent = erros;
+          document.getElementById('bt-running').textContent = andamento;
+
+          const ctx = document.getElementById('backtest-chart').getContext('2d');
+          if (backtestChartObj) backtestChartObj.destroy();
+          backtestChartObj = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Gain (Alvo)', 'Loss (Stop)', 'Em Andamento'],
+              datasets: [{
+                data: [acertos, erros, andamento],
+                backgroundColor: ['#5DCAA5', '#F09595', '#FAC775'],
+                borderColor: '#080810',
+                borderWidth: 4,
+                hoverOffset: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '75%',
+              plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: '#15151f', titleColor: '#fff', bodyColor: '#fff', displayColors: true }
+              }
+            }
+          });
+
+        } else {
+          tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint);">Nenhum histórico encontrado.</td></tr>`;
+        }
+      } catch (e) {
+        console.error("Erro histórico:", e);
+      }
+    }
+
+    // ==============================================
+    // CARTEIRA E REQUISIÇÕES DA API
+    // ==============================================
+    async function carregarDadosCarteira() {
+      try {
+        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira'); 
+        const dados = await resposta.json();
+        
+        if (dados.status === "sucesso") {
+          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          
+          const divLucro = document.getElementById('lucro-total'); 
+          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
+          divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+          
+          document.getElementById('grid-carteira').innerHTML = dados.ativos.map(ativo => {
+            let cl = 'hold', ic = '—', txt = 'Manter', cor = 'var(--amber-bright)', bd = 'var(--amber)';
+            
+            if (ativo.Sinal === 'COMPRA') { 
+                cl = 'buy'; ic = '↑'; txt = 'Comprar Mais'; cor = 'var(--green-bright)'; bd = 'var(--green)'; 
+            } else if (ativo.Sinal === 'VENDA') { 
+                cl = 'sell'; ic = '↓'; txt = 'Vender Posição'; cor = 'var(--red-bright)'; bd = 'var(--red)'; 
+            }
+            
+            let cRent = ativo['Rentabilidade_%'] >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+            
+            return `
+            <div class="signal-card ${cl}">
+                <div class="signal-header">
+                    <div class="signal-icon" style="background:${bd};color:#fff">${ic}</div>
+                    <span class="signal-action" style="color:${cor}">${txt}</span>
+                </div>
+                <div class="levels" style="grid-template-columns: 1fr 1fr; margin-top: 16px; margin-bottom: 20px;">
+                    <div class="level">
+                        <div class="level-lbl">Ativo</div>
+                        <div class="level-val">${ativo.Ativo}</div>
+                        <div class="level-sub">${ativo.Quantidade} cotas</div>
+                    </div>
+                    <div class="level">
+                        <div class="level-lbl">Retorno</div>
+                        <div class="level-val" style="color:${cRent}">${ativo['Rentabilidade_%']}%</div>
+                        <div class="level-sub" style="color:${cRent}">R$ ${ativo['Lucro_R$']}</div>
+                    </div>
+                </div>
+                <button onclick="removerAcao('${ativo.Ativo}')" class="btn-ghost" style="width:100%;font-size:12px;border-color:var(--border2);">Encerrar Posição</button>
+            </div>`;
+          }).join('');
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function adicionarAcao() { 
+      const a = document.getElementById('nova-acao').value;
+      const q = document.getElementById('nova-qtd').value;
+      const p = document.getElementById('novo-preco').value; 
+      
+      if(!a||!q||!p) return alert('Preencha todos os campos.'); 
+      
+      await fetch('https://projeto-trendsight.onrender.com/api/carteira/adicionar', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ Ativo: a, Quantidade: q, Preco_Medio: p }) 
+      }); 
+      
+      carregarDadosCarteira(); 
+    }
+
+    async function removerAcao(a) { 
+      if(!confirm(`Remover ${a}?`)) return; 
+      
+      await fetch(`https://projeto-trendsight.onrender.com/api/carteira/remover/${a}`, { method: 'DELETE' }); 
+      carregarDadosCarteira(); 
     }
 
     async function carregarDadosMercado() {
@@ -1406,11 +1955,13 @@
           dispararNotificacao(dados.todos);
           
           const fita = document.getElementById('fita-cotacoes'); 
-          if (fita) fita.innerHTML = dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)']>=0?'ticker-up':'ticker-down'}">${a['Variação (%)']>=0?'▲':'▼'} ${a['Variação (%)']}%</span></div>`).join('') + dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)']>=0?'ticker-up':'ticker-down'}">${a['Variação (%)']>=0?'▲':'▼'} ${a['Variação (%)']}%</span></div>`).join('');
+          if (fita) {
+              const htmlFita = dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)']>=0?'ticker-up':'ticker-down'}">${a['Variação (%)']>=0?'▲':'▼'} ${a['Variação (%)']}%</span></div>`).join('');
+              fita.innerHTML = htmlFita + htmlFita;
+          }
           
           const criarBotoes = (l, cl) => l.map((a, i) => `<button class="pill-btn ${i===0?'active '+cl:''}" onclick="mudarAcaoCard('${cl}', ${i})">${a.Ativo}</button>`).join('');
 
-          // AS BARRAS DE PROBABILIDADE ESTÃO AQUI NESTE BLOCO
           document.getElementById('grid-sinais').innerHTML = `
             <div class="signal-card buy">
               <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
@@ -1418,7 +1969,11 @@
               <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
               <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-compra">--</span></div>
-              <div class="prob-row"><span class="prob-label">Score</span><div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div><span class="prob-pct" id="pct-compra">0%</span></div>
+              <div class="prob-row">
+                  <span class="prob-label">Score</span>
+                  <div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div>
+                  <span class="prob-pct" id="pct-compra">0%</span>
+              </div>
             </div>
             
             <div class="signal-card sell">
@@ -1427,7 +1982,11 @@
               <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
               <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-venda">--</span></div>
-              <div class="prob-row"><span class="prob-label">Risco</span><div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div><span class="prob-pct" id="pct-venda">0%</span></div>
+              <div class="prob-row">
+                  <span class="prob-label">Risco</span>
+                  <div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div>
+                  <span class="prob-pct" id="pct-venda">0%</span>
+              </div>
             </div>
             
             <div class="signal-card hold">
@@ -1449,148 +2008,6 @@
           renderizarPilotoAutomatico();
         }
       } catch (e) { console.error(e); }
-    }
-
-    function alternarDetalhes() { 
-      modoDetalhes = modoDetalhes === 'buy' ? 'sell' : (modoDetalhes === 'sell' ? 'hold' : 'buy'); 
-      renderizarDetalhes(); 
-    }
-
-    function renderizarDetalhes() {
-      let acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : (modoDetalhes === 'sell' ? acaoSelecionadaVenda : acaoSelecionadaEspera);
-      const b = document.getElementById('detalhes-badge'), vA = document.getElementById('detalhes-val-alvo'), sA = document.getElementById('detalhes-sub-alvo'), vS = document.getElementById('detalhes-val-stop'), sS = document.getElementById('detalhes-sub-stop');
-
-      if (modoDetalhes === 'buy') {
-        document.getElementById('detalhes-label').textContent = acao ? 'Operação de compra — DETALHES' : 'Sem Ativos'; 
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até'; 
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo'; 
-        document.getElementById('detalhes-lbl-stop').textContent = 'Stop'; 
-        b.style.color = 'var(--green-bright)'; b.style.borderColor = 'var(--green)'; b.style.background = 'var(--green-dim)'; 
-        vA.style.color = 'var(--green-bright)'; sA.style.color = 'var(--green)'; vS.style.color = 'var(--red-bright)'; sS.style.color = 'var(--red)'; 
-        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo, você terá:';
-      } else if (modoDetalhes === 'sell') {
-        document.getElementById('detalhes-label').textContent = acao ? 'Operação de venda — DETALHES' : 'Sem Ativos'; 
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Short por'; 
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo (Queda)'; 
-        document.getElementById('detalhes-lbl-stop').textContent = 'Trava'; 
-        b.style.color = 'var(--red-bright)'; b.style.borderColor = 'var(--red)'; b.style.background = 'var(--red-dim)'; 
-        vA.style.color = 'var(--green-bright)'; sA.style.color = 'var(--green)'; vS.style.color = 'var(--red-bright)'; sS.style.color = 'var(--red)'; 
-        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo (queda), seu lucro será:';
-      } else {
-        document.getElementById('detalhes-label').textContent = acao ? 'Em Observação' : 'Sem Ativos'; 
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Atual'; 
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo'; 
-        document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava'; 
-        b.style.color = 'var(--amber-bright)'; b.style.borderColor = 'var(--amber)'; b.style.background = 'rgba(239, 159, 39, 0.1)'; 
-        vA.style.color = 'var(--text-muted)'; sA.style.color = 'var(--text-faint)'; vS.style.color = 'var(--text-muted)'; sS.style.color = 'var(--text-faint)';
-      }
-
-      if (!acao) {
-          document.getElementById('detalhes-ticker').textContent = "--"; 
-          document.getElementById('detalhes-val-entrada').textContent = `--`; 
-          vA.textContent = `--`; vS.textContent = `--`; sA.textContent = `0,0%`; sS.textContent = `0,0%`; b.textContent = `0%`; 
-          document.getElementById('detalhes-scorecard').style.display = 'none'; 
-          calcSim(); desenharGrafico(modoDetalhes, modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera'), 0, "", ""); return;
-      }
-
-      document.getElementById('detalhes-ticker').textContent = acao.Ativo; 
-      document.getElementById('detalhes-val-entrada').textContent = `R$ ${acao['Preço (R$)']}`;
-      
-      if (modoDetalhes === 'hold') { 
-          vA.textContent = `--`; sA.textContent = `Consolidado`; vS.textContent = `--`; sS.textContent = `Consolidado`; b.textContent = `Aguardando sinais`; 
-      } else {
-          vA.textContent = `R$ ${acao['Alvo (R$)']}`; 
-          vS.textContent = `R$ ${acao['Stop (R$)']}`;
-          
-          const diffAlvoPct = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
-          const diffStopPct = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
-          
-          sA.textContent = (diffAlvoPct > 0 ? '+' : '') + diffAlvoPct.toFixed(1) + '%'; 
-          sS.textContent = (diffStopPct > 0 ? '+' : '') + diffStopPct.toFixed(1) + '%'; 
-          b.textContent = `Score ${acao.Score}/6`;
-      }
-
-      if (acao.Score !== undefined) {
-          document.getElementById('detalhes-scorecard').style.display = 'block'; 
-          document.getElementById('score-num').textContent = acao.Score;
-          
-          document.getElementById('ind-rsi').textContent = acao.RSI; document.getElementById('ind-rsi').style.color = acao.RSI < 45 ? 'var(--green-bright)' : (acao.RSI > 60 ? 'var(--red-bright)' : 'var(--text-muted)'); 
-          document.getElementById('ind-macd').textContent = acao.MACD_Hist; document.getElementById('ind-macd').style.color = acao.MACD_Hist > 0 ? 'var(--green-bright)' : 'var(--red-bright)'; 
-          document.getElementById('ind-bb').textContent = acao.BB_Posicao; document.getElementById('ind-bb').style.color = acao.BB_Posicao < 0.3 ? 'var(--green-bright)' : (acao.BB_Posicao > 0.7 ? 'var(--red-bright)' : 'var(--text-muted)'); 
-          document.getElementById('ind-mm').textContent = acao.MM50 > acao.MM200 ? 'Alta' : 'Baixa'; document.getElementById('ind-mm').style.color = acao.MM50 > acao.MM200 ? 'var(--green-bright)' : 'var(--red-bright)';
-          
-          const cv = document.getElementById('radar-chart');
-          if (cv) { 
-              if (radarChartObj) radarChartObj.destroy(); 
-              radarChartObj = new Chart(cv.getContext('2d'), { 
-                  type: 'radar', 
-                  data: { 
-                      labels: ['RSI', 'MACD', 'Bands', 'Tendência', 'Outros'], 
-                      datasets: [{ data: [acao.RSI<45?1:0.3, acao.MACD_Hist>0?1:0.3, acao.BB_Posicao<0.3?1:0.3, acao.MM50>acao.MM200?1:0.3, acao.Score/6], backgroundColor: 'rgba(127, 119, 221, 0.25)', borderColor: '#7F77DD', borderWidth: 2 }] 
-                  }, 
-                  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.8)', font: { size: 9, family: 'Syne' } }, ticks: { display: false, min: 0, max: 1 } } } } 
-              }); 
-          }
-      }
-      calcSim(); 
-      desenharGrafico(modoDetalhes, modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera'), acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
-    }
-
-    function mudarAcaoCard(tipoBotao, index) {
-      const chave = tipoBotao === 'buy' ? 'compras' : (tipoBotao === 'sell' ? 'vendas' : 'espera');
-      const acao = dadosMercadoGlobais[chave][index]; 
-      if(!acao) return;
-
-      document.getElementById(`nav-${chave}`).querySelectorAll('.pill-btn').forEach((btn, i) => { btn.className = `pill-btn ${i === index ? 'active ' + tipoBotao : ''}`; });
-      
-      const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera'); 
-      document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
-      
-      // A LÓGICA QUE PREENCHE A BARRA DE PROBABILIDADE ESTÁ AQUI
-      if(tipoBotao !== 'hold') {
-          const pctEl = document.getElementById(`pct-${idSufixo}`);
-          const barraEl = document.getElementById(`barra-${idSufixo}`);
-          if (pctEl && barraEl) { 
-              pctEl.textContent = `${acao['Probabilidade (%)']}%`; 
-              barraEl.style.width = `${acao['Probabilidade (%)']}%`; 
-          }
-      }
-
-      if(tipoBotao === 'buy') acaoSelecionadaCompra = acao; 
-      else if(tipoBotao === 'sell') acaoSelecionadaVenda = acao; 
-      else acaoSelecionadaEspera = acao;
-      
-      if (tipoBotao !== modoDetalhes) modoDetalhes = tipoBotao; 
-      renderizarDetalhes();
-    }
-
-    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) {
-      const cv = document.getElementById(`chart-${sufixo}`); 
-      if(!cv) return; 
-      if(graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
-      
-      const ctx = cv.getContext('2d'); 
-      let cor = tipo === 'buy' ? '#5DCAA5' : (tipo === 'sell' ? '#F09595' : '#FAC775'), grad = ctx.createLinearGradient(0, 0, 0, 60);
-      grad.addColorStop(0, cor.replace(')', ', 0.4)').replace('rgb', 'rgba').replace('#5DCAA5', 'rgba(93, 202, 165, 0.4)').replace('#F09595', 'rgba(240, 149, 149, 0.4)').replace('#FAC775', 'rgba(250, 199, 117, 0.4)')); 
-      grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-      let hist = precosStr ? precosStr.split(',').map(Number) : [0,0,0], dts = datasStr ? datasStr.split(',') : ['','',''];
-      if(timeframeAtual === '10d') { hist = hist.slice(-10); dts = dts.slice(-10); } 
-      else if(timeframeAtual === '1m') { hist = hist.slice(-22); dts = dts.slice(-22); }
-      
-      graficosAtuais[sufixo] = new Chart(ctx, { 
-          type: 'line', 
-          data: { 
-              labels: dts.map(d=>d.substring(5)), 
-              datasets: [{ data: hist, borderColor: cor, backgroundColor: grad, borderWidth: 2, pointRadius: timeframeAtual==='10d'?2:0, pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4 }] 
-          }, 
-          options: { 
-              responsive: true, maintainAspectRatio: false, 
-              plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } } }, 
-              scales: { x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } }, y: { display: false } }, 
-              interaction: { mode: 'index', intersect: false } 
-          } 
-      });
     }
 
     carregarDadosMercado();
