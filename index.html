@@ -75,7 +75,7 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    /* FITA DE COTAÇÕES (MARQUEE) */
+    /* FITA DE COTAÇÕES */
     .ticker-tape-wrap {
       background: #000; border-bottom: 1px solid var(--border); overflow: hidden;
       white-space: nowrap; padding: 8px 0; display: flex; position: sticky; top: 60px; z-index: 99;
@@ -131,9 +131,6 @@
     .signal-text { font-size: 12px; color: rgba(255, 255, 255, 0.7); line-height: 1.5; margin-bottom: 12px; }
     .tickers { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
     .ticker { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; font-family: 'Syne', sans-serif; }
-    .buy .ticker { background: rgba(29, 158, 117, .25); color: var(--green-bright); border: 1px solid var(--green); }
-    .sell .ticker { background: rgba(192, 57, 43, .25); color: var(--red-bright); border: 1px solid var(--red); }
-    .hold .ticker { background: rgba(239, 159, 39, .2); color: var(--amber-bright); border: 1px solid var(--amber); }
 
     .prob-row { display: flex; align-items: center; gap: 8px; }
     .prob-label { font-size: 11px; color: rgba(255, 255, 255, 0.4); min-width: 38px; }
@@ -150,7 +147,7 @@
     .card-label { font-size: 14px; font-weight: 600; color: var(--purple); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; }
     .op-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .op-ticker-big { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #fff; }
-    .op-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; background: var(--green-dim); color: var(--green-bright); border: 1px solid var(--green); }
+    .op-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
 
     .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .level { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; border: 1px solid var(--border); }
@@ -218,7 +215,6 @@
     .long-rec-body strong { color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; }
     .alloc-result { background: var(--bg); border-radius: var(--radius-sm); padding: 14px; font-size: 13px; color: rgba(255, 255, 255, 0.7); line-height: 1.65; border: 1px solid var(--border); min-height: 60px; }
     .alloc-result strong { color: #fff; }
-
   </style>
 </head>
 
@@ -289,15 +285,15 @@
             <div class="level entry">
               <div class="level-lbl" id="detalhes-lbl-entrada">Compre por até</div>
               <div class="level-val" id="detalhes-val-entrada">R$ 0,00</div>
-              <div class="level-sub" style="color:var(--text-faint)">Entrada</div>
+              <div class="level-sub" id="detalhes-sub-entrada" style="color:var(--text-faint)">Entrada</div>
             </div>
             <div class="level target">
-              <div class="level-lbl">Alvo de lucro</div>
+              <div class="level-lbl" id="detalhes-lbl-alvo">Alvo de lucro</div>
               <div class="level-val" id="detalhes-val-alvo" style="color:var(--green-bright)">R$ 0,00</div>
               <div class="level-sub" id="detalhes-sub-alvo" style="color:var(--green)">+0,0%</div>
             </div>
             <div class="level stop">
-              <div class="level-lbl">Trava de segurança</div>
+              <div class="level-lbl" id="detalhes-lbl-stop">Trava de segurança</div>
               <div class="level-val" id="detalhes-val-stop" style="color:var(--red-bright)">R$ 0,00</div>
               <div class="level-sub" id="detalhes-sub-stop" style="color:var(--red)">−0,0%</div>
             </div>
@@ -314,10 +310,10 @@
               </div>
             </div>
             <div class="sim-result">
-              <div class="sim-result-lbl">Se a ação atingir o Alvo, você terá:</div>
+              <div class="sim-result-lbl" id="sim-lbl-acao">Se a ação atingir o Alvo, você terá:</div>
               <div class="sim-result-val" id="simResult">R$ 0,00</div>
               <div class="sim-gain" id="simGain">+R$ 0,00 &nbsp;·&nbsp; +0,0%</div>
-              <div class="sim-note">Cálculo dinâmico baseado no alvo da operação ao lado.</div>
+              <div class="sim-note" id="sim-note-abaixo">Cálculo dinâmico baseado no alvo da operação ao lado.</div>
             </div>
           </div>
         </div>
@@ -327,9 +323,9 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
           <div class="card-label" style="margin-bottom: 0;">Termômetro do Mercado (Diário)</div>
           <div class="pill-nav" style="margin: 0; padding-bottom: 0;">
-            <button class="pill-btn active buy" id="btn-rank-altas" onclick="mudarAbaRanking('altas', this)">Maiores Altas</button>
-            <button class="pill-btn" onclick="mudarAbaRanking('baixas', this)">Maiores Baixas</button>
-            <button class="pill-btn" onclick="mudarAbaRanking('volume', this)">Mais Negociadas</button>
+            <button class="pill-btn active buy" id="btn-rank-altas" onclick="mudarAbaRanking('altas', this)">🔥 Maiores Altas</button>
+            <button class="pill-btn" onclick="mudarAbaRanking('baixas', this)">🧊 Maiores Baixas</button>
+            <button class="pill-btn" onclick="mudarAbaRanking('volume', this)">📊 Mais Negociadas</button>
           </div>
         </div>
         
@@ -453,17 +449,28 @@
 
     function calcSim() {
       const v = parseFloat(document.getElementById('simVal').value) || 0;
-      const acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : acaoSelecionadaVenda;
-      let percentualReal = 0;
-      if (acao) {
-        const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1);
-        percentualReal = Math.abs(diffAlvo);
-      }
-      const gain = v * percentualReal;
-      const total = v + gain;
+      let acao = null;
+      if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
+      else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
+      else acao = acaoSelecionadaEspera;
 
-      document.getElementById('simResult').textContent = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('simGain').innerHTML = '+R$ ' + gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' &nbsp;·&nbsp; +' + (percentualReal * 100).toFixed(1) + '%';
+      if (!acao) return;
+
+      if (modoDetalhes === 'hold') {
+         // Na espera, o alvo não existe para simular lucro
+         document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+         document.getElementById('simGain').innerHTML = 'Ativo em Consolidação';
+         document.getElementById('simGain').style.color = 'var(--text-muted)';
+      } else {
+         const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1);
+         const percentualReal = Math.abs(diffAlvo);
+         const gain = v * percentualReal;
+         const total = v + gain;
+
+         document.getElementById('simResult').textContent = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+         document.getElementById('simGain').innerHTML = '+R$ ' + gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' &nbsp;·&nbsp; +' + (percentualReal * 100).toFixed(1) + '%';
+         document.getElementById('simGain').style.color = 'var(--green-bright)';
+      }
     }
 
     function calcAlloc() {
@@ -484,26 +491,34 @@
     // --- VARIÁVEIS GLOBAIS ---
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
     let graficosAtuais = { compra: null, venda: null, espera: null };
-    let modoDetalhes = 'buy';
+    
+    // O sistema agora começa na aba de COMPRA (ou passa pra VENDA/ESPERA)
+    let modoDetalhes = 'buy'; 
     let acaoSelecionadaCompra = null;
     let acaoSelecionadaVenda = null;
+    let acaoSelecionadaEspera = null; // <- NOVA VARIÁVEL
     let timeframeAtual = '10d'; 
 
     // --- FILTRO DE TEMPO E GRÁFICOS ---
     function mudarTimeframe(tf, btn) {
       const seletor = btn.parentElement;
-      seletor.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
+      seletor.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active', 'buy', 'sell', 'hold'));
       btn.classList.add('active');
       
       if (modoDetalhes === 'buy') btn.classList.add('buy');
-      if (modoDetalhes === 'sell') btn.classList.add('sell');
+      else if (modoDetalhes === 'sell') btn.classList.add('sell');
+      else btn.classList.add('hold');
 
       timeframeAtual = tf;
       
-      const acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : acaoSelecionadaVenda;
+      let acao = null;
+      if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
+      else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
+      else acao = acaoSelecionadaEspera;
+
       if (acao) {
-        // Agora passamos as Datas também!
-        desenharGrafico(modoDetalhes, modoDetalhes === 'buy' ? 'compra' : 'venda', acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
+        let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+        desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
       }
     }
 
@@ -598,7 +613,6 @@
         } catch(e) { console.error(e); }
     }
 
-
     // --- MERCADO E GRÁFICOS ---
     function mudarAbaRanking(tipo, btn) {
       btn.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
@@ -661,7 +675,7 @@
           grid.innerHTML = `
             <div class="signal-card buy">
               <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
-              <p class="signal-text">As 5 melhores oportunidades detectadas pelo algoritmo hoje.</p>
+              <p class="signal-text">Oportunidades de Força Relativa detectadas hoje.</p>
               <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-compra">--</span></div>
@@ -679,7 +693,7 @@
 
             <div class="signal-card hold">
               <div class="signal-header"><div class="signal-icon" style="background:var(--amber);color:#fff">—</div><span class="signal-action" style="color:var(--amber-bright)">Esperar</span></div>
-              <p class="signal-text">Ativos consolidados sem tendência clara. Aguarde sinais.</p>
+              <p class="signal-text">Ativos consolidados sem tendência clara de Compra ou Venda.</p>
               <div class="pill-nav" id="nav-espera">${criarBotoes(dados.espera, 'hold')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-espera"></canvas></div>
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
@@ -692,16 +706,29 @@
 
           const btnAltas = document.getElementById('btn-rank-altas');
           if (btnAltas) mudarAbaRanking('altas', btnAltas);
+          
+          // Inicia o painel na compra por padrão se tiver, senao vai passando pra quem tiver
+          if(dados.compras.length > 0) { modoDetalhes = 'buy'; renderizarDetalhes(); }
+          else if(dados.vendas.length > 0) { modoDetalhes = 'sell'; renderizarDetalhes(); }
+          else if(dados.espera.length > 0) { modoDetalhes = 'hold'; renderizarDetalhes(); }
         }
       } catch (e) { console.error(e); }
     }
 
+    // --- NOVO CARROSSEL DE 3 ESTADOS ---
     function alternarDetalhes() {
-      modoDetalhes = modoDetalhes === 'buy' ? 'sell' : 'buy';
+      // Ciclo: buy -> sell -> hold -> buy...
+      if (modoDetalhes === 'buy') {
+          modoDetalhes = 'sell';
+      } else if (modoDetalhes === 'sell') {
+          modoDetalhes = 'hold';
+      } else {
+          modoDetalhes = 'buy';
+      }
       
       const btnTempoAtivo = document.querySelector('.time-btn.active');
       if (btnTempoAtivo) {
-         btnTempoAtivo.classList.remove('buy', 'sell');
+         btnTempoAtivo.classList.remove('buy', 'sell', 'hold');
          btnTempoAtivo.classList.add(modoDetalhes);
       }
 
@@ -709,38 +736,103 @@
     }
 
     function renderizarDetalhes() {
-      const acao = modoDetalhes === 'buy' ? acaoSelecionadaCompra : acaoSelecionadaVenda;
-      if (!acao) return;
+      let acao = null;
+      if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
+      else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
+      else acao = acaoSelecionadaEspera;
+
+      // Se a aba estiver vazia (ex: nada pra comprar hoje), pula pro próximo estado
+      if (!acao) {
+          document.getElementById('detalhes-ticker').textContent = "--";
+          document.getElementById('detalhes-label').textContent = `OPERAÇÃO SEM ATIVOS HOJE`;
+          document.getElementById('detalhes-badge').textContent = `0%`;
+          return;
+      }
 
       document.getElementById('detalhes-ticker').textContent = acao.Ativo;
       document.getElementById('detalhes-val-entrada').textContent = `R$ ${acao['Preço (R$)']}`;
-      document.getElementById('detalhes-val-alvo').textContent = `R$ ${acao['Alvo (R$)']}`;
-      document.getElementById('detalhes-val-stop').textContent = `R$ ${acao['Stop (R$)']}`;
-
+      
       const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
       const diffStop = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
-      document.getElementById('detalhes-sub-alvo').textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
-      document.getElementById('detalhes-sub-stop').textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
 
       const badge = document.getElementById('detalhes-badge');
       
       if (modoDetalhes === 'buy') {
         document.getElementById('detalhes-label').textContent = 'Operação de compra — DETALHES';
         document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até';
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo de lucro';
+        document.getElementById('detalhes-lbl-stop').textContent = 'Trava de segurança';
+        
+        document.getElementById('detalhes-val-alvo').textContent = `R$ ${acao['Alvo (R$)']}`;
+        document.getElementById('detalhes-val-stop').textContent = `R$ ${acao['Stop (R$)']}`;
+        document.getElementById('detalhes-sub-alvo').textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
+        document.getElementById('detalhes-sub-stop').textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
+        
+        document.getElementById('detalhes-val-alvo').style.color = 'var(--green-bright)';
+        document.getElementById('detalhes-sub-alvo').style.color = 'var(--green)';
+        document.getElementById('detalhes-val-stop').style.color = 'var(--red-bright)';
+        document.getElementById('detalhes-sub-stop').style.color = 'var(--red)';
+
         badge.textContent = `${acao['Probabilidade (%)']}% de chance de alta`;
         badge.style.color = 'var(--green-bright)';
         badge.style.borderColor = 'var(--green)';
         badge.style.background = 'var(--green-dim)';
-      } else {
+        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo, você terá:';
+        document.getElementById('sim-note-abaixo').textContent = 'Cálculo dinâmico baseado no alvo da operação ao lado.';
+
+      } else if (modoDetalhes === 'sell') {
         document.getElementById('detalhes-label').textContent = 'Operação de venda — DETALHES';
         document.getElementById('detalhes-lbl-entrada').textContent = 'Venda a descoberto por';
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo de lucro (Queda)';
+        document.getElementById('detalhes-lbl-stop').textContent = 'Trava de segurança';
+        
+        document.getElementById('detalhes-val-alvo').textContent = `R$ ${acao['Alvo (R$)']}`;
+        document.getElementById('detalhes-val-stop').textContent = `R$ ${acao['Stop (R$)']}`;
+        document.getElementById('detalhes-sub-alvo').textContent = (diffAlvo > 0 ? '+' : '') + diffAlvo.toFixed(1) + '%';
+        document.getElementById('detalhes-sub-stop').textContent = (diffStop > 0 ? '+' : '') + diffStop.toFixed(1) + '%';
+
+        document.getElementById('detalhes-val-alvo').style.color = 'var(--green-bright)';
+        document.getElementById('detalhes-sub-alvo').style.color = 'var(--green)';
+        document.getElementById('detalhes-val-stop').style.color = 'var(--red-bright)';
+        document.getElementById('detalhes-sub-stop').style.color = 'var(--red)';
+
         badge.textContent = `${acao['Probabilidade (%)']}% de risco de queda`;
         badge.style.color = 'var(--red-bright)';
         badge.style.borderColor = 'var(--red)';
         badge.style.background = 'var(--red-dim)';
+        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo (cair), seu lucro será:';
+        document.getElementById('sim-note-abaixo').textContent = 'Cálculo dinâmico operando vendido (short).';
+
+      } else if (modoDetalhes === 'hold') {
+        // --- O NOVO ESTADO DE ESPERA NO PAINEL ---
+        document.getElementById('detalhes-label').textContent = 'Operação em Observação — DETALHES';
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Preço Atual na B3';
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo definido';
+        document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava definida';
+        
+        document.getElementById('detalhes-val-alvo').textContent = `--`;
+        document.getElementById('detalhes-sub-alvo').textContent = `Consolidado`;
+        document.getElementById('detalhes-val-stop').textContent = `--`;
+        document.getElementById('detalhes-sub-stop').textContent = `Consolidado`;
+
+        document.getElementById('detalhes-val-alvo').style.color = 'var(--text-muted)';
+        document.getElementById('detalhes-sub-alvo').style.color = 'var(--text-faint)';
+        document.getElementById('detalhes-val-stop').style.color = 'var(--text-muted)';
+        document.getElementById('detalhes-sub-stop').style.color = 'var(--text-faint)';
+
+        badge.textContent = `Aguardando cruzamento de MACD / RSI`;
+        badge.style.color = 'var(--amber-bright)';
+        badge.style.borderColor = 'var(--amber)';
+        badge.style.background = 'rgba(239, 159, 39, 0.1)';
+        
+        document.getElementById('sim-lbl-acao').textContent = 'Simulação Indisponível';
+        document.getElementById('sim-note-abaixo').textContent = 'O algoritmo não projeta lucros para ativos sem tendência de força relativa.';
       }
 
       calcSim();
+      // Sempre que renderizar o painel, recarrega o gráfico dele também
+      let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+      desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
     }
 
     function mudarAcaoCard(tipoBotao, index) {
@@ -757,7 +849,7 @@
         });
       }
 
-      const idSufixo = tipoBotao === 'buy' ? 'compra' : tipoBotao === 'sell' ? 'venda' : 'espera';
+      const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera');
       document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
       
       if(tipoBotao !== 'hold') {
@@ -765,19 +857,27 @@
         document.getElementById(`barra-${idSufixo}`).style.width = `${acao['Probabilidade (%)']}%`;
       }
 
+      // Atualiza a variável global que armazena a ação clicada
       if(tipoBotao === 'buy') acaoSelecionadaCompra = acao;
-      if(tipoBotao === 'sell') acaoSelecionadaVenda = acao;
+      else if(tipoBotao === 'sell') acaoSelecionadaVenda = acao;
+      else if(tipoBotao === 'hold') acaoSelecionadaEspera = acao; // <- AGORA SALVAMOS A ESPERA
 
-      if (tipoBotao === modoDetalhes) {
-        renderizarDetalhes();
+      // Se o usuário clicou numa ação da aba que já está aberta nos detalhes, atualiza os detalhes.
+      // E melhor ainda: se o usuário clicar numa pílula de ESPERAR, a caixa de detalhes vira ESPERAR automaticamente!
+      if (tipoBotao !== modoDetalhes) {
+          modoDetalhes = tipoBotao;
+          
+          const btnTempoAtivo = document.querySelector('.time-btn.active');
+          if (btnTempoAtivo) {
+             btnTempoAtivo.classList.remove('buy', 'sell', 'hold');
+             btnTempoAtivo.classList.add(modoDetalhes);
+          }
       }
-
-      // Agora passamos as DATAS também
-      desenharGrafico(tipoBotao, idSufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
+      renderizarDetalhes();
     }
 
-    // --- A GRANDE MÁGICA: GRÁFICO COM DATAS E FILTRO REAL ---
     function desenharGrafico(tipo, sufixo, precoAtual, historicoPrecosStr, historicoDatasStr) {
+      // Ignora gráficos que não estão na tela
       const canvas = document.getElementById(`chart-${sufixo}`);
       if(!canvas) return;
 
@@ -796,7 +896,6 @@
          let precos = historicoPrecosStr.split(',').map(Number);
          let datas = historicoDatasStr.split(',');
 
-         // FATIANDO PREÇOS E DATAS JUNTOS!
          if (timeframeAtual === '10d') { 
             historicoFinal = precos.slice(-10); datasFinais = datas.slice(-10);
          } else if (timeframeAtual === '1m') { 
@@ -807,14 +906,12 @@
             historicoFinal = precos; datasFinais = datas; 
          }
 
-         // FORMATANDO A DATA PARA O PADRÃO BRASILEIRO (DD/MM/AA)
          datasFinais = datasFinais.map(d => {
-             const partes = d.split('-'); // 2026-04-01 -> [2026, 04, 01]
+             const partes = d.split('-'); 
              if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
              return d;
          });
       } else {
-         // Fallback de segurança se o Python ainda não rodou
          historicoFinal = [precoAtual*.88, precoAtual*.90, precoAtual*.89, precoAtual*.92, precoAtual*.94, precoAtual*.93, precoAtual*.95, precoAtual*.97, precoAtual*.98, precoAtual];
          datasFinais = ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'D-1', 'Hoje'];
       }
@@ -822,7 +919,7 @@
       graficosAtuais[sufixo] = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: datasFinais, // <- AGORA USAMOS AS DATAS REAIS AQUI
+          labels: datasFinais,
           datasets: [{
             data: historicoFinal, borderColor: cor, backgroundColor: grad, borderWidth: 2, 
             pointRadius: timeframeAtual === '10d' ? 2 : 0, 
@@ -836,7 +933,6 @@
               tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } } 
           },
           scales: { 
-              // LIGAMOS O EIXO X PARA MOSTRAR AS DATAS!
               x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } }, 
               y: { display: false } 
           }, 
