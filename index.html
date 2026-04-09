@@ -167,6 +167,10 @@
     .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; margin-top: 14px; }
     .heatmap-cell { padding: 12px 8px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; font-family: 'Syne', sans-serif; cursor: pointer; transition: transform 0.2s, filter 0.2s; border: 1px solid rgba(255,255,255,0.1); }
     .heatmap-cell:hover { transform: scale(1.05); filter: brightness(1.2); z-index: 10; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    
+    /* NOVO: Classe para a célula selecionada do Heatmap */
+    .heatmap-cell.selected { border: 2px solid var(--purple); box-shadow: 0 0 15px var(--purple-glow); transform: scale(1.05); filter: brightness(1.2); z-index: 10; position: relative; }
+
     .hm-ticker { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
     .hm-var { font-size: 11px; font-family: 'DM Sans', sans-serif; opacity: 0.9; }
 
@@ -299,10 +303,20 @@
 
       <div class="card anim anim-d2" style="margin-bottom: 20px;">
         <div class="card-label" style="margin-bottom: 4px;">Heatmap de Ativos (B3)</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Visão global de temperatura baseada na variação percentual de hoje.</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Clique em qualquer ativo para ver o gráfico de histórico completo.</div>
         <div id="heatmap-container"></div>
-      </div>
+        
+        <div id="heatmap-chart-wrapper" style="display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border2);">
+          <div style="margin-bottom: 16px;">
+            <div id="hm-chart-ticker" style="font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: #fff;">--</div>
+            <div id="hm-chart-price" style="font-size: 15px; color: var(--text-muted);">--</div>
+          </div>
+          <div class="chart-container" style="height: 250px; width: 100%;">
+            <canvas id="chart-heatmap"></canvas>
+          </div>
+        </div>
 
+      </div>
     </div>
 
     <div id="view-backtest" class="view">
@@ -469,6 +483,10 @@
     let acaoSelecionadaCompra = null, acaoSelecionadaVenda = null, acaoSelecionadaEspera = null; 
     let timeframeAtual = '10d'; 
 
+    // NOVO: Variáveis para o controle de estado do Heatmap
+    let acaoSelecionadaHeatmap = null;
+    let heatmapChartObj = null;
+
     function mudarTimeframe(tf, btn) {
       btn.parentElement.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active'); 
@@ -520,6 +538,107 @@
         carregarDadosCarteira();
     }
 
+    function mudarAbaRanking(tipo, btn) {
+      btn.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
+      if(tipo === 'altas') btn.classList.add('active', 'buy');
+      if(tipo === 'baixas') btn.classList.add('active', 'sell');
+      if(tipo === 'volume') btn.classList.add('active');
+
+      const lista = [...dadosMercadoGlobais.todos];
+      let html = '';
+
+      if (tipo === 'altas') lista.sort((a,b) => b['Variação (%)'] - a['Variação (%)']);
+      else if (tipo === 'baixas') lista.sort((a,b) => a['Variação (%)'] - b['Variação (%)']);
+      else if (tipo === 'volume') lista.sort((a,b) => b['Volume'] - a['Volume']);
+
+      lista.slice(0, 5).forEach((acao, i) => {
+         const varPct = acao['Variação (%)'] || 0;
+         const cor = varPct >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+         const sinal = varPct > 0 ? '+' : '';
+         const valExtra = tipo === 'volume'
+            ? `<span style="color:var(--text-muted); font-size:12px; font-weight:600;">Vol: ${(acao.Volume / 1000000).toFixed(1)}M</span>`
+            : `<span style="color:${cor}; font-weight:700; font-family:'Syne', sans-serif;">${sinal}${varPct.toFixed(2).replace('.', ',')}%</span>`;
+
+         html += `
+         <div class="rank-row">
+           <div style="display:flex; align-items:center; gap: 14px;">
+             <span style="font-size: 12px; font-weight:700; color:var(--text-faint); min-width: 20px;">${i+1}º</span>
+             <span style="font-family:'Syne', sans-serif; font-size: 15px; font-weight:700;">${acao.Ativo}</span>
+             <span style="color:var(--text-muted); font-size:12px; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">R$ ${acao['Preço (R$)'].toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>
+           </div>
+           <div>${valExtra}</div>
+         </div>`;
+      });
+      document.getElementById('ranking-content').innerHTML = html;
+    }
+
+    // NOVO: Lógica do clique no Heatmap
+    window.selecionarHeatmap = function(ticker) {
+        if (acaoSelecionadaHeatmap === ticker) {
+            // Se clicou na mesma ação, ele "fecha" o gráfico
+            acaoSelecionadaHeatmap = null;
+            document.getElementById('heatmap-chart-wrapper').style.display = 'none';
+        } else {
+            // Se clicou em uma nova, ele abre e desenha o gráfico
+            acaoSelecionadaHeatmap = ticker;
+            document.getElementById('heatmap-chart-wrapper').style.display = 'block';
+            
+            const acao = dadosMercadoGlobais.todos.find(a => a.Ativo === ticker);
+            if (acao) {
+                document.getElementById('hm-chart-ticker').textContent = acao.Ativo;
+                document.getElementById('hm-chart-price').textContent = `R$ ${acao['Preço (R$)'].toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                desenharGraficoHeatmap(acao);
+            }
+        }
+        // Recarrega o Heatmap para aplicar a borda na ação selecionada
+        renderizarHeatmap(dadosMercadoGlobais.todos);
+    }
+
+    // NOVO: Função que desenha o gráfico roxo de 1 ano
+    function desenharGraficoHeatmap(acao) {
+        const canvas = document.getElementById(`chart-heatmap`);
+        if(!canvas) return;
+        if(heatmapChartObj) heatmapChartObj.destroy();
+
+        const ctx = canvas.getContext('2d');
+        let cor = '#7F77DD', grad = ctx.createLinearGradient(0, 0, 0, 250);
+        grad.addColorStop(0, 'rgba(127, 119, 221, 0.4)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+        let precos = acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0,0,0];
+        let datas = acao.Historico_Datas ? acao.Historico_Datas.split(',') : ['','',''];
+
+        let datasFinais = datas.map(d => {
+             const partes = d.split('-');
+             if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
+             return d;
+        });
+
+        heatmapChartObj = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: datasFinais,
+              datasets: [{
+                data: precos, borderColor: cor, backgroundColor: grad, borderWidth: 2,
+                pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                  legend: { display: false },
+                  tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } }
+              },
+              scales: {
+                  x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 12, maxRotation: 0 } },
+                  y: { display: false }
+              },
+              interaction: { mode: 'index', intersect: false }
+            }
+        });
+    }
+
+    // ATUALIZADO: renderizarHeatmap agora checa quem está selecionado para botar a classe CSS
     function renderizarHeatmap(lista) {
         const grid = document.getElementById('heatmap-container');
         if(!grid) return;
@@ -534,7 +653,9 @@
             else if (v <= -2.5) bg = 'rgba(192, 57, 43, 0.9)';
             else if (v < -0.5) bg = 'rgba(192, 57, 43, 0.4)';
 
-            html += `<div class="heatmap-cell" style="background: ${bg};" title="Score: ${acao.Score||0}/6">
+            const selClass = acaoSelecionadaHeatmap === acao.Ativo ? 'selected' : '';
+
+            html += `<div class="heatmap-cell ${selClass}" style="background: ${bg};" title="Score: ${acao.Score||0}/6" onclick="selecionarHeatmap('${acao.Ativo}')">
                 <span class="hm-ticker">${acao.Ativo}</span>
                 <span class="hm-var">${v > 0 ? '+'+v : v}%</span>
             </div>`;
@@ -696,74 +817,17 @@
       renderizarDetalhes();
     }
 
-    // --- FUNÇÃO DO GRÁFICO RESTAURADA PARA A VERSÃO PREMIUM (COM BOLINHAS E EIXO X) ---
-    function desenharGrafico(tipo, sufixo, precoAtual, historicoPrecosStr, historicoDatasStr) {
-      const canvas = document.getElementById(`chart-${sufixo}`);
-      if(!canvas) return;
-
+    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) {
+      const cv = document.getElementById(`chart-${sufixo}`);
+      if(!cv) return;
       if(graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
+      const ctx = cv.getContext('2d');
+      let cor = tipo === 'buy' ? '#5DCAA5' : (tipo === 'sell' ? '#F09595' : '#FAC775'), grad = ctx.createLinearGradient(0, 0, 0, 60);
+      grad.addColorStop(0, cor.replace(')', ', 0.4)').replace('rgb', 'rgba').replace('#5DCAA5', 'rgba(93, 202, 165, 0.4)').replace('#F09595', 'rgba(240, 149, 149, 0.4)').replace('#FAC775', 'rgba(250, 199, 117, 0.4)')); grad.addColorStop(1, 'rgba(0,0,0,0)');
 
-      const ctx = canvas.getContext('2d');
-      let cor, grad = ctx.createLinearGradient(0, 0, 0, 60);
-      let historicoFinal = [];
-      let datasFinais = [];
-
-      if(tipo === 'buy') { cor = '#5DCAA5'; grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); grad.addColorStop(1, 'rgba(93, 202, 165, 0.0)'); }
-      else if(tipo === 'sell') { cor = '#F09595'; grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); grad.addColorStop(1, 'rgba(240, 149, 149, 0.0)'); }
-      else { cor = '#FAC775'; grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); grad.addColorStop(1, 'rgba(250, 199, 117, 0.0)'); }
-
-      if (historicoPrecosStr && historicoDatasStr) {
-         let precos = historicoPrecosStr.split(',').map(Number);
-         let datas = historicoDatasStr.split(',');
-
-         if (timeframeAtual === '10d') {
-            historicoFinal = precos.slice(-10); datasFinais = datas.slice(-10);
-         } else if (timeframeAtual === '1m') {
-            historicoFinal = precos.slice(-22); datasFinais = datas.slice(-22);
-         } else if (timeframeAtual === '3m') {
-            historicoFinal = precos.slice(-66); datasFinais = datas.slice(-66);
-         } else {
-            historicoFinal = precos; datasFinais = datas;
-         }
-
-         datasFinais = datasFinais.map(d => {
-             const partes = d.split('-');
-             if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
-             return d;
-         });
-      } else {
-         if (precoAtual === 0) {
-             historicoFinal = [0, 0, 0, 0, 0];
-             datasFinais = ['','','','',''];
-         } else {
-             historicoFinal = [precoAtual*.88, precoAtual*.90, precoAtual*.89, precoAtual*.92, precoAtual*.94, precoAtual*.93, precoAtual*.95, precoAtual*.97, precoAtual*.98, precoAtual];
-             datasFinais = ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'D-1', 'Hoje'];
-         }
-      }
-
-      graficosAtuais[sufixo] = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: datasFinais,
-          datasets: [{
-            data: historicoFinal, borderColor: cor, backgroundColor: grad, borderWidth: 2,
-            pointRadius: timeframeAtual === '10d' ? 2 : 0,
-            pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-              legend: { display: false },
-              tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } }
-          },
-          scales: {
-              x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } },
-              y: { display: false }
-          },
-          interaction: { mode: 'index', intersect: false }
-        }
-      });
+      let hist = precosStr ? precosStr.split(',').map(Number) : [0,0,0], dts = datasStr ? datasStr.split(',') : ['','',''];
+      if(timeframeAtual === '10d') { hist = hist.slice(-10); dts = dts.slice(-10); } else if(timeframeAtual === '1m') { hist = hist.slice(-22); dts = dts.slice(-22); }
+      graficosAtuais[sufixo] = new Chart(ctx, { type: 'line', data: { labels: dts.map(d=>d.substring(5)), datasets: [{ data: hist, borderColor: cor, backgroundColor: grad, borderWidth: 2, pointRadius: timeframeAtual==='10d'?2:0, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } } });
     }
 
     carregarDadosMercado();
