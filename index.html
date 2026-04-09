@@ -171,23 +171,8 @@
     .hm-ticker { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
     .hm-var { font-size: 11px; font-family: 'DM Sans', sans-serif; opacity: 0.9; }
 
-    #heatmap-chart-wrapper {
-      max-height: 0;
-      opacity: 0;
-      overflow: hidden;
-      margin-top: 0;
-      padding-top: 0;
-      border-top: 1px solid transparent;
-      transition: max-height 0.5s cubic-bezier(0, 1, 0, 1), opacity 0.4s ease, margin-top 0.4s ease, padding-top 0.4s ease;
-    }
-    #heatmap-chart-wrapper.open {
-      max-height: 500px;
-      opacity: 1;
-      margin-top: 24px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border2);
-      transition: max-height 0.6s ease-in-out, opacity 0.5s ease 0.1s, margin-top 0.4s ease, padding-top 0.4s ease;
-    }
+    #heatmap-chart-wrapper { max-height: 0; opacity: 0; overflow: hidden; margin-top: 0; padding-top: 0; border-top: 1px solid transparent; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1), opacity 0.4s ease, margin-top 0.4s ease, padding-top 0.4s ease; }
+    #heatmap-chart-wrapper.open { max-height: 500px; opacity: 1; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border2); transition: max-height 0.6s ease-in-out, opacity 0.5s ease 0.1s, margin-top 0.4s ease, padding-top 0.4s ease; }
 
     .table-wrap { width: 100%; overflow-x: auto; }
     .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
@@ -471,7 +456,6 @@
       
       document.getElementById('simResult').textContent = 'R$ ' + (v + gain).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       
-      // O lucro é sempre dinheiro entrando, então deixamos explícito visualmente que é um ganho.
       document.getElementById('simGain').innerHTML = `+R$ ${gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} de lucro`;
       document.getElementById('simGain').style.color = 'var(--green-bright)';
 
@@ -518,9 +502,9 @@
         const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
         const dados = await resposta.json();
         if (dados.status === "sucesso") {
-          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           const divLucro = document.getElementById('lucro-total');
-          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
 
           let htmlCards = '';
@@ -715,14 +699,13 @@
 
           const criarBotoes = (l, cl) => l.map((a, i) => `<button class="pill-btn ${i===0?'active '+cl:''}" onclick="mudarAcaoCard('${cl}', ${i})">${a.Ativo}</button>`).join('');
 
-          // RESTAUREI AS BARRINHAS DE PROBABILIDADE NOS CARDS AQUI:
           document.getElementById('grid-sinais').innerHTML = `
             <div class="signal-card buy">
               <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
               <p class="signal-text">Ativos aprovados pelo Ensemble Scoring hoje.</p>
               <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
-              <div class="tickers"><span class="ticker" id="ticker-compra">--</span></div>
+              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-compra">--</span></div>
               <div class="prob-row"><span class="prob-label">Score</span><div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div><span class="prob-pct" id="pct-compra">0%</span></div>
             </div>
             <div class="signal-card sell">
@@ -730,7 +713,7 @@
               <p class="signal-text">Maior risco de queda ou reversão.</p>
               <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
-              <div class="tickers"><span class="ticker" id="ticker-venda">--</span></div>
+              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-venda">--</span></div>
               <div class="prob-row"><span class="prob-label">Risco</span><div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div><span class="prob-pct" id="pct-venda">0%</span></div>
             </div>
             <div class="signal-card hold">
@@ -738,7 +721,7 @@
               <p class="signal-text">Ativos em consolidação.</p>
               <div class="pill-nav" id="nav-espera">${criarBotoes(dados.espera, 'hold')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-espera"></canvas></div>
-              <div class="tickers"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
+              <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
             </div>`;
 
           if(dados.compras.length > 0) mudarAcaoCard('buy', 0);
@@ -795,7 +778,6 @@
       } else {
           vA.textContent = `R$ ${acao['Alvo (R$)']}`; vS.textContent = `R$ ${acao['Stop (R$)']}`;
           
-          // MUDANÇA RESTAURADA: Matemática Correta para Variação do Ativo (+/-)
           const diffAlvoPct = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
           const diffStopPct = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
           
@@ -837,7 +819,6 @@
       const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera');
       document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
       
-      // RESTAUREI A FUNÇÃO QUE PREENCHE A BARRA E A % DA PROBABILIDADE
       if(tipoBotao !== 'hold') {
           const pctEl = document.getElementById(`pct-${idSufixo}`);
           const barraEl = document.getElementById(`barra-${idSufixo}`);
