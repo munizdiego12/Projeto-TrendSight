@@ -458,6 +458,7 @@
             document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('simGain').innerHTML = 'Ativo em Consolidação';
             document.getElementById('simGain').style.color = 'var(--text-muted)';
+            document.getElementById('sim-lbl-acao').textContent = 'Simulação Indisponível';
          }
          if(riskBox) riskBox.style.display = modoDetalhes === 'hold' ? 'block' : 'none';
          if(cotasEl) cotasEl.textContent = '--';
@@ -467,8 +468,11 @@
 
       const diffAlvo = Math.abs((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1);
       const gain = v * diffAlvo;
+      
       document.getElementById('simResult').textContent = 'R$ ' + (v + gain).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('simGain').innerHTML = `+R$ ${gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} &nbsp;·&nbsp; +${(diffAlvo * 100).toFixed(1)}%`;
+      
+      // O lucro é sempre dinheiro entrando, então deixamos explícito visualmente que é um ganho.
+      document.getElementById('simGain').innerHTML = `+R$ ${gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} de lucro`;
       document.getElementById('simGain').style.color = 'var(--green-bright)';
 
       if(riskBox) riskBox.style.display = 'block';
@@ -514,9 +518,9 @@
         const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
         const dados = await resposta.json();
         if (dados.status === "sucesso") {
-          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
           const divLucro = document.getElementById('lucro-total');
-          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
           divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
 
           let htmlCards = '';
@@ -711,6 +715,7 @@
 
           const criarBotoes = (l, cl) => l.map((a, i) => `<button class="pill-btn ${i===0?'active '+cl:''}" onclick="mudarAcaoCard('${cl}', ${i})">${a.Ativo}</button>`).join('');
 
+          // RESTAUREI AS BARRINHAS DE PROBABILIDADE NOS CARDS AQUI:
           document.getElementById('grid-sinais').innerHTML = `
             <div class="signal-card buy">
               <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
@@ -718,6 +723,7 @@
               <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
               <div class="tickers"><span class="ticker" id="ticker-compra">--</span></div>
+              <div class="prob-row"><span class="prob-label">Score</span><div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div><span class="prob-pct" id="pct-compra">0%</span></div>
             </div>
             <div class="signal-card sell">
               <div class="signal-header"><div class="signal-icon">↓</div><span class="signal-action">Vender</span></div>
@@ -725,6 +731,7 @@
               <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
               <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
               <div class="tickers"><span class="ticker" id="ticker-venda">--</span></div>
+              <div class="prob-row"><span class="prob-label">Risco</span><div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div><span class="prob-pct" id="pct-venda">0%</span></div>
             </div>
             <div class="signal-card hold">
               <div class="signal-header"><div class="signal-icon" style="background:var(--amber);color:#fff">—</div><span class="signal-action" style="color:var(--amber-bright)">Esperar</span></div>
@@ -759,11 +766,13 @@
         document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até'; document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo'; document.getElementById('detalhes-lbl-stop').textContent = 'Stop';
         b.style.color = 'var(--green-bright)'; b.style.borderColor = 'var(--green)'; b.style.background = 'var(--green-dim)';
         vA.style.color = 'var(--green-bright)'; sA.style.color = 'var(--green)'; vS.style.color = 'var(--red-bright)'; sS.style.color = 'var(--red)';
+        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo, você terá:';
       } else if (modoDetalhes === 'sell') {
         document.getElementById('detalhes-label').textContent = acao ? 'Operação de venda — DETALHES' : 'Sem Ativos';
         document.getElementById('detalhes-lbl-entrada').textContent = 'Short por'; document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo (Queda)'; document.getElementById('detalhes-lbl-stop').textContent = 'Trava';
         b.style.color = 'var(--red-bright)'; b.style.borderColor = 'var(--red)'; b.style.background = 'var(--red-dim)';
         vA.style.color = 'var(--green-bright)'; sA.style.color = 'var(--green)'; vS.style.color = 'var(--red-bright)'; sS.style.color = 'var(--red)';
+        document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo (queda), seu lucro será:';
       } else {
         document.getElementById('detalhes-label').textContent = acao ? 'Em Observação' : 'Sem Ativos';
         document.getElementById('detalhes-lbl-entrada').textContent = 'Atual'; document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo'; document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava';
@@ -786,7 +795,7 @@
       } else {
           vA.textContent = `R$ ${acao['Alvo (R$)']}`; vS.textContent = `R$ ${acao['Stop (R$)']}`;
           
-          // MUDANÇA: SINAL DINÂMICO PARA COMPRA OU VENDA NO DETALHE
+          // MUDANÇA RESTAURADA: Matemática Correta para Variação do Ativo (+/-)
           const diffAlvoPct = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
           const diffStopPct = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
           
@@ -828,6 +837,16 @@
       const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera');
       document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
       
+      // RESTAUREI A FUNÇÃO QUE PREENCHE A BARRA E A % DA PROBABILIDADE
+      if(tipoBotao !== 'hold') {
+          const pctEl = document.getElementById(`pct-${idSufixo}`);
+          const barraEl = document.getElementById(`barra-${idSufixo}`);
+          if (pctEl && barraEl) {
+              pctEl.textContent = `${acao['Probabilidade (%)']}%`;
+              barraEl.style.width = `${acao['Probabilidade (%)']}%`;
+          }
+      }
+
       if(tipoBotao === 'buy') acaoSelecionadaCompra = acao; else if(tipoBotao === 'sell') acaoSelecionadaVenda = acao; else acaoSelecionadaEspera = acao;
       if (tipoBotao !== modoDetalhes) modoDetalhes = tipoBotao;
       renderizarDetalhes();
