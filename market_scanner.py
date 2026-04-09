@@ -11,99 +11,111 @@ load_dotenv()
 def analisar_mercado(tickers):
     print("Analisando o termômetro global do IBOVESPA...")
     try:
-        # Filtro Global - O Mercado dita a maré
         ibov = yf.Ticker('^BVSP').history(period='10d')
         ibov_tendencia = "ALTA" if ibov['Close'].iloc[-1] > ibov['Close'].iloc[-5] else "BAIXA"
         print(f"Tendência Global: {ibov_tendencia}\n")
     except:
-        ibov_tendencia = "ALTA" # Fallback de segurança
+        ibov_tendencia = "ALTA"
 
-    print(f"Iniciando varredura com Ensemble Learning em {len(tickers)} ativos...\n")
+    print(f"Iniciando varredura Quantitativa Avançada (ATR/EMA9) em {len(tickers)} ativos...\n")
     resultados = []
 
     for ticker in tickers:
         try:
             acao = yf.Ticker(ticker)
-            # Puxamos 2 anos para garantir o cálculo perfeito da Média de 200 dias
             df = acao.history(period="2y")
             
             if df.empty or len(df) < 200: 
                 continue
 
-            # 1. RSI (Índice de Força Relativa) - 14 dias
+            # 1. RSI (14 dias) e Cálculo de Divergência
             delta = df['Close'].diff()
             ganho = delta.clip(lower=0).ewm(alpha=1/14, adjust=False).mean()
             perda = -delta.clip(upper=0).ewm(alpha=1/14, adjust=False).mean()
             rs = ganho / perda
             df['RSI_14'] = 100 - (100 / (1 + rs))
 
-            # 2. MACD (Convergência/Divergência)
+            preco_min_recente = df['Close'].tail(20).min()
+            indice_min_preco = df['Close'].tail(20).idxmin()
+            rsi_no_min_preco = df['RSI_14'].loc[indice_min_preco]
+            rsi_atual_val = df['RSI_14'].iloc[-1]
+            
+            # 2. MACD
             ema_rapida = df['Close'].ewm(span=12, adjust=False).mean()
             ema_lenta = df['Close'].ewm(span=26, adjust=False).mean()
             linha_macd = ema_rapida - ema_lenta
             linha_sinal = linha_macd.ewm(span=9, adjust=False).mean()
             df['MACD_Hist'] = linha_macd - linha_sinal
 
-            # 3. Bandas de Bollinger (20 dias, 2 desvios)
+            # 3. Bandas de Bollinger
             media_20 = df['Close'].rolling(20).mean()
             desvio = df['Close'].rolling(20).std()
             bb_upper = media_20 + 2 * desvio
             bb_lower = media_20 - 2 * desvio
-            # Normalização: 0 = tocando a banda inferior (barato), 1 = tocando a superior (caro)
             amplitude_bb = bb_upper.iloc[-1] - bb_lower.iloc[-1]
             posicao_bb = (df['Close'].iloc[-1] - bb_lower.iloc[-1]) / amplitude_bb if amplitude_bb != 0 else 0.5
 
-            # 4. Médias Móveis (Golden Cross / Death Cross)
+            # 4. Médias Móveis Clássicas e EMA 9 (Tendência Curta)
             mm50 = df['Close'].tail(50).mean()
             mm200 = df['Close'].tail(200).mean()
             golden_cross = mm50 > mm200
+            ema9 = df['Close'].ewm(span=9, adjust=False).mean().iloc[-1]
 
-            # 5. Confirmação de Volume
+            # 5. Volume
             volume_atual = int(df['Volume'].iloc[-1]) if not pd.isna(df['Volume'].iloc[-1]) else 0
             vol_medio_20d = df['Volume'].tail(20).mean()
-            confirmacao_volume = volume_atual > (vol_medio_20d * 1.3) # 30% acima da média
+            confirmacao_volume = volume_atual > (vol_medio_20d * 1.3)
+            
+            # 6. NOVO: ATR (Average True Range) para Volatilidade Real
+            high_low = df['High'] - df['Low']
+            high_prev = abs(df['High'] - df['Close'].shift(1))
+            low_prev = abs(df['Low'] - df['Close'].shift(1))
+            tr = pd.concat([high_low, high_prev, low_prev], axis=1).max(axis=1)
+            atr = tr.rolling(14).mean().iloc[-1]
             
             df.dropna(inplace=True)
             if df.empty: continue
 
-            # Leituras Finais
+            # Extrações Finais
             preco_atual = round(df['Close'].iloc[-1], 2)
             preco_ontem = df['Close'].iloc[-2]
             variacao = round(((preco_atual / preco_ontem) - 1) * 100, 2)
-            rsi_atual = round(df['RSI_14'].iloc[-1], 2)
             macd_hist = df['MACD_Hist'].iloc[-1]
+            tendencia_curta = preco_atual > ema9
 
-            # --- SISTEMA DE PONTOS (ENSEMBLE SCORING) ---
+            # --- NOVO SISTEMA DE PONTOS (Score Máximo = 6) ---
             score = 0
-            max_score = 5
+            max_score = 6
             
-            if rsi_atual < 45: score += 1           # Sobrevendido
-            if macd_hist > 0: score += 1            # Força compradora
-            if posicao_bb < 0.30: score += 1        # Esticado para baixo
-            if golden_cross: score += 1             # Tendência de alta longa
-            if confirmacao_volume: score += 1       # Dinheiro institucional entrando
+            if rsi_atual_val < 45: score += 1
+            if macd_hist > 0: score += 1
+            if posicao_bb < 0.30: score += 1
+            if golden_cross: score += 1
+            if confirmacao_volume: score += 1
+            
+            # Bônus: Divergência de Alta
+            divergencia_alta = (preco_atual <= preco_min_recente * 1.02) and (rsi_atual_val > rsi_no_min_preco + 5)
+            if divergencia_alta: score += 1
 
-            # Trava de Segurança Institucional: Se o mercado derrete, rebaixamos o sinal
             if ibov_tendencia == "BAIXA" and score >= 3:
                 score -= 1 
 
             probabilidade = (score / max_score) * 100
 
-            # Decisão de Negócio baseada em Score
-            if score >= 3:
+            # --- DECISÃO DE NEGÓCIO (Usando ATR para Alvos e Stops) ---
+            if score >= 4: # Aumentei a exigência para 4/6 para filtrar melhor
                 sinal = "COMPRA"
-                alvo = round(preco_atual * 1.06, 2)
-                stop = round(preco_atual * 0.94, 2)
+                alvo = round(preco_atual + (atr * 3.0), 2) # Risco Retorno 1:2
+                stop = round(preco_atual - (atr * 1.5), 2)
             elif score <= 1:
                 sinal = "VENDA"
-                alvo = round(preco_atual * 0.94, 2)
-                stop = round(preco_atual * 1.06, 2)
+                alvo = round(preco_atual - (atr * 3.0), 2) 
+                stop = round(preco_atual + (atr * 1.5), 2)
             else:
                 sinal = "ESPERAR"
                 alvo = preco_atual
                 stop = preco_atual
 
-            # Prepara os dados visuais (1 ano de gráfico)
             df_historico = df.tail(250)
             historico_precos = ",".join(df_historico['Close'].round(2).astype(str).tolist())
             historico_datas = ",".join(df_historico.index.strftime('%Y-%m-%d').tolist())
@@ -117,12 +129,12 @@ def analisar_mercado(tickers):
                 'Probabilidade (%)': round(probabilidade, 1),
                 'Alvo (R$)': alvo,
                 'Stop (R$)': stop,
-                'Score': score,                           # NOVO: Dado para o Front-end
-                'RSI': rsi_atual,                         # NOVO: Dado para o Front-end
-                'MACD_Hist': round(float(macd_hist), 4),  # NOVO: Dado para o Front-end
-                'BB_Posicao': round(float(posicao_bb), 2),# NOVO: Dado para o Front-end
-                'MM50': round(float(mm50), 2),            # NOVO: Dado para o Front-end
-                'MM200': round(float(mm200), 2),          # NOVO: Dado para o Front-end
+                'Score': score,
+                'RSI': round(rsi_atual_val, 2),
+                'MACD_Hist': round(float(macd_hist), 4),
+                'BB_Posicao': round(float(posicao_bb), 2),
+                'MM50': round(float(mm50), 2),
+                'MM200': round(float(mm200), 2),
                 'Historico_Precos': historico_precos,
                 'Historico_Datas': historico_datas
             })
@@ -139,7 +151,7 @@ def salvar_no_banco(df):
 
     engine = create_engine(DATABASE_URL)
     df.to_sql('analise_mercado', engine, if_exists='replace', index=False)
-    print("✅ Banco atualizado! Estrutura de Score e Indicadores salva com sucesso!")
+    print("✅ Banco atualizado! Gestão de Risco por ATR e EMA9 aplicados com sucesso!")
 
 if __name__ == "__main__":
     lista = [

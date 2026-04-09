@@ -4,37 +4,71 @@ from flask_cors import CORS
 from sqlalchemy import create_engine, text
 import pandas as pd
 from dotenv import load_dotenv
+from time import time
+from datetime import datetime
 
-# Carrega as senhas ocultas do arquivo .env
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app) 
 
-# --- PERFORMANCE: Inicia o motor do banco APENAS UMA VEZ com um "Pool" de conexões ---
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("⚠️ ERRO CRÍTICO: DATABASE_URL não encontrada. Verifique o arquivo .env!")
 
-# O pool_size=5 mantém 5 conexões ativas na memória, deixando a API muito mais rápida
 engine = create_engine(DATABASE_URL, pool_size=5, max_overflow=10)
+
+# --- SISTEMA DE CACHE EM MEMÓRIA ---
+# Evita sobrecarregar o banco Neon se muitos usuários acessarem ao mesmo tempo
+cache_mercado = {"dados": None, "timestamp": 0}
+TEMPO_CACHE_SEGUNDOS = 300 # 5 minutos
 
 @app.route('/')
 def home():
     return send_file('index.html')
 
+# --- NOVA ROTA: HEALTH CHECK ---
+@app.route('/api/health')
+def health():
+    return jsonify({
+        "status": "ok", 
+        "ambiente": "TrendSight API v2.1",
+        "timestamp": datetime.utcnow().isoformat()
+    })
+
 @app.route('/api/mercado', methods=['GET'])
 def obter_dados_mercado():
+    global cache_mercado
+    
     try:
-        query = text('SELECT * FROM analise_mercado ORDER BY "Probabilidade (%)" DESC')
+        # Verifica se o cache ainda é válido
+        if cache_mercado["dados"] and (time() - cache_mercado["timestamp"] < TEMPO_CACHE_SEGUNDOS):
+            return jsonify(cache_mercado["dados"])
+
+        # Se o cache expirou, busca no banco de dados
+        query = text('SELECT * FROM analise_mercado ORDER BY "Score" DESC, "Probabilidade (%)" DESC')
         df = pd.read_sql_query(query, engine)
         
         dados = df.to_dict(orient='records')
         top_compras = [acao for acao in dados if acao['Sinal'] == 'COMPRA'][:5]
         top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:5]
-        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:3]
+        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:5] # Aumentei para mostrar mais consolidações
         
-        return jsonify({"status": "sucesso", "todos": dados, "compras": top_compras, "vendas": top_vendas, "espera": top_espera})
+        resultado_final = {
+            "status": "sucesso", 
+            "todos": dados, 
+            "compras": top_compras, 
+            "vendas": top_vendas, 
+            "espera": top_espera,
+            "origem": "banco_de_dados"
+        }
+        
+        # Atualiza o Cache
+        cache_mercado["dados"] = resultado_final
+        cache_mercado["dados"]["origem"] = "cache_memoria" # Marcação para debug
+        cache_mercado["timestamp"] = time()
+        
+        return jsonify(resultado_final)
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)})
 
