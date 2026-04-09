@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TrendSight Analytics — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -36,9 +34,7 @@
       --radius-sm: 8px;
     }
 
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -162,15 +158,8 @@
     }
 
     @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.3;
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
     .ticker-tape-wrap {
@@ -205,36 +194,14 @@
       border-right: 1px solid var(--border2);
     }
 
-    .ticker-symbol {
-      color: #fff;
-    }
-
-    .ticker-price {
-      color: var(--text-muted);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-    }
-
-    .ticker-up {
-      color: var(--green-bright);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-    }
-
-    .ticker-down {
-      color: var(--red-bright);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-    }
+    .ticker-symbol { color: #fff; }
+    .ticker-price { color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-weight: 500; }
+    .ticker-up { color: var(--green-bright); font-family: 'DM Sans', sans-serif; font-weight: 500; }
+    .ticker-down { color: var(--red-bright); font-family: 'DM Sans', sans-serif; font-weight: 500; }
 
     @keyframes tickerScroll {
-      0% {
-        transform: translateX(0);
-      }
-
-      100% {
-        transform: translateX(-50%);
-      }
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
 
     .main {
@@ -291,13 +258,8 @@
     }
 
     @media (max-width: 680px) {
-      .signals-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .two-col {
-        grid-template-columns: 1fr;
-      }
+      .signals-grid { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
     }
 
     .signal-card {
@@ -312,20 +274,9 @@
       flex-direction: column;
     }
 
-    .signal-card.buy {
-      background: var(--green-dim);
-      border-color: var(--green);
-    }
-
-    .signal-card.sell {
-      background: var(--red-dim);
-      border-color: var(--red);
-    }
-
-    .signal-card.hold {
-      background: var(--amber-dim);
-      border-color: var(--amber);
-    }
+    .signal-card.buy { background: var(--green-dim); border-color: var(--green); }
+    .signal-card.sell { background: var(--red-dim); border-color: var(--red); }
+    .signal-card.hold { background: var(--amber-dim); border-color: var(--amber); }
 
     .chart-container {
       height: 80px;
@@ -352,20 +303,9 @@
       font-weight: 700;
     }
 
-    .buy .signal-icon {
-      background: var(--green);
-      color: #fff;
-    }
-
-    .sell .signal-icon {
-      background: var(--red);
-      color: #fff;
-    }
-
-    .hold .signal-icon {
-      background: var(--amber);
-      color: #fff;
-    }
+    .buy .signal-icon { background: var(--green); color: #fff; }
+    .sell .signal-icon { background: var(--red); color: #fff; }
+    .hold .signal-icon { background: var(--amber); color: #fff; }
 
     .signal-action {
       font-family: 'Syne', sans-serif;
@@ -375,17 +315,9 @@
       text-transform: uppercase;
     }
 
-    .buy .signal-action {
-      color: var(--green-bright);
-    }
-
-    .sell .signal-action {
-      color: var(--red-bright);
-    }
-
-    .hold .signal-action {
-      color: var(--amber-bright);
-    }
+    .buy .signal-action { color: var(--green-bright); }
+    .sell .signal-action { color: var(--red-bright); }
+    .hold .signal-action { color: var(--amber-bright); }
 
     .signal-text {
       font-size: 12px;
@@ -436,13 +368,8 @@
       transition: width 1s ease;
     }
 
-    .buy .prob-fill {
-      background: var(--green-bright);
-    }
-
-    .sell .prob-fill {
-      background: var(--red-bright);
-    }
+    .buy .prob-fill { background: var(--green-bright); }
+    .sell .prob-fill { background: var(--red-bright); }
 
     .prob-pct {
       font-size: 12px;
@@ -451,13 +378,8 @@
       text-align: right;
     }
 
-    .buy .prob-pct {
-      color: var(--green-bright);
-    }
-
-    .sell .prob-pct {
-      color: var(--red-bright);
-    }
+    .buy .prob-pct { color: var(--green-bright); }
+    .sell .prob-pct { color: var(--red-bright); }
 
     .two-col {
       display: grid;
@@ -555,30 +477,17 @@
       font-weight: 700;
     }
 
-    .level.entry .level-val {
-      color: #fff;
-    }
-
-    .level.target .level-val {
-      color: var(--green-bright);
-    }
-
-    .level.stop .level-val {
-      color: var(--red-bright);
-    }
+    .level.entry .level-val { color: #fff; }
+    .level.target .level-val { color: var(--green-bright); }
+    .level.stop .level-val { color: var(--red-bright); }
 
     .level-sub {
       font-size: 10px;
       margin-top: 3px;
     }
 
-    .level.target .level-sub {
-      color: var(--green);
-    }
-
-    .level.stop .level-sub {
-      color: var(--red);
-    }
+    .level.target .level-sub { color: var(--green); }
+    .level.stop .level-sub { color: var(--red); }
 
     .scorecard {
       margin-top: 20px;
@@ -723,7 +632,7 @@
       font-family: 'Syne', sans-serif;
       cursor: pointer;
       transition: transform 0.2s, filter 0.2s;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .heatmap-cell:hover {
@@ -731,7 +640,7 @@
       filter: brightness(1.2);
       z-index: 10;
       position: relative;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
 
     .heatmap-cell.selected {
@@ -803,7 +712,7 @@
     }
 
     .data-table tr:hover {
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255,255,255,0.02);
     }
 
     .badge {
@@ -873,23 +782,9 @@
       color: #fff;
     }
 
-    .pill-btn.active.buy {
-      background: rgba(93, 202, 165, 0.15);
-      border-color: var(--green);
-      color: var(--green-bright);
-    }
-
-    .pill-btn.active.sell {
-      background: rgba(240, 149, 149, 0.15);
-      border-color: var(--red);
-      color: var(--red-bright);
-    }
-
-    .pill-btn.active.hold {
-      background: rgba(250, 199, 117, 0.15);
-      border-color: var(--amber);
-      color: var(--amber-bright);
-    }
+    .pill-btn.active.buy { background: rgba(93, 202, 165, 0.15); border-color: var(--green); color: var(--green-bright); }
+    .pill-btn.active.sell { background: rgba(240, 149, 149, 0.15); border-color: var(--red); color: var(--red-bright); }
+    .pill-btn.active.hold { background: rgba(250, 199, 117, 0.15); border-color: var(--amber); color: var(--amber-bright); }
 
     .rank-row {
       display: flex;
@@ -901,7 +796,7 @@
     }
 
     .rank-row:hover {
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255,255,255,0.02);
       border-radius: 8px;
     }
 
@@ -962,13 +857,8 @@
       flex-shrink: 0;
     }
 
-    .long-dot.g {
-      background: var(--green-bright);
-    }
-
-    .long-dot.r {
-      background: var(--red-bright);
-    }
+    .long-dot.g { background: var(--green-bright); }
+    .long-dot.r { background: var(--red-bright); }
 
     .long-rec-body {
       font-size: 13px;
@@ -1005,10 +895,8 @@
     <div class="logo">
       <div class="logo-mark">
         <svg viewBox="0 0 18 18" fill="none">
-          <polyline points="1,13 6,7 10,10 17,3" stroke="#fff" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round" />
-          <polyline points="13,3 17,3 17,7" stroke="#fff" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round" />
+          <polyline points="1,13 6,7 10,10 17,3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <polyline points="13,3 17,3 17,7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>
       <span class="logo-name">Trend<span>Sight</span></span>
@@ -1023,8 +911,7 @@
 
     <div class="topbar-right">
       <span class="date" id="dateDisplay"></span>
-      <span class="live-dot" style="cursor: pointer;" onclick="pedirPermissaoNotificacao()"
-        title="Ativar Notificações">Ao vivo</span>
+      <span class="live-dot" style="cursor: pointer;" onclick="pedirPermissaoNotificacao()" title="Ativar Notificações">Ao vivo</span>
     </div>
   </nav>
 
@@ -1046,11 +933,9 @@
         <div class="card" id="card-detalhes">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <div class="card-label" id="detalhes-label" style="margin-bottom: 0;">Operação de compra — DETALHES</div>
-            <button onclick="alternarDetalhes()"
-              style="background: transparent; border: 1px solid var(--border2); color: var(--text-muted); border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: 600;">⇄
-              Inverter</button>
+            <button onclick="alternarDetalhes()" style="background: transparent; border: 1px solid var(--border2); color: var(--text-muted); border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: 600;">⇄ Inverter</button>
           </div>
-
+          
           <div style="display: flex; gap: 6px; margin-bottom: 16px; justify-content: flex-end;">
             <button class="time-btn active" onclick="mudarTimeframe('10d', this)">10D</button>
             <button class="time-btn" onclick="mudarTimeframe('1m', this)">1M</button>
@@ -1082,19 +967,13 @@
           </div>
 
           <div class="scorecard" id="detalhes-scorecard">
-            <div
-              style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700;">
-              Raio-X do Algoritmo (Score: <span id="score-num">0</span>/6)</div>
+            <div style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700;">Raio-X do Algoritmo (Score: <span id="score-num">0</span>/6)</div>
             <div class="scorecard-layout">
               <div class="score-grid">
-                <div class="score-item"><span class="score-lbl">RSI (14d)</span><span class="score-val"
-                    id="ind-rsi">--</span></div>
-                <div class="score-item"><span class="score-lbl">MACD Hist.</span><span class="score-val"
-                    id="ind-macd">--</span></div>
-                <div class="score-item"><span class="score-lbl">Bollinger</span><span class="score-val"
-                    id="ind-bb">--</span></div>
-                <div class="score-item"><span class="score-lbl">Tendência</span><span class="score-val"
-                    id="ind-mm">--</span></div>
+                <div class="score-item"><span class="score-lbl">RSI (14d)</span><span class="score-val" id="ind-rsi">--</span></div>
+                <div class="score-item"><span class="score-lbl">MACD Hist.</span><span class="score-val" id="ind-macd">--</span></div>
+                <div class="score-item"><span class="score-lbl">Bollinger</span><span class="score-val" id="ind-bb">--</span></div>
+                <div class="score-item"><span class="score-lbl">Tendência</span><span class="score-val" id="ind-mm">--</span></div>
               </div>
               <div class="radar-container">
                 <canvas id="radar-chart"></canvas>
@@ -1109,8 +988,7 @@
             <div class="sim-wrap">
               <div class="sim-input-row">
                 <span class="sim-prefix">R$</span>
-                <input class="sim-input" type="number" id="simVal" value="1000" min="100" step="100" oninput="calcSim()"
-                  placeholder="Valor investido" />
+                <input class="sim-input" type="number" id="simVal" value="1000" min="100" step="100" oninput="calcSim()" placeholder="Valor investido" />
               </div>
               <div class="sim-result">
                 <div class="sim-result-lbl" id="sim-lbl-acao">Se a ação atingir o Alvo, você terá:</div>
@@ -1120,12 +998,9 @@
               </div>
             </div>
           </div>
-
-          <div class="scorecard" id="sim-risk-box"
-            style="display: block; margin-top: 0; padding-top: 0; border-top: none;">
-            <div
-              style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700; border-top: 1px solid var(--border2); padding-top: 20px;">
-              Gestão de Risco (Stop Loss)</div>
+          
+          <div class="scorecard" id="sim-risk-box" style="display: block; margin-top: 0; padding-top: 0; border-top: none;">
+            <div style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700; border-top: 1px solid var(--border2); padding-top: 20px;">Gestão de Risco (Stop Loss)</div>
             <div class="score-grid">
               <div class="score-item" style="align-items: center; text-align: center;">
                 <span class="score-lbl">Tamanho da Posição</span>
@@ -1136,23 +1011,20 @@
                 <span class="score-val" id="sim-perda-stop" style="font-size: 16px; color: var(--red-bright);">--</span>
               </div>
             </div>
-            <div style="margin-top: 12px; font-size: 10px; color: var(--text-faint); text-align: center;">Relação
-              Risco/Retorno calculada nativamente via ATR.</div>
+            <div style="margin-top: 12px; font-size: 10px; color: var(--text-faint); text-align: center;">Relação Risco/Retorno calculada nativamente via ATR.</div>
           </div>
         </div>
       </div>
 
       <div class="card" style="margin-bottom: 20px;">
         <div class="card-label" style="margin-bottom: 4px;">Heatmap de Ativos (B3)</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Clique em qualquer ativo para ver o
-          gráfico de histórico completo.</div>
-
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Clique em qualquer ativo para ver o gráfico de histórico completo.</div>
+        
         <div id="heatmap-container"></div>
-
+        
         <div id="heatmap-chart-wrapper">
           <div style="margin-bottom: 16px;">
-            <div id="hm-chart-ticker"
-              style="font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: #fff;">--</div>
+            <div id="hm-chart-ticker" style="font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: #fff;">--</div>
             <div id="hm-chart-price" style="font-size: 15px; color: var(--text-muted);">--</div>
           </div>
           <div class="chart-container" style="height: 250px; width: 100%;">
@@ -1165,52 +1037,44 @@
 
     <div id="view-backtest" class="view">
       <div style="text-align: center; margin-bottom: 40px; padding: 0 20px;">
-        <h1 style="font-family: 'Syne', sans-serif; font-size: 32px; color: #fff; margin-bottom: 14px;">Marcação a
-          Mercado (Backtest)</h1>
-        <p style="color: var(--text-muted); font-size: 16px; max-width: 750px; margin: 0 auto; line-height: 1.6;">O
-          algoritmo cruza os registros imutáveis do passado com a fita de preços de hoje para validar matematicamente os
-          resultados reais.</p>
+        <h1 style="font-family: 'Syne', sans-serif; font-size: 32px; color: #fff; margin-bottom: 14px;">Marcação a Mercado (Backtest)</h1>
+        <p style="color: var(--text-muted); font-size: 16px; max-width: 750px; margin: 0 auto; line-height: 1.6;">O algoritmo cruza os registros imutáveis do passado com a fita de preços de hoje para validar matematicamente os resultados reais.</p>
       </div>
 
       <div class="two-col" style="margin-bottom: 20px;">
         <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <div class="card-label">Taxa de Acerto (Win Rate)</div>
-          <div style="font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 700; color: #fff;"
-            id="hit-rate-text">--%</div>
-          <div style="width: 200px; height: 200px; margin-top: 10px; position: relative;">
-            <canvas id="backtest-chart"></canvas>
-          </div>
+           <div class="card-label">Taxa de Acerto (Win Rate)</div>
+           <div style="font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 700; color: #fff;" id="hit-rate-text">--%</div>
+           <div style="width: 200px; height: 200px; margin-top: 10px; position: relative;">
+              <canvas id="backtest-chart"></canvas>
+           </div>
         </div>
-
+        
         <div class="card">
-          <div class="card-label">Resumo do Algoritmo</div>
-          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Auditoria automática baseada nas
-            últimas 50 recomendações geradas pelo motor quantitativo.</div>
-
-          <div class="score-grid" style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="score-item" style="flex-direction: row; justify-content: space-between;">
-              <span class="score-lbl">Total de Sinais Auditados</span>
-              <span class="score-val" id="bt-total" style="font-size: 18px;">0</span>
-            </div>
-            <div class="score-item"
-              style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--green-bright);">
-              <span class="score-lbl">Alvos Atingidos (Gain)</span>
-              <span class="score-val" id="bt-gain" style="color: var(--green-bright); font-size: 18px;">0</span>
-            </div>
-            <div class="score-item"
-              style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--red-bright);">
-              <span class="score-lbl">Stops Acionados (Loss)</span>
-              <span class="score-val" id="bt-loss" style="color: var(--red-bright); font-size: 18px;">0</span>
-            </div>
-            <div class="score-item"
-              style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--amber-bright);">
-              <span class="score-lbl">Aguardando Desfecho</span>
-              <span class="score-val" id="bt-running" style="color: var(--amber-bright); font-size: 18px;">0</span>
-            </div>
-          </div>
+           <div class="card-label">Resumo do Algoritmo</div>
+           <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Auditoria automática baseada nas últimas 50 recomendações geradas pelo motor quantitativo.</div>
+           
+           <div class="score-grid" style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="score-item" style="flex-direction: row; justify-content: space-between;">
+                 <span class="score-lbl">Total de Sinais Auditados</span>
+                 <span class="score-val" id="bt-total" style="font-size: 18px;">0</span>
+              </div>
+              <div class="score-item" style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--green-bright);">
+                 <span class="score-lbl">Alvos Atingidos (Gain)</span>
+                 <span class="score-val" id="bt-gain" style="color: var(--green-bright); font-size: 18px;">0</span>
+              </div>
+              <div class="score-item" style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--red-bright);">
+                 <span class="score-lbl">Stops Acionados (Loss)</span>
+                 <span class="score-val" id="bt-loss" style="color: var(--red-bright); font-size: 18px;">0</span>
+              </div>
+              <div class="score-item" style="flex-direction: row; justify-content: space-between; border-left: 3px solid var(--amber-bright);">
+                 <span class="score-lbl">Aguardando Desfecho</span>
+                 <span class="score-val" id="bt-running" style="color: var(--amber-bright); font-size: 18px;">0</span>
+              </div>
+           </div>
         </div>
-      </div>
-
+     </div>
+      
       <div class="card" style="margin-bottom: 20px;">
         <div class="card-label">Livro Razão (Banco de Dados)</div>
         <div class="table-wrap">
@@ -1227,10 +1091,7 @@
               </tr>
             </thead>
             <tbody id="tb-historico">
-              <tr>
-                <td colspan="7" style="text-align:center; color:var(--text-faint);">Carregando validação do servidor...
-                </td>
-              </tr>
+              <tr><td colspan="7" style="text-align:center; color:var(--text-faint);">Carregando validação do servidor...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1239,36 +1100,42 @@
 
 
     <div id="view-carteira" class="view">
+      <div style="text-align: center; margin-bottom: 40px; padding: 0 20px;">
+        <h1 style="font-family: 'Syne', sans-serif; font-size: 32px; color: #fff; margin-bottom: 14px;">Raio-X da Carteira</h1>
+        <p style="color: var(--text-muted); font-size: 16px; max-width: 750px; margin: 0 auto; line-height: 1.6;">Acompanhe sua alocação, rentabilidade em tempo real e os sinais do algoritmo para cada ativo que você possui.</p>
+      </div>
+
+      <div class="two-col" style="margin-bottom: 20px;">
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center; gap: 30px;">
+          <div>
+            <div class="card-label">Patrimônio Total</div>
+            <div class="op-ticker-big" id="patrimonio-total" style="font-size: 42px;">R$ 0,00</div>
+          </div>
+          <div>
+            <div class="card-label">Lucro / Prejuízo Aberto</div>
+            <div class="op-ticker-big" id="lucro-total" style="font-size: 32px;">R$ 0,00</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div class="card-label">Alocação por Ativo</div>
+          <div style="width: 220px; height: 220px; margin-top: 10px; position: relative;">
+            <canvas id="carteira-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
       <div class="card" style="margin-bottom: 30px;">
         <div class="card-label">Adicionar / Atualizar Ativo</div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <input class="alloc-input" list="tickers-b3" type="text" id="nova-acao" placeholder="Ticker (ex: BBAS3)"
-            style="margin: 0; flex: 1; min-width: 150px; text-transform: uppercase;" autocomplete="off" />
-          <datalist id="tickers-b3">
-            <option value="PETR4">
-            <option value="VALE3">
-            <option value="ITUB4">
-            <option value="BBDC4">
-            <option value="BBAS3">
-          </datalist>
-          <input class="alloc-input" type="number" id="nova-qtd" placeholder="Quantidade"
-            style="margin: 0; flex: 1; min-width: 120px;" />
-          <input class="alloc-input" type="number" id="novo-preco" placeholder="Preço Pago (R$)"
-            style="margin: 0; flex: 1; min-width: 120px;" step="0.01" />
-          <button class="btn-ghost" onclick="adicionarAcao()"
-            style="margin: 0; background: var(--purple); color: #fff; border-color: var(--purple);">➕ Adicionar</button>
+          <input class="alloc-input" list="tickers-b3" type="text" id="nova-acao" placeholder="Ticker (ex: BBAS3)" style="margin: 0; flex: 1; min-width: 150px; text-transform: uppercase;" autocomplete="off" />
+          <datalist id="tickers-b3"><option value="PETR4"><option value="VALE3"><option value="ITUB4"><option value="BBDC4"><option value="BBAS3"></datalist>
+          <input class="alloc-input" type="number" id="nova-qtd" placeholder="Quantidade" style="margin: 0; flex: 1; min-width: 120px;" />
+          <input class="alloc-input" type="number" id="novo-preco" placeholder="Preço Pago (R$)" style="margin: 0; flex: 1; min-width: 120px;" step="0.01" />
+          <button class="btn-ghost" onclick="adicionarAcao()" style="margin: 0; background: var(--purple); color: #fff; border-color: var(--purple);">➕ Adicionar</button>
         </div>
       </div>
-      <div class="two-col">
-        <div class="card" style="text-align: center; padding: 30px;">
-          <div class="card-label">Patrimônio Total</div>
-          <div class="op-ticker-big" id="patrimonio-total" style="font-size: 36px;">R$ 0,00</div>
-        </div>
-        <div class="card" style="text-align: center; padding: 30px;">
-          <div class="card-label">Lucro / Prejuízo Aberto</div>
-          <div class="op-ticker-big" id="lucro-total" style="font-size: 36px;">R$ 0,00</div>
-        </div>
-      </div>
+
       <div class="verdict-heading" style="margin-top: 40px;">Suas Posições</div>
       <div class="signals-grid" id="grid-carteira"></div>
     </div>
@@ -1280,7 +1147,7 @@
         <div class="verdict-heading">Onde colocar o dinheiro agora?</div>
         <div class="signals-grid" id="piloto-cards"></div>
       </div>
-
+      
       <div class="two-col">
         <div class="card">
           <div class="card-label">Por que essas ações?</div>
@@ -1288,8 +1155,7 @@
         </div>
         <div class="card">
           <div class="card-label">Quanto eu invisto?</div>
-          <input class="alloc-input" type="number" id="allocVal" value="1000" min="100" step="100" oninput="calcAlloc()"
-            placeholder="Quanto tem disponível (R$)" />
+          <input class="alloc-input" type="number" id="allocVal" value="1000" min="100" step="100" oninput="calcAlloc()" placeholder="Quanto tem disponível (R$)" />
           <div class="alloc-result" id="allocResult">Calculando alocação dinâmica baseada no algoritmo...</div>
         </div>
       </div>
@@ -1301,23 +1167,24 @@
     // ==============================================
     // VARIÁVEIS GLOBAIS DE ESTADO
     // ==============================================
-    const now = new Date();
+    const now = new Date(); 
     document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
     let graficosAtuais = { compra: null, venda: null, espera: null };
-
+    
     let radarChartObj = null;
-    let backtestChartObj = null;
+    let backtestChartObj = null; 
     let heatmapChartObj = null;
-
-    let modoDetalhes = 'buy';
+    let carteiraChartObj = null; // NOVO: Objeto do gráfico da carteira
+    
+    let modoDetalhes = 'buy'; 
     let acaoSelecionadaCompra = null;
     let acaoSelecionadaVenda = null;
-    let acaoSelecionadaEspera = null;
+    let acaoSelecionadaEspera = null; 
     let acaoSelecionadaHeatmap = null;
-
-    let timeframeAtual = '10d';
+    
+    let timeframeAtual = '10d'; 
 
     // ==============================================
     // NAVEGAÇÃO E UI GERAL
@@ -1325,11 +1192,11 @@
     function setMode(m) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-
+      
       document.getElementById('view-' + m).classList.add('active');
       document.getElementById('btn' + m.charAt(0).toUpperCase() + m.slice(1)).classList.add('active');
-
-      if (m === 'backtest') carregarHistorico();
+      
+      if(m === 'backtest') carregarHistorico();
     }
 
     function pedirPermissaoNotificacao() {
@@ -1341,13 +1208,13 @@
 
     function dispararNotificacao(acoes) {
       if (!("Notification" in window) || Notification.permission !== "granted") return;
-
+      
       const fortes = acoes.filter(a => a.Score >= 5 && a.Sinal === 'COMPRA');
-
-      if (fortes.length > 0 && !window.notificacaoEnviadaHoje) {
-        new Notification('TrendSight Analytics', {
-          body: `Oportunidade Forte: ${fortes[0].Ativo} está com Score ${fortes[0].Score}/6 para Compra!`,
-          icon: 'https://cdn-icons-png.flaticon.com/512/2950/2950085.png'
+      
+      if(fortes.length > 0 && !window.notificacaoEnviadaHoje) {
+        new Notification('TrendSight Analytics', { 
+          body: `Oportunidade Forte: ${fortes[0].Ativo} está com Score ${fortes[0].Score}/6 para Compra!`, 
+          icon: 'https://cdn-icons-png.flaticon.com/512/2950/2950085.png' 
         });
         window.notificacaoEnviadaHoje = true;
       }
@@ -1359,7 +1226,7 @@
     function calcSim() {
       const v = parseFloat(document.getElementById('simVal').value) || 0;
       let acao = null;
-
+      
       if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
       else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
       else acao = acaoSelecionadaEspera;
@@ -1369,36 +1236,36 @@
       const perdaEl = document.getElementById('sim-perda-stop');
 
       if (!acao || modoDetalhes === 'hold') {
-        if (modoDetalhes === 'hold') {
-          document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          document.getElementById('simGain').innerHTML = 'Ativo em Consolidação';
-          document.getElementById('simGain').style.color = 'var(--text-muted)';
-          document.getElementById('sim-lbl-acao').textContent = 'Simulação Indisponível';
-        }
-
-        if (riskBox) riskBox.style.display = modoDetalhes === 'hold' ? 'block' : 'none';
-        if (cotasEl) cotasEl.textContent = '--';
-        if (perdaEl) {
-          perdaEl.textContent = '--';
-          perdaEl.style.color = 'var(--text-muted)';
-        }
-        return;
+         if (modoDetalhes === 'hold') {
+            document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('simGain').innerHTML = 'Ativo em Consolidação'; 
+            document.getElementById('simGain').style.color = 'var(--text-muted)'; 
+            document.getElementById('sim-lbl-acao').textContent = 'Simulação Indisponível';
+         }
+         
+         if(riskBox) riskBox.style.display = modoDetalhes === 'hold' ? 'block' : 'none';
+         if(cotasEl) cotasEl.textContent = '--';
+         if(perdaEl) { 
+            perdaEl.textContent = '--'; 
+            perdaEl.style.color = 'var(--text-muted)'; 
+         }
+         return;
       }
 
       const diffAlvo = Math.abs((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1);
       const gain = v * diffAlvo;
-
+      
       document.getElementById('simResult').textContent = 'R$ ' + (v + gain).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('simGain').innerHTML = `+R$ ${gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} de lucro`;
+      document.getElementById('simGain').innerHTML = `+R$ ${gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} de lucro`; 
       document.getElementById('simGain').style.color = 'var(--green-bright)';
 
-      if (riskBox) riskBox.style.display = 'block';
-      if (cotasEl) cotasEl.textContent = `${Math.floor(v / acao['Preço (R$)'])} cotas`;
-
-      if (perdaEl) {
-        const diffStop = Math.abs((acao['Stop (R$)'] / acao['Preço (R$)']) - 1);
-        perdaEl.textContent = `- R$ ${(v * diffStop).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        perdaEl.style.color = 'var(--red-bright)';
+      if(riskBox) riskBox.style.display = 'block';
+      if(cotasEl) cotasEl.textContent = `${Math.floor(v / acao['Preço (R$)'])} cotas`;
+      
+      if(perdaEl) { 
+          const diffStop = Math.abs((acao['Stop (R$)'] / acao['Preço (R$)']) - 1);
+          perdaEl.textContent = `- R$ ${(v * diffStop).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; 
+          perdaEl.style.color = 'var(--red-bright)'; 
       }
     }
 
@@ -1410,20 +1277,20 @@
       const el = document.getElementById('allocResult');
       const compras = dadosMercadoGlobais.compras;
 
-      if (v < 100) {
-        el.innerHTML = 'Digite um valor acima de R$ 100 para ver a alocação sugerida.';
-        return;
+      if (v < 100) { 
+          el.innerHTML = 'Digite um valor acima de R$ 100 para ver a alocação sugerida.'; 
+          return; 
       }
-      if (!compras || compras.length === 0) {
-        el.innerHTML = 'Nenhum ativo com sinal forte de COMPRA hoje para alocar capital.';
-        return;
+      if (!compras || compras.length === 0) { 
+          el.innerHTML = 'Nenhum ativo com sinal forte de COMPRA hoje para alocar capital.'; 
+          return; 
       }
 
       const orcamentoPorAcao = v / compras.length;
-
+      
       const strAlocacao = compras.map(a => {
-        const qtd = Math.floor(orcamentoPorAcao / a['Preço (R$)']);
-        return `<strong>${qtd} cota${qtd !== 1 ? 's' : ''} de ${a.Ativo}</strong>`;
+          const qtd = Math.floor(orcamentoPorAcao / a['Preço (R$)']);
+          return `<strong>${qtd} cota${qtd !== 1 ? 's' : ''} de ${a.Ativo}</strong>`;
       }).join(' e ');
 
       let peso = Math.floor(100 / compras.length);
@@ -1435,17 +1302,17 @@
     function renderizarPilotoAutomatico() {
       const containerCards = document.getElementById('piloto-cards');
       const containerReasons = document.getElementById('piloto-reasons');
-
-      if (!containerCards || !containerReasons) return;
+      
+      if(!containerCards || !containerReasons) return;
 
       let buysHTML = '';
       let sellsHTML = '';
       let reasonsHTML = '';
 
       if (dadosMercadoGlobais.compras.length > 0) {
-        let tickersBuy = dadosMercadoGlobais.compras.map(a => `<span class="ticker">${a.Ativo}</span>`).join('');
-
-        buysHTML = `
+          let tickersBuy = dadosMercadoGlobais.compras.map(a => `<span class="ticker">${a.Ativo}</span>`).join('');
+          
+          buysHTML = `
           <div class="signal-card buy" style="grid-column: span 2;">
             <div class="signal-header">
                 <div class="signal-icon">↑</div>
@@ -1459,20 +1326,20 @@
                 <span class="prob-pct">Forte</span>
             </div>
           </div>`;
-
-        dadosMercadoGlobais.compras.forEach(a => {
-          reasonsHTML += `
+          
+          dadosMercadoGlobais.compras.forEach(a => { 
+              reasonsHTML += `
               <div class="long-rec">
                   <div class="long-dot g"></div>
                   <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Alvo projetado em R$ ${a['Alvo (R$)']}.</div>
-              </div>`;
-        });
+              </div>`; 
+          });
       }
 
       if (dadosMercadoGlobais.vendas.length > 0) {
-        let tickersSell = dadosMercadoGlobais.vendas.map(a => `<span class="ticker">${a.Ativo}</span>`).join('');
-
-        sellsHTML = `
+          let tickersSell = dadosMercadoGlobais.vendas.map(a => `<span class="ticker">${a.Ativo}</span>`).join('');
+          
+          sellsHTML = `
           <div class="signal-card sell">
             <div class="signal-header">
                 <div class="signal-icon">↓</div>
@@ -1481,24 +1348,24 @@
             <p class="signal-text">Risco elevado detectado pelos indicadores matemáticos hoje.</p>
             <div class="tickers">${tickersSell}</div>
           </div>`;
-
-        dadosMercadoGlobais.vendas.forEach(a => {
-          reasonsHTML += `
+          
+          dadosMercadoGlobais.vendas.forEach(a => { 
+              reasonsHTML += `
               <div class="long-rec">
                   <div class="long-dot r"></div>
                   <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Risco de correção até R$ ${a['Alvo (R$)']}.</div>
-              </div>`;
-        });
+              </div>`; 
+          });
       }
 
-      if (dadosMercadoGlobais.compras.length === 0 && dadosMercadoGlobais.vendas.length === 0) {
-        containerCards.innerHTML = '<p style="color:var(--text-muted); grid-column: span 3; margin-top:20px;">Aguardando varredura do algoritmo...</p>';
-        containerReasons.innerHTML = '<p style="color:var(--text-muted);">Sem dados de varredura disponíveis hoje.</p>';
+      if(dadosMercadoGlobais.compras.length === 0 && dadosMercadoGlobais.vendas.length === 0) {
+          containerCards.innerHTML = '<p style="color:var(--text-muted); grid-column: span 3; margin-top:20px;">Aguardando varredura do algoritmo...</p>';
+          containerReasons.innerHTML = '<p style="color:var(--text-muted);">Sem dados de varredura disponíveis hoje.</p>';
       } else {
-        containerCards.innerHTML = buysHTML + sellsHTML;
-        containerReasons.innerHTML = reasonsHTML;
+          containerCards.innerHTML = buysHTML + sellsHTML;
+          containerReasons.innerHTML = reasonsHTML;
       }
-
+      
       calcAlloc();
     }
 
@@ -1506,28 +1373,28 @@
     // AÇÃO RÁPIDA (CARDS, GRÁFICOS E DETALHES)
     // ==============================================
     function mudarTimeframe(tf, btn) {
-      btn.parentElement.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
+      btn.parentElement.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active')); 
+      btn.classList.add('active'); 
+      
       timeframeAtual = tf;
-
+      
       let acao = null;
       if (modoDetalhes === 'buy') acao = acaoSelecionadaCompra;
       else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
       else acao = acaoSelecionadaEspera;
 
       if (acao) {
-        let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
-        desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
+          let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+          desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
       }
     }
 
-    function alternarDetalhes() {
+    function alternarDetalhes() { 
       if (modoDetalhes === 'buy') modoDetalhes = 'sell';
       else if (modoDetalhes === 'sell') modoDetalhes = 'hold';
       else modoDetalhes = 'buy';
-
-      renderizarDetalhes();
+      
+      renderizarDetalhes(); 
     }
 
     function renderizarDetalhes() {
@@ -1543,370 +1410,374 @@
       const subStop = document.getElementById('detalhes-sub-stop');
 
       if (modoDetalhes === 'buy') {
-        document.getElementById('detalhes-label').textContent = acao ? 'Operação de compra — DETALHES' : 'Sem Ativos';
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até';
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo';
-        document.getElementById('detalhes-lbl-stop').textContent = 'Stop';
-
-        badge.style.color = 'var(--green-bright)';
-        badge.style.borderColor = 'var(--green)';
-        badge.style.background = 'var(--green-dim)';
-
-        valAlvo.style.color = 'var(--green-bright)';
-        subAlvo.style.color = 'var(--green)';
-        valStop.style.color = 'var(--red-bright)';
-        subStop.style.color = 'var(--red)';
-
+        document.getElementById('detalhes-label').textContent = acao ? 'Operação de compra — DETALHES' : 'Sem Ativos'; 
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até'; 
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo'; 
+        document.getElementById('detalhes-lbl-stop').textContent = 'Stop'; 
+        
+        badge.style.color = 'var(--green-bright)'; 
+        badge.style.borderColor = 'var(--green)'; 
+        badge.style.background = 'var(--green-dim)'; 
+        
+        valAlvo.style.color = 'var(--green-bright)'; 
+        subAlvo.style.color = 'var(--green)'; 
+        valStop.style.color = 'var(--red-bright)'; 
+        subStop.style.color = 'var(--red)'; 
+        
         document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo, você terá:';
-
+      
       } else if (modoDetalhes === 'sell') {
-        document.getElementById('detalhes-label').textContent = acao ? 'Operação de venda — DETALHES' : 'Sem Ativos';
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Short por';
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo (Queda)';
-        document.getElementById('detalhes-lbl-stop').textContent = 'Trava';
-
-        badge.style.color = 'var(--red-bright)';
-        badge.style.borderColor = 'var(--red)';
-        badge.style.background = 'var(--red-dim)';
-
-        valAlvo.style.color = 'var(--green-bright)';
-        subAlvo.style.color = 'var(--green)';
-        valStop.style.color = 'var(--red-bright)';
-        subStop.style.color = 'var(--red)';
-
+        document.getElementById('detalhes-label').textContent = acao ? 'Operação de venda — DETALHES' : 'Sem Ativos'; 
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Short por'; 
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo (Queda)'; 
+        document.getElementById('detalhes-lbl-stop').textContent = 'Trava'; 
+        
+        badge.style.color = 'var(--red-bright)'; 
+        badge.style.borderColor = 'var(--red)'; 
+        badge.style.background = 'var(--red-dim)'; 
+        
+        valAlvo.style.color = 'var(--green-bright)'; 
+        subAlvo.style.color = 'var(--green)'; 
+        valStop.style.color = 'var(--red-bright)'; 
+        subStop.style.color = 'var(--red)'; 
+        
         document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo (queda), seu lucro será:';
-
+      
       } else {
-        document.getElementById('detalhes-label').textContent = acao ? 'Em Observação' : 'Sem Ativos';
-        document.getElementById('detalhes-lbl-entrada').textContent = 'Atual';
-        document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo';
-        document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava';
-
-        badge.style.color = 'var(--amber-bright)';
-        badge.style.borderColor = 'var(--amber)';
-        badge.style.background = 'rgba(239, 159, 39, 0.1)';
-
-        valAlvo.style.color = 'var(--text-muted)';
-        subAlvo.style.color = 'var(--text-faint)';
-        valStop.style.color = 'var(--text-muted)';
+        document.getElementById('detalhes-label').textContent = acao ? 'Em Observação' : 'Sem Ativos'; 
+        document.getElementById('detalhes-lbl-entrada').textContent = 'Atual'; 
+        document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo'; 
+        document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava'; 
+        
+        badge.style.color = 'var(--amber-bright)'; 
+        badge.style.borderColor = 'var(--amber)'; 
+        badge.style.background = 'rgba(239, 159, 39, 0.1)'; 
+        
+        valAlvo.style.color = 'var(--text-muted)'; 
+        subAlvo.style.color = 'var(--text-faint)'; 
+        valStop.style.color = 'var(--text-muted)'; 
         subStop.style.color = 'var(--text-faint)';
       }
 
       if (!acao) {
-        document.getElementById('detalhes-ticker').textContent = "--";
-        document.getElementById('detalhes-val-entrada').textContent = `--`;
-        valAlvo.textContent = `--`;
-        valStop.textContent = `--`;
-        subAlvo.textContent = `0,0%`;
-        subStop.textContent = `0,0%`;
-        badge.textContent = `0%`;
-
-        document.getElementById('detalhes-scorecard').style.display = 'none';
-        calcSim();
-
-        let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
-        desenharGrafico(modoDetalhes, sufixo, 0, "", "");
-        return;
+          document.getElementById('detalhes-ticker').textContent = "--"; 
+          document.getElementById('detalhes-val-entrada').textContent = `--`; 
+          valAlvo.textContent = `--`; 
+          valStop.textContent = `--`; 
+          subAlvo.textContent = `0,0%`; 
+          subStop.textContent = `0,0%`; 
+          badge.textContent = `0%`; 
+          
+          document.getElementById('detalhes-scorecard').style.display = 'none'; 
+          calcSim(); 
+          
+          let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
+          desenharGrafico(modoDetalhes, sufixo, 0, "", ""); 
+          return;
       }
 
-      document.getElementById('detalhes-ticker').textContent = acao.Ativo;
+      document.getElementById('detalhes-ticker').textContent = acao.Ativo; 
       document.getElementById('detalhes-val-entrada').textContent = `R$ ${acao['Preço (R$)']}`;
-
-      if (modoDetalhes === 'hold') {
-        valAlvo.textContent = `--`;
-        subAlvo.textContent = `Consolidado`;
-        valStop.textContent = `--`;
-        subStop.textContent = `Consolidado`;
-        badge.textContent = `Aguardando sinais`;
+      
+      if (modoDetalhes === 'hold') { 
+          valAlvo.textContent = `--`; 
+          subAlvo.textContent = `Consolidado`; 
+          valStop.textContent = `--`; 
+          subStop.textContent = `Consolidado`; 
+          badge.textContent = `Aguardando sinais`; 
       } else {
-        valAlvo.textContent = `R$ ${acao['Alvo (R$)']}`;
-        valStop.textContent = `R$ ${acao['Stop (R$)']}`;
-
-        const diffAlvoPct = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
-        const diffStopPct = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
-
-        subAlvo.textContent = (diffAlvoPct > 0 ? '+' : '') + diffAlvoPct.toFixed(1) + '%';
-        subStop.textContent = (diffStopPct > 0 ? '+' : '') + diffStopPct.toFixed(1) + '%';
-        badge.textContent = `Score ${acao.Score}/6`;
+          valAlvo.textContent = `R$ ${acao['Alvo (R$)']}`; 
+          valStop.textContent = `R$ ${acao['Stop (R$)']}`;
+          
+          const diffAlvoPct = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
+          const diffStopPct = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
+          
+          subAlvo.textContent = (diffAlvoPct > 0 ? '+' : '') + diffAlvoPct.toFixed(1) + '%'; 
+          subStop.textContent = (diffStopPct > 0 ? '+' : '') + diffStopPct.toFixed(1) + '%'; 
+          badge.textContent = `Score ${acao.Score}/6`;
       }
 
       if (acao.Score !== undefined) {
-        document.getElementById('detalhes-scorecard').style.display = 'block';
-        document.getElementById('score-num').textContent = acao.Score;
-
-        const rsiEl = document.getElementById('ind-rsi');
-        rsiEl.textContent = acao.RSI;
-        rsiEl.style.color = acao.RSI < 45 ? 'var(--green-bright)' : (acao.RSI > 60 ? 'var(--red-bright)' : 'var(--text-muted)');
-
-        const macdEl = document.getElementById('ind-macd');
-        macdEl.textContent = acao.MACD_Hist;
-        macdEl.style.color = acao.MACD_Hist > 0 ? 'var(--green-bright)' : 'var(--red-bright)';
-
-        const bbEl = document.getElementById('ind-bb');
-        bbEl.textContent = acao.BB_Posicao;
-        bbEl.style.color = acao.BB_Posicao < 0.3 ? 'var(--green-bright)' : (acao.BB_Posicao > 0.7 ? 'var(--red-bright)' : 'var(--text-muted)');
-
-        const mmEl = document.getElementById('ind-mm');
-        mmEl.textContent = acao.MM50 > acao.MM200 ? 'Alta' : 'Baixa';
-        mmEl.style.color = acao.MM50 > acao.MM200 ? 'var(--green-bright)' : 'var(--red-bright)';
-
-        const cv = document.getElementById('radar-chart');
-        if (cv) {
-          if (radarChartObj) radarChartObj.destroy();
-          radarChartObj = new Chart(cv.getContext('2d'), {
-            type: 'radar',
-            data: {
-              labels: ['RSI', 'MACD', 'Bands', 'Tendência', 'Outros'],
-              datasets: [{
-                data: [
-                  acao.RSI < 45 ? 1 : 0.3,
-                  acao.MACD_Hist > 0 ? 1 : 0.3,
-                  acao.BB_Posicao < 0.3 ? 1 : 0.3,
-                  acao.MM50 > acao.MM200 ? 1 : 0.3,
-                  acao.Score / 6
-                ],
-                backgroundColor: 'rgba(127, 119, 221, 0.25)',
-                borderColor: '#7F77DD',
-                borderWidth: 2
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                r: {
-                  angleLines: { color: 'rgba(255,255,255,0.1)' },
-                  grid: { color: 'rgba(255,255,255,0.1)' },
-                  pointLabels: { color: 'rgba(255,255,255,0.8)', font: { size: 9, family: 'Syne' } },
-                  ticks: { display: false, min: 0, max: 1 }
-                }
-              }
-            }
-          });
-        }
+          document.getElementById('detalhes-scorecard').style.display = 'block'; 
+          document.getElementById('score-num').textContent = acao.Score;
+          
+          const rsiEl = document.getElementById('ind-rsi');
+          rsiEl.textContent = acao.RSI; 
+          rsiEl.style.color = acao.RSI < 45 ? 'var(--green-bright)' : (acao.RSI > 60 ? 'var(--red-bright)' : 'var(--text-muted)'); 
+          
+          const macdEl = document.getElementById('ind-macd');
+          macdEl.textContent = acao.MACD_Hist; 
+          macdEl.style.color = acao.MACD_Hist > 0 ? 'var(--green-bright)' : 'var(--red-bright)'; 
+          
+          const bbEl = document.getElementById('ind-bb');
+          bbEl.textContent = acao.BB_Posicao; 
+          bbEl.style.color = acao.BB_Posicao < 0.3 ? 'var(--green-bright)' : (acao.BB_Posicao > 0.7 ? 'var(--red-bright)' : 'var(--text-muted)'); 
+          
+          const mmEl = document.getElementById('ind-mm');
+          mmEl.textContent = acao.MM50 > acao.MM200 ? 'Alta' : 'Baixa'; 
+          mmEl.style.color = acao.MM50 > acao.MM200 ? 'var(--green-bright)' : 'var(--red-bright)';
+          
+          const cv = document.getElementById('radar-chart');
+          if (cv) { 
+              if (radarChartObj) radarChartObj.destroy(); 
+              radarChartObj = new Chart(cv.getContext('2d'), { 
+                  type: 'radar', 
+                  data: { 
+                      labels: ['RSI', 'MACD', 'Bands', 'Tendência', 'Outros'], 
+                      datasets: [{ 
+                          data: [
+                              acao.RSI < 45 ? 1 : 0.3, 
+                              acao.MACD_Hist > 0 ? 1 : 0.3, 
+                              acao.BB_Posicao < 0.3 ? 1 : 0.3, 
+                              acao.MM50 > acao.MM200 ? 1 : 0.3, 
+                              acao.Score / 6
+                          ], 
+                          backgroundColor: 'rgba(127, 119, 221, 0.25)', 
+                          borderColor: '#7F77DD', 
+                          borderWidth: 2 
+                      }] 
+                  }, 
+                  options: { 
+                      responsive: true, 
+                      maintainAspectRatio: false, 
+                      plugins: { legend: { display: false } }, 
+                      scales: { 
+                          r: { 
+                              angleLines: { color: 'rgba(255,255,255,0.1)' }, 
+                              grid: { color: 'rgba(255,255,255,0.1)' }, 
+                              pointLabels: { color: 'rgba(255,255,255,0.8)', font: { size: 9, family: 'Syne' } }, 
+                              ticks: { display: false, min: 0, max: 1 } 
+                          } 
+                      } 
+                  } 
+              }); 
+          }
       }
-
-      calcSim();
+      
+      calcSim(); 
       let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
       desenharGrafico(modoDetalhes, sufixo, acao['Preço (R$)'], acao.Historico_Precos, acao.Historico_Datas);
     }
 
     function mudarAcaoCard(tipoBotao, index) {
       const chave = tipoBotao === 'buy' ? 'compras' : (tipoBotao === 'sell' ? 'vendas' : 'espera');
-      const acao = dadosMercadoGlobais[chave][index];
+      const acao = dadosMercadoGlobais[chave][index]; 
+      
+      if(!acao) return;
 
-      if (!acao) return;
-
-      document.getElementById(`nav-${chave}`).querySelectorAll('.pill-btn').forEach((btn, i) => {
-        btn.className = `pill-btn ${i === index ? 'active ' + tipoBotao : ''}`;
+      document.getElementById(`nav-${chave}`).querySelectorAll('.pill-btn').forEach((btn, i) => { 
+          btn.className = `pill-btn ${i === index ? 'active ' + tipoBotao : ''}`; 
       });
-
-      const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera');
+      
+      const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera'); 
       document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
-
-      if (tipoBotao !== 'hold') {
-        const pctEl = document.getElementById(`pct-${idSufixo}`);
-        const barraEl = document.getElementById(`barra-${idSufixo}`);
-        if (pctEl && barraEl) {
-          pctEl.textContent = `${acao['Probabilidade (%)']}%`;
-          barraEl.style.width = `${acao['Probabilidade (%)']}%`;
-        }
+      
+      if(tipoBotao !== 'hold') {
+          const pctEl = document.getElementById(`pct-${idSufixo}`);
+          const barraEl = document.getElementById(`barra-${idSufixo}`);
+          if (pctEl && barraEl) { 
+              pctEl.textContent = `${acao['Probabilidade (%)']}%`; 
+              barraEl.style.width = `${acao['Probabilidade (%)']}%`; 
+          }
       }
 
-      if (tipoBotao === 'buy') acaoSelecionadaCompra = acao;
-      else if (tipoBotao === 'sell') acaoSelecionadaVenda = acao;
+      if(tipoBotao === 'buy') acaoSelecionadaCompra = acao; 
+      else if(tipoBotao === 'sell') acaoSelecionadaVenda = acao; 
       else acaoSelecionadaEspera = acao;
-
+      
       if (tipoBotao !== modoDetalhes) {
-        modoDetalhes = tipoBotao;
+          modoDetalhes = tipoBotao; 
       }
-
+      
       renderizarDetalhes();
     }
 
     function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) {
-      const cv = document.getElementById(`chart-${sufixo}`);
-      if (!cv) return;
-
-      if (graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
-
-      const ctx = cv.getContext('2d');
+      const cv = document.getElementById(`chart-${sufixo}`); 
+      if(!cv) return; 
+      
+      if(graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
+      
+      const ctx = cv.getContext('2d'); 
       let cor = tipo === 'buy' ? '#5DCAA5' : (tipo === 'sell' ? '#F09595' : '#FAC775');
       let grad = ctx.createLinearGradient(0, 0, 0, 60);
-
+      
       if (tipo === 'buy') {
-        grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)');
+          grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)');
       } else if (tipo === 'sell') {
-        grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)');
+          grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)');
       } else {
-        grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)');
+          grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)');
       }
       grad.addColorStop(1, 'rgba(0,0,0,0)');
 
-      let hist = precosStr ? precosStr.split(',').map(Number) : [0, 0, 0];
-      let dts = datasStr ? datasStr.split(',') : ['', '', ''];
-
-      if (timeframeAtual === '10d') {
-        hist = hist.slice(-10); dts = dts.slice(-10);
-      } else if (timeframeAtual === '1m') {
-        hist = hist.slice(-22); dts = dts.slice(-22);
+      let hist = precosStr ? precosStr.split(',').map(Number) : [0,0,0];
+      let dts = datasStr ? datasStr.split(',') : ['','',''];
+      
+      if(timeframeAtual === '10d') { 
+          hist = hist.slice(-10); dts = dts.slice(-10); 
+      } else if(timeframeAtual === '1m') { 
+          hist = hist.slice(-22); dts = dts.slice(-22); 
       }
-
-      graficosAtuais[sufixo] = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: dts.map(d => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0].substring(2)}` : d; }),
-          datasets: [{
-            data: hist,
-            borderColor: cor,
-            backgroundColor: grad,
-            borderWidth: 2,
-            pointRadius: timeframeAtual === '10d' ? 2 : 0,
-            pointHoverRadius: 6,
-            pointBackgroundColor: cor,
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              enabled: true,
-              backgroundColor: '#15151f',
-              titleColor: '#7F77DD',
-              bodyColor: '#fff',
-              displayColors: false,
-              callbacks: {
-                label: function (c) { return 'R$ ' + c.parsed.y.toFixed(2); }
-              }
-            }
-          },
-          scales: {
-            x: {
-              display: true,
-              grid: { display: false, drawBorder: false },
-              ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 }
-            },
-            y: { display: false }
-          },
-          interaction: { mode: 'index', intersect: false }
-        }
+      
+      graficosAtuais[sufixo] = new Chart(ctx, { 
+          type: 'line', 
+          data: { 
+              // CORREÇÃO: FORMATANDO A DATA AQUI (DD/MM/YY)
+              labels: dts.map(d => { 
+                  const p = d.split('-'); 
+                  return p.length === 3 ? `${p[2]}/${p[1]}/${p[0].substring(2)}` : d; 
+              }), 
+              datasets: [{ 
+                  data: hist, 
+                  borderColor: cor, 
+                  backgroundColor: grad, 
+                  borderWidth: 2, 
+                  pointRadius: timeframeAtual === '10d' ? 2 : 0, 
+                  pointHoverRadius: 6, 
+                  pointBackgroundColor: cor, 
+                  fill: true, 
+                  tension: 0.4 
+              }] 
+          }, 
+          options: { 
+              responsive: true, 
+              maintainAspectRatio: false, 
+              plugins: { 
+                  legend: { display: false }, 
+                  tooltip: { 
+                      enabled: true, 
+                      backgroundColor: '#15151f', 
+                      titleColor: '#7F77DD', 
+                      bodyColor: '#fff', 
+                      displayColors: false, 
+                      callbacks: { 
+                          label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } 
+                      } 
+                  } 
+              }, 
+              scales: { 
+                  x: { 
+                      display: true, 
+                      grid: { display: false, drawBorder: false }, 
+                      ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } 
+                  }, 
+                  y: { display: false } 
+              }, 
+              interaction: { mode: 'index', intersect: false } 
+          } 
       });
     }
 
     // ==============================================
     // HEATMAP GLOBAL (B3)
     // ==============================================
-    window.selecionarHeatmap = function (ticker) {
-      const wrapper = document.getElementById('heatmap-chart-wrapper');
-
-      if (acaoSelecionadaHeatmap === ticker) {
-        acaoSelecionadaHeatmap = null;
-        wrapper.classList.remove('open');
-      } else {
-        acaoSelecionadaHeatmap = ticker;
-        wrapper.classList.add('open');
-
-        const acao = dadosMercadoGlobais.todos.find(a => a.Ativo === ticker);
-        if (acao) {
-          document.getElementById('hm-chart-ticker').textContent = acao.Ativo;
-          document.getElementById('hm-chart-price').textContent = `R$ ${acao['Preço (R$)'].toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-          desenharGraficoHeatmap(acao);
-        }
-      }
-      renderizarHeatmap(dadosMercadoGlobais.todos);
+    window.selecionarHeatmap = function(ticker) {
+        const wrapper = document.getElementById('heatmap-chart-wrapper');
+        
+        if (acaoSelecionadaHeatmap === ticker) { 
+            acaoSelecionadaHeatmap = null; 
+            wrapper.classList.remove('open'); 
+        } else { 
+            acaoSelecionadaHeatmap = ticker; 
+            wrapper.classList.add('open'); 
+            
+            const acao = dadosMercadoGlobais.todos.find(a => a.Ativo === ticker); 
+            if (acao) { 
+                document.getElementById('hm-chart-ticker').textContent = acao.Ativo; 
+                document.getElementById('hm-chart-price').textContent = `R$ ${acao['Preço (R$)'].toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; 
+                desenharGraficoHeatmap(acao); 
+            } 
+        } 
+        renderizarHeatmap(dadosMercadoGlobais.todos);
     }
 
     function desenharGraficoHeatmap(acao) {
-      const canvas = document.getElementById(`chart-heatmap`);
-      if (!canvas) return;
+        const canvas = document.getElementById(`chart-heatmap`); 
+        if(!canvas) return; 
+        
+        if(heatmapChartObj) heatmapChartObj.destroy();
+        
+        const ctx = canvas.getContext('2d'); 
+        let cor = '#7F77DD';
+        let grad = ctx.createLinearGradient(0, 0, 0, 250); 
+        grad.addColorStop(0, 'rgba(127, 119, 221, 0.4)'); 
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        let precos = acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0,0,0];
+        let datas = acao.Historico_Datas ? acao.Historico_Datas.split(',') : ['','',''];
 
-      if (heatmapChartObj) heatmapChartObj.destroy();
+        let datasFinais = datas.map(d => {
+             const partes = d.split('-');
+             if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
+             return d;
+        });
 
-      const ctx = canvas.getContext('2d');
-      let cor = '#7F77DD';
-      let grad = ctx.createLinearGradient(0, 0, 0, 250);
-      grad.addColorStop(0, 'rgba(127, 119, 221, 0.4)');
-      grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-      let precos = acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0, 0, 0];
-      let datas = acao.Historico_Datas ? acao.Historico_Datas.split(',') : ['', '', ''];
-
-      let datasFinais = datas.map(d => {
-        const partes = d.split('-');
-        if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
-        return d;
-      });
-
-      heatmapChartObj = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: datasFinais,
-          datasets: [{
-            data: precos,
-            borderColor: cor,
-            backgroundColor: grad,
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHoverRadius: 6,
-            pointBackgroundColor: cor,
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              enabled: true,
-              backgroundColor: '#15151f',
-              titleColor: '#7F77DD',
-              bodyColor: '#fff',
-              displayColors: false,
-              callbacks: { label: function (c) { return 'R$ ' + c.parsed.y.toFixed(2); } }
-            }
-          },
-          scales: {
-            x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 12, maxRotation: 0 } },
-            y: { display: false }
-          },
-          interaction: { mode: 'index', intersect: false }
-        }
-      });
+        heatmapChartObj = new Chart(ctx, { 
+            type: 'line', 
+            data: { 
+                labels: datasFinais, 
+                datasets: [{ 
+                    data: precos, 
+                    borderColor: cor, 
+                    backgroundColor: grad, 
+                    borderWidth: 2, 
+                    pointRadius: 0, 
+                    pointHoverRadius: 6, 
+                    pointBackgroundColor: cor, 
+                    fill: true, 
+                    tension: 0.4 
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { 
+                        enabled: true, 
+                        backgroundColor: '#15151f', 
+                        titleColor: '#7F77DD', 
+                        bodyColor: '#fff', 
+                        displayColors: false, 
+                        callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } 
+                    } 
+                }, 
+                scales: { 
+                    x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 12, maxRotation: 0 } }, 
+                    y: { display: false } 
+                }, 
+                interaction: { mode: 'index', intersect: false } 
+            } 
+        });
     }
 
     function renderizarHeatmap(lista) {
-      const grid = document.getElementById('heatmap-container');
-      if (!grid) return;
+        const grid = document.getElementById('heatmap-container'); 
+        if(!grid) return; 
+        
+        let html = '<div class="heatmap-grid">';
+        let listaSort = [...lista].sort((a,b) => b['Variação (%)'] - a['Variação (%)']);
+        
+        listaSort.forEach(acao => { 
+            const v = acao['Variação (%)'] || 0; 
+            let bg = 'rgba(255,255,255,0.05)'; 
+            
+            if (v >= 2.5) bg = 'rgba(29, 158, 117, 0.9)'; 
+            else if (v > 0.5) bg = 'rgba(29, 158, 117, 0.4)'; 
+            else if (v <= -2.5) bg = 'rgba(192, 57, 43, 0.9)'; 
+            else if (v < -0.5) bg = 'rgba(192, 57, 43, 0.4)'; 
 
-      let html = '<div class="heatmap-grid">';
-      let listaSort = [...lista].sort((a, b) => b['Variação (%)'] - a['Variação (%)']);
-
-      listaSort.forEach(acao => {
-        const v = acao['Variação (%)'] || 0;
-        let bg = 'rgba(255,255,255,0.05)';
-
-        if (v >= 2.5) bg = 'rgba(29, 158, 117, 0.9)';
-        else if (v > 0.5) bg = 'rgba(29, 158, 117, 0.4)';
-        else if (v <= -2.5) bg = 'rgba(192, 57, 43, 0.9)';
-        else if (v < -0.5) bg = 'rgba(192, 57, 43, 0.4)';
-
-        const selClass = acaoSelecionadaHeatmap === acao.Ativo ? 'selected' : '';
-
-        html += `
-            <div class="heatmap-cell ${selClass}" style="background: ${bg};" title="Score: ${acao.Score || 0}/6" onclick="selecionarHeatmap('${acao.Ativo}')">
+            const selClass = acaoSelecionadaHeatmap === acao.Ativo ? 'selected' : '';
+            
+            html += `
+            <div class="heatmap-cell ${selClass}" style="background: ${bg};" title="Score: ${acao.Score||0}/6" onclick="selecionarHeatmap('${acao.Ativo}')">
                 <span class="hm-ticker">${acao.Ativo}</span>
-                <span class="hm-var">${v > 0 ? '+' + v : v}%</span>
-            </div>`;
-      });
-
-      grid.innerHTML = html + '</div>';
+                <span class="hm-var">${v > 0 ? '+'+v : v}%</span>
+            </div>`; 
+        });
+        
+        grid.innerHTML = html + '</div>';
     }
 
     // ==============================================
@@ -2020,32 +1891,42 @@
     }
 
     // ==============================================
-    // CARTEIRA E REQUISIÇÕES DA API
+    // CARTEIRA COM GRÁFICO DE ALOCAÇÃO
     // ==============================================
     async function carregarDadosCarteira() {
       try {
-        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
+        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira'); 
         const dados = await resposta.json();
-
+        
         if (dados.status === "sucesso") {
           document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-          const divLucro = document.getElementById('lucro-total');
-          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          
+          const divLucro = document.getElementById('lucro-total'); 
+          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
           divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
+          
+          let labelsGrafico = [];
+          let dadosGrafico = [];
+          let coresFundo = ['#7F77DD', '#5DCAA5', '#FAC775', '#F09595', '#534AB7', '#1D9E75', '#EF9F27', '#c0392b'];
 
-          document.getElementById('grid-carteira').innerHTML = dados.ativos.map(ativo => {
+          let htmlCards = '';
+
+          dados.ativos.forEach(ativo => {
+            labelsGrafico.push(ativo.Ativo);
+            dadosGrafico.push(ativo.Saldo_Total);
+
             let cl = 'hold', ic = '—', txt = 'Manter', cor = 'var(--amber-bright)', bd = 'var(--amber)';
-
-            if (ativo.Sinal === 'COMPRA') {
-              cl = 'buy'; ic = '↑'; txt = 'Comprar Mais'; cor = 'var(--green-bright)'; bd = 'var(--green)';
-            } else if (ativo.Sinal === 'VENDA') {
-              cl = 'sell'; ic = '↓'; txt = 'Vender Posição'; cor = 'var(--red-bright)'; bd = 'var(--red)';
+            
+            if (ativo.Sinal === 'COMPRA') { 
+                cl = 'buy'; ic = '↑'; txt = 'Comprar Mais'; cor = 'var(--green-bright)'; bd = 'var(--green)'; 
+            } else if (ativo.Sinal === 'VENDA') { 
+                cl = 'sell'; ic = '↓'; txt = 'Vender Posição'; cor = 'var(--red-bright)'; bd = 'var(--red)'; 
             }
-
+            
             let cRent = ativo['Rentabilidade_%'] >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
-
-            return `
+            let sinalLucro = ativo['Lucro_R$'] > 0 ? '+' : '';
+            
+            htmlCards += `
             <div class="signal-card ${cl}">
                 <div class="signal-header">
                     <div class="signal-icon" style="background:${bd};color:#fff">${ic}</div>
@@ -2059,58 +1940,102 @@
                     </div>
                     <div class="level">
                         <div class="level-lbl">Retorno</div>
-                        <div class="level-val" style="color:${cRent}">${ativo['Rentabilidade_%']}%</div>
-                        <div class="level-sub" style="color:${cRent}">R$ ${ativo['Lucro_R$']}</div>
+                        <div class="level-val" style="color:${cRent}">${sinalLucro}${ativo['Rentabilidade_%']}%</div>
+                        <div class="level-sub" style="color:${cRent}">${sinalLucro}R$ ${ativo['Lucro_R$'].toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     </div>
                 </div>
-                <button onclick="removerAcao('${ativo.Ativo}')" class="btn-ghost" style="width:100%;font-size:12px;border-color:var(--border2);">Encerrar Posição</button>
+                <div class="prob-row">
+                    <span class="prob-label">Saldo</span>
+                    <span class="prob-pct" style="color: #fff; font-size: 14px;">R$ ${ativo.Saldo_Total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+                <button onclick="removerAcao('${ativo.Ativo}')" class="btn-ghost" style="width:100%;font-size:12px;border-color:var(--border2); margin-top: 16px;">Encerrar Posição</button>
             </div>`;
-          }).join('');
+          });
+          
+          document.getElementById('grid-carteira').innerHTML = htmlCards;
+
+          // DESENHA O GRÁFICO DE ALOCAÇÃO DA CARTEIRA
+          const ctx = document.getElementById('carteira-chart');
+          if (ctx) {
+              if (carteiraChartObj) carteiraChartObj.destroy();
+              carteiraChartObj = new Chart(ctx.getContext('2d'), {
+                  type: 'doughnut',
+                  data: {
+                      labels: labelsGrafico,
+                      datasets: [{
+                          data: dadosGrafico,
+                          backgroundColor: coresFundo.slice(0, dadosGrafico.length),
+                          borderColor: '#080810',
+                          borderWidth: 3,
+                          hoverOffset: 6
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      cutout: '70%',
+                      plugins: {
+                          legend: { display: false },
+                          tooltip: {
+                              backgroundColor: '#15151f',
+                              titleColor: '#fff',
+                              bodyColor: '#fff',
+                              callbacks: {
+                                  label: function(c) {
+                                      let valor = c.parsed.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                      return `R$ ${valor}`;
+                                  }
+                              }
+                          }
+                      }
+                  }
+              });
+          }
         }
       } catch (e) { console.error(e); }
     }
 
-    async function adicionarAcao() {
+    async function adicionarAcao() { 
       const a = document.getElementById('nova-acao').value;
       const q = document.getElementById('nova-qtd').value;
-      const p = document.getElementById('novo-preco').value;
-
-      if (!a || !q || !p) return alert('Preencha todos os campos.');
-
-      await fetch('https://projeto-trendsight.onrender.com/api/carteira/adicionar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Ativo: a, Quantidade: q, Preco_Medio: p })
-      });
-
-      carregarDadosCarteira();
+      const p = document.getElementById('novo-preco').value; 
+      
+      if(!a||!q||!p) return alert('Preencha todos os campos.'); 
+      
+      await fetch('https://projeto-trendsight.onrender.com/api/carteira/adicionar', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ Ativo: a, Quantidade: q, Preco_Medio: p }) 
+      }); 
+      
+      carregarDadosCarteira(); 
     }
 
-    async function removerAcao(a) {
-      if (!confirm(`Remover ${a}?`)) return;
-
-      await fetch(`https://projeto-trendsight.onrender.com/api/carteira/remover/${a}`, { method: 'DELETE' });
-      carregarDadosCarteira();
+    async function removerAcao(a) { 
+      if(!confirm(`Remover ${a}?`)) return; 
+      
+      await fetch(`https://projeto-trendsight.onrender.com/api/carteira/remover/${a}`, { method: 'DELETE' }); 
+      carregarDadosCarteira(); 
     }
 
     async function carregarDadosMercado() {
       try {
-        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/mercado');
+        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/mercado'); 
         const dados = await resposta.json();
-
+        
         if (dados.status === "sucesso") {
           dadosMercadoGlobais = dados;
-
-          if (dados.todos.length > 0) renderizarHeatmap(dados.todos);
+          
+          if(dados.todos.length > 0) renderizarHeatmap(dados.todos); 
           dispararNotificacao(dados.todos);
-
-          const fita = document.getElementById('fita-cotacoes');
+          
+          const fita = document.getElementById('fita-cotacoes'); 
           if (fita) {
-            const htmlFita = dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)'] >= 0 ? 'ticker-up' : 'ticker-down'}">${a['Variação (%)'] >= 0 ? '▲' : '▼'} ${a['Variação (%)']}%</span></div>`).join('');
-            fita.innerHTML = htmlFita + htmlFita;
+              const htmlFita = dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)']>=0?'ticker-up':'ticker-down'}">${a['Variação (%)']>=0?'▲':'▼'} ${a['Variação (%)']}%</span></div>`).join('');
+              fita.innerHTML = htmlFita + htmlFita;
           }
-
-          const criarBotoes = (l, cl) => l.map((a, i) => `<button class="pill-btn ${i === 0 ? 'active ' + cl : ''}" onclick="mudarAcaoCard('${cl}', ${i})">${a.Ativo}</button>`).join('');
+          
+          const criarBotoes = (l, cl) => l.map((a, i) => `<button class="pill-btn ${i===0?'active '+cl:''}" onclick="mudarAcaoCard('${cl}', ${i})">${a.Ativo}</button>`).join('');
 
           document.getElementById('grid-sinais').innerHTML = `
             <div class="signal-card buy">
@@ -2147,14 +2072,14 @@
               <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
             </div>`;
 
-          if (dados.compras.length > 0) mudarAcaoCard('buy', 0);
-          if (dados.vendas.length > 0) mudarAcaoCard('sell', 0);
-          if (dados.espera.length > 0) mudarAcaoCard('hold', 0);
-
-          if (dados.compras.length > 0) { modoDetalhes = 'buy'; renderizarDetalhes(); }
-          else if (dados.vendas.length > 0) { modoDetalhes = 'sell'; renderizarDetalhes(); }
-          else if (dados.espera.length > 0) { modoDetalhes = 'hold'; renderizarDetalhes(); }
-
+          if(dados.compras.length > 0) mudarAcaoCard('buy', 0); 
+          if(dados.vendas.length > 0) mudarAcaoCard('sell', 0); 
+          if(dados.espera.length > 0) mudarAcaoCard('hold', 0);
+          
+          if(dados.compras.length > 0) { modoDetalhes = 'buy'; renderizarDetalhes(); } 
+          else if(dados.vendas.length > 0) { modoDetalhes = 'sell'; renderizarDetalhes(); } 
+          else if(dados.espera.length > 0) { modoDetalhes = 'hold'; renderizarDetalhes(); }
+          
           renderizarPilotoAutomatico();
         }
       } catch (e) { console.error(e); }
