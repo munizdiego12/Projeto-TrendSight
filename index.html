@@ -164,7 +164,6 @@
     .sim-gain { font-size: 13px; color: var(--green-bright); font-weight: 500; margin-bottom: 4px; }
     .sim-note { font-size: 11px; color: var(--text-faint); }
 
-    /* CSS DO HEATMAP E BACKTESTING */
     .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; margin-top: 14px; }
     .heatmap-cell { padding: 12px 8px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; font-family: 'Syne', sans-serif; cursor: pointer; transition: transform 0.2s, filter 0.2s; border: 1px solid rgba(255,255,255,0.1); }
     .heatmap-cell:hover { transform: scale(1.05); filter: brightness(1.2); z-index: 10; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
@@ -529,11 +528,11 @@
         
         listaSort.forEach(acao => {
             const v = acao['Variação (%)'] || 0;
-            let bg = 'rgba(255,255,255,0.05)'; // neutro
-            if (v >= 2.5) bg = 'rgba(29, 158, 117, 0.9)'; // verde forte
-            else if (v > 0.5) bg = 'rgba(29, 158, 117, 0.4)'; // verde fraco
-            else if (v <= -2.5) bg = 'rgba(192, 57, 43, 0.9)'; // vermelho forte
-            else if (v < -0.5) bg = 'rgba(192, 57, 43, 0.4)'; // vermelho fraco
+            let bg = 'rgba(255,255,255,0.05)';
+            if (v >= 2.5) bg = 'rgba(29, 158, 117, 0.9)';
+            else if (v > 0.5) bg = 'rgba(29, 158, 117, 0.4)';
+            else if (v <= -2.5) bg = 'rgba(192, 57, 43, 0.9)';
+            else if (v < -0.5) bg = 'rgba(192, 57, 43, 0.4)';
 
             html += `<div class="heatmap-cell" style="background: ${bg};" title="Score: ${acao.Score||0}/6">
                 <span class="hm-ticker">${acao.Ativo}</span>
@@ -575,7 +574,7 @@
           dadosMercadoGlobais = dados;
           
           if(dados.todos.length > 0) renderizarHeatmap(dados.todos);
-          dispararNotificacao(dados.todos); // Tenta notificar se tiver oportunidade de Ouro
+          dispararNotificacao(dados.todos);
           
           const fita = document.getElementById('fita-cotacoes');
           if (fita) fita.innerHTML = dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)']>=0?'ticker-up':'ticker-down'}">${a['Variação (%)']>=0?'▲':'▼'} ${a['Variação (%)']}%</span></div>`).join('') + dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)']>=0?'ticker-up':'ticker-down'}">${a['Variação (%)']>=0?'▲':'▼'} ${a['Variação (%)']}%</span></div>`).join('');
@@ -697,23 +696,79 @@
       renderizarDetalhes();
     }
 
-    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) {
-      const cv = document.getElementById(`chart-${sufixo}`);
-      if(!cv) return;
-      if(graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
-      const ctx = cv.getContext('2d');
-      let cor = tipo === 'buy' ? '#5DCAA5' : (tipo === 'sell' ? '#F09595' : '#FAC775'), grad = ctx.createLinearGradient(0, 0, 0, 60);
-      grad.addColorStop(0, cor.replace(')', ', 0.4)').replace('rgb', 'rgba').replace('#5DCAA5', 'rgba(93, 202, 165, 0.4)').replace('#F09595', 'rgba(240, 149, 149, 0.4)').replace('#FAC775', 'rgba(250, 199, 117, 0.4)')); grad.addColorStop(1, 'rgba(0,0,0,0)');
+    // --- FUNÇÃO DO GRÁFICO RESTAURADA PARA A VERSÃO PREMIUM (COM BOLINHAS E EIXO X) ---
+    function desenharGrafico(tipo, sufixo, precoAtual, historicoPrecosStr, historicoDatasStr) {
+      const canvas = document.getElementById(`chart-${sufixo}`);
+      if(!canvas) return;
 
-      let hist = precosStr ? precosStr.split(',').map(Number) : [0,0,0], dts = datasStr ? datasStr.split(',') : ['','',''];
-      if(timeframeAtual === '10d') { hist = hist.slice(-10); dts = dts.slice(-10); } else if(timeframeAtual === '1m') { hist = hist.slice(-22); dts = dts.slice(-22); }
-      graficosAtuais[sufixo] = new Chart(ctx, { type: 'line', data: { labels: dts.map(d=>d.substring(5)), datasets: [{ data: hist, borderColor: cor, backgroundColor: grad, borderWidth: 2, pointRadius: timeframeAtual==='10d'?2:0, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } } });
+      if(graficosAtuais[sufixo]) graficosAtuais[sufixo].destroy();
+
+      const ctx = canvas.getContext('2d');
+      let cor, grad = ctx.createLinearGradient(0, 0, 0, 60);
+      let historicoFinal = [];
+      let datasFinais = [];
+
+      if(tipo === 'buy') { cor = '#5DCAA5'; grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)'); grad.addColorStop(1, 'rgba(93, 202, 165, 0.0)'); }
+      else if(tipo === 'sell') { cor = '#F09595'; grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)'); grad.addColorStop(1, 'rgba(240, 149, 149, 0.0)'); }
+      else { cor = '#FAC775'; grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)'); grad.addColorStop(1, 'rgba(250, 199, 117, 0.0)'); }
+
+      if (historicoPrecosStr && historicoDatasStr) {
+         let precos = historicoPrecosStr.split(',').map(Number);
+         let datas = historicoDatasStr.split(',');
+
+         if (timeframeAtual === '10d') {
+            historicoFinal = precos.slice(-10); datasFinais = datas.slice(-10);
+         } else if (timeframeAtual === '1m') {
+            historicoFinal = precos.slice(-22); datasFinais = datas.slice(-22);
+         } else if (timeframeAtual === '3m') {
+            historicoFinal = precos.slice(-66); datasFinais = datas.slice(-66);
+         } else {
+            historicoFinal = precos; datasFinais = datas;
+         }
+
+         datasFinais = datasFinais.map(d => {
+             const partes = d.split('-');
+             if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
+             return d;
+         });
+      } else {
+         if (precoAtual === 0) {
+             historicoFinal = [0, 0, 0, 0, 0];
+             datasFinais = ['','','','',''];
+         } else {
+             historicoFinal = [precoAtual*.88, precoAtual*.90, precoAtual*.89, precoAtual*.92, precoAtual*.94, precoAtual*.93, precoAtual*.95, precoAtual*.97, precoAtual*.98, precoAtual];
+             datasFinais = ['D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'D-1', 'Hoje'];
+         }
+      }
+
+      graficosAtuais[sufixo] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: datasFinais,
+          datasets: [{
+            data: historicoFinal, borderColor: cor, backgroundColor: grad, borderWidth: 2,
+            pointRadius: timeframeAtual === '10d' ? 2 : 0,
+            pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } }
+          },
+          scales: {
+              x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } },
+              y: { display: false }
+          },
+          interaction: { mode: 'index', intersect: false }
+        }
+      });
     }
 
     carregarDadosMercado();
     carregarDadosCarteira();
     
-    // Pede permissão para notificar logo que a tela carrega (se ainda não tiver)
     setTimeout(pedirPermissaoNotificacao, 2000);
   </script>
 </body>
