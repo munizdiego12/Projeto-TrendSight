@@ -75,7 +75,6 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    /* FITA DE COTAÇÕES */
     .ticker-tape-wrap {
       background: #000; border-bottom: 1px solid var(--border); overflow: hidden;
       white-space: nowrap; padding: 8px 0; display: flex; position: sticky; top: 60px; z-index: 99;
@@ -164,12 +163,14 @@
     .level.target .level-sub { color: var(--green); }
     .level.stop .level-sub { color: var(--red); }
 
-    /* NOVO: CSS DO SCORECARD */
+    /* CSS DO NOVO SCORECARD RADAR */
     .scorecard { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border2); display: none; }
-    .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .score-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; }
+    .scorecard-layout { display: grid; grid-template-columns: 1fr 150px; gap: 16px; align-items: center; }
+    .score-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .score-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
     .score-lbl { font-size: 11px; color: var(--text-muted); }
     .score-val { font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif; }
+    .radar-container { width: 100%; height: 150px; position: relative; }
 
     .sim-wrap { display: flex; flex-direction: column; gap: 16px; }
     .sim-input-row { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius-sm); overflow: hidden; }
@@ -216,7 +217,6 @@
     .rank-row:hover { background: rgba(255,255,255,0.02); border-radius: 8px; }
     .rank-row:last-child { border-bottom: none; }
 
-    /* CSS DO PILOTO AUTOMÁTICO */
     .long-rec { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
     .long-rec:last-child { border-bottom: none; padding-bottom: 0; }
     .long-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
@@ -312,28 +312,34 @@
 
           <div class="scorecard" id="detalhes-scorecard">
             <div style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700;">
-              Raio-X do Algoritmo (Score: <span id="score-num">0</span>/5)
+              Raio-X do Algoritmo (Score: <span id="score-num">0</span>/6)
             </div>
-            <div class="score-grid">
-              <div class="score-item">
-                <span class="score-lbl">RSI (14d)</span>
-                <span class="score-val" id="ind-rsi">--</span>
+            
+            <div class="scorecard-layout">
+              <div class="score-grid">
+                <div class="score-item">
+                  <span class="score-lbl">RSI (14d)</span>
+                  <span class="score-val" id="ind-rsi">--</span>
+                </div>
+                <div class="score-item">
+                  <span class="score-lbl">MACD Hist.</span>
+                  <span class="score-val" id="ind-macd">--</span>
+                </div>
+                <div class="score-item">
+                  <span class="score-lbl">Bollinger</span>
+                  <span class="score-val" id="ind-bb">--</span>
+                </div>
+                <div class="score-item">
+                  <span class="score-lbl">Tendência</span>
+                  <span class="score-val" id="ind-mm">--</span>
+                </div>
               </div>
-              <div class="score-item">
-                <span class="score-lbl">MACD Hist.</span>
-                <span class="score-val" id="ind-macd">--</span>
-              </div>
-              <div class="score-item">
-                <span class="score-lbl">Bollinger</span>
-                <span class="score-val" id="ind-bb">--</span>
-              </div>
-              <div class="score-item">
-                <span class="score-lbl">Tendência</span>
-                <span class="score-val" id="ind-mm">--</span>
+              <div class="radar-container">
+                <canvas id="radar-chart"></canvas>
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
 
         <div class="card">
@@ -349,7 +355,7 @@
               <div class="sim-result-lbl" id="sim-lbl-acao">Se a ação atingir o Alvo, você terá:</div>
               <div class="sim-result-val" id="simResult">R$ 0,00</div>
               <div class="sim-gain" id="simGain">+R$ 0,00 &nbsp;·&nbsp; +0,0%</div>
-              <div class="sim-note" id="sim-note-abaixo">Cálculo dinâmico baseado no alvo da operação ao lado.</div>
+              <div class="sim-note" id="sim-note-abaixo">Cálculo dinâmico baseado no alvo estipulado pelo ATR.</div>
             </div>
           </div>
         </div>
@@ -521,6 +527,7 @@
 
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
     let graficosAtuais = { compra: null, venda: null, espera: null };
+    let radarChartObj = null;
     
     let modoDetalhes = 'buy'; 
     let acaoSelecionadaCompra = null;
@@ -805,7 +812,6 @@
         noteAbaixo.textContent = 'O algoritmo não projeta lucros para ativos sem tendência de força relativa.';
       }
 
-      // NOVO: LÓGICA DO SCORECARD
       const scorecardEl = document.getElementById('detalhes-scorecard');
       
       if (!acao) {
@@ -816,7 +822,7 @@
           subAlvo.textContent = modoDetalhes === 'hold' ? 'Consolidado' : `0,0%`;
           subStop.textContent = modoDetalhes === 'hold' ? 'Consolidado' : `0,0%`;
           badge.textContent = `0%`; 
-          scorecardEl.style.display = 'none'; // Esconde se não tem ativo
+          scorecardEl.style.display = 'none'; 
           
           calcSim();
           let sufixo = modoDetalhes === 'buy' ? 'compra' : (modoDetalhes === 'sell' ? 'venda' : 'espera');
@@ -844,34 +850,75 @@
           badge.textContent = `${acao['Probabilidade (%)']}% de ${modoDetalhes === 'buy' ? 'chance de alta' : 'risco de queda'}`;
       }
 
-      // EXIBE O SCORECARD SE OS DADOS EXISTIREM NO BANCO
       if (acao.Score !== undefined) {
           scorecardEl.style.display = 'block';
+          
+          // ATUALIZAÇÃO PARA 6 PONTOS (MÁXIMO)
           document.getElementById('score-num').textContent = acao.Score;
           
-          // Formatação do RSI
           const rsiEl = document.getElementById('ind-rsi');
           rsiEl.textContent = acao.RSI;
           if(acao.RSI < 45) { rsiEl.style.color = 'var(--green-bright)'; rsiEl.textContent += ' (Bom)'; }
           else if(acao.RSI > 60) { rsiEl.style.color = 'var(--red-bright)'; rsiEl.textContent += ' (Caro)'; }
           else { rsiEl.style.color = 'var(--text-muted)'; }
 
-          // Formatação do MACD
           const macdEl = document.getElementById('ind-macd');
           macdEl.textContent = acao.MACD_Hist > 0 ? `+${acao.MACD_Hist}` : acao.MACD_Hist;
           macdEl.style.color = acao.MACD_Hist > 0 ? 'var(--green-bright)' : 'var(--red-bright)';
 
-          // Formatação do Bollinger
           const bbEl = document.getElementById('ind-bb');
           bbEl.textContent = acao.BB_Posicao;
           if(acao.BB_Posicao < 0.3) { bbEl.style.color = 'var(--green-bright)'; bbEl.textContent += ' (Base)'; }
           else if(acao.BB_Posicao > 0.7) { bbEl.style.color = 'var(--red-bright)'; bbEl.textContent += ' (Topo)'; }
           else { bbEl.style.color = 'var(--text-muted)'; }
 
-          // Formatação da Média Móvel
           const mmEl = document.getElementById('ind-mm');
           if (acao.MM50 > acao.MM200) { mmEl.textContent = 'Alta'; mmEl.style.color = 'var(--green-bright)'; }
           else { mmEl.textContent = 'Baixa'; mmEl.style.color = 'var(--red-bright)'; }
+
+          // --- NOVO: LÓGICA DO GRÁFICO RADAR (CHART.JS) ---
+          const canvasRadar = document.getElementById('radar-chart');
+          if (canvasRadar) {
+              if (radarChartObj) { radarChartObj.destroy(); }
+              const ctxRadar = canvasRadar.getContext('2d');
+              
+              // Conversão dos valores para o Gráfico Radar (0 ou 1)
+              let valRSI = acao.RSI < 45 ? 1 : (acao.RSI > 60 ? 0.2 : 0.5);
+              let valMACD = acao.MACD_Hist > 0 ? 1 : 0.2;
+              let valBB = acao.BB_Posicao < 0.3 ? 1 : (acao.BB_Posicao > 0.7 ? 0.2 : 0.5);
+              let valMM = acao.MM50 > acao.MM200 ? 1 : 0.2;
+              let valScoreGeral = acao.Score / 6; // Representa o resto dos indicadores (Volume, IBOV, Divergencia)
+
+              radarChartObj = new Chart(ctxRadar, {
+                  type: 'radar',
+                  data: {
+                      labels: ['RSI', 'MACD', 'Bollinger', 'Tendência', 'Vol / Diverg.'],
+                      datasets: [{
+                          data: [valRSI, valMACD, valBB, valMM, valScoreGeral],
+                          backgroundColor: 'rgba(127, 119, 221, 0.25)',
+                          borderColor: '#7F77DD',
+                          pointBackgroundColor: '#5DCAA5',
+                          pointBorderColor: '#fff',
+                          pointHoverBackgroundColor: '#fff',
+                          pointHoverBorderColor: '#5DCAA5',
+                          borderWidth: 2
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: { legend: { display: false } },
+                      scales: {
+                          r: {
+                              angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                              pointLabels: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 9, family: 'Syne' } },
+                              ticks: { display: false, min: 0, max: 1 }
+                          }
+                      }
+                  }
+              });
+          }
 
       } else {
           scorecardEl.style.display = 'none';
