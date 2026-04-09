@@ -167,12 +167,27 @@
     .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; margin-top: 14px; }
     .heatmap-cell { padding: 12px 8px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; font-family: 'Syne', sans-serif; cursor: pointer; transition: transform 0.2s, filter 0.2s; border: 1px solid rgba(255,255,255,0.1); }
     .heatmap-cell:hover { transform: scale(1.05); filter: brightness(1.2); z-index: 10; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-    
-    /* NOVO: Classe para a célula selecionada do Heatmap */
     .heatmap-cell.selected { border: 2px solid var(--purple); box-shadow: 0 0 15px var(--purple-glow); transform: scale(1.05); filter: brightness(1.2); z-index: 10; position: relative; }
-
     .hm-ticker { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
     .hm-var { font-size: 11px; font-family: 'DM Sans', sans-serif; opacity: 0.9; }
+
+    #heatmap-chart-wrapper {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 1px solid transparent;
+      transition: max-height 0.5s cubic-bezier(0, 1, 0, 1), opacity 0.4s ease, margin-top 0.4s ease, padding-top 0.4s ease;
+    }
+    #heatmap-chart-wrapper.open {
+      max-height: 500px;
+      opacity: 1;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border2);
+      transition: max-height 0.6s ease-in-out, opacity 0.5s ease 0.1s, margin-top 0.4s ease, padding-top 0.4s ease;
+    }
 
     .table-wrap { width: 100%; overflow-x: auto; }
     .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
@@ -306,7 +321,7 @@
         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Clique em qualquer ativo para ver o gráfico de histórico completo.</div>
         <div id="heatmap-container"></div>
         
-        <div id="heatmap-chart-wrapper" style="display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border2);">
+        <div id="heatmap-chart-wrapper">
           <div style="margin-bottom: 16px;">
             <div id="hm-chart-ticker" style="font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: #fff;">--</div>
             <div id="hm-chart-price" style="font-size: 15px; color: var(--text-muted);">--</div>
@@ -440,7 +455,7 @@
 
       if (!acao || modoDetalhes === 'hold') {
          if (modoDetalhes === 'hold') {
-            document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('simGain').innerHTML = 'Ativo em Consolidação';
             document.getElementById('simGain').style.color = 'var(--text-muted)';
          }
@@ -452,8 +467,8 @@
 
       const diffAlvo = Math.abs((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1);
       const gain = v * diffAlvo;
-      document.getElementById('simResult').textContent = 'R$ ' + (v + gain).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-      document.getElementById('simGain').innerHTML = `+R$ ${gain.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} &nbsp;·&nbsp; +${(diffAlvo * 100).toFixed(1)}%`;
+      document.getElementById('simResult').textContent = 'R$ ' + (v + gain).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('simGain').innerHTML = `+R$ ${gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} &nbsp;·&nbsp; +${(diffAlvo * 100).toFixed(1)}%`;
       document.getElementById('simGain').style.color = 'var(--green-bright)';
 
       if(riskBox) riskBox.style.display = 'block';
@@ -461,7 +476,7 @@
       const diffStop = Math.abs((acao['Stop (R$)'] / acao['Preço (R$)']) - 1);
       if(cotasEl) cotasEl.textContent = `${qtdCotas} cotas`;
       if(perdaEl) {
-          perdaEl.textContent = `- R$ ${(v * diffStop).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+          perdaEl.textContent = `- R$ ${(v * diffStop).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
           perdaEl.style.color = 'var(--red-bright)';
       }
     }
@@ -483,7 +498,6 @@
     let acaoSelecionadaCompra = null, acaoSelecionadaVenda = null, acaoSelecionadaEspera = null; 
     let timeframeAtual = '10d'; 
 
-    // NOVO: Variáveis para o controle de estado do Heatmap
     let acaoSelecionadaHeatmap = null;
     let heatmapChartObj = null;
 
@@ -500,9 +514,9 @@
         const resposta = await fetch('https://projeto-trendsight.onrender.com/api/carteira');
         const dados = await resposta.json();
         if (dados.status === "sucesso") {
-          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+          document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           const divLucro = document.getElementById('lucro-total');
-          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+          divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
 
           let htmlCards = '';
@@ -572,29 +586,25 @@
       document.getElementById('ranking-content').innerHTML = html;
     }
 
-    // NOVO: Lógica do clique no Heatmap
     window.selecionarHeatmap = function(ticker) {
+        const wrapper = document.getElementById('heatmap-chart-wrapper');
         if (acaoSelecionadaHeatmap === ticker) {
-            // Se clicou na mesma ação, ele "fecha" o gráfico
             acaoSelecionadaHeatmap = null;
-            document.getElementById('heatmap-chart-wrapper').style.display = 'none';
+            wrapper.classList.remove('open');
         } else {
-            // Se clicou em uma nova, ele abre e desenha o gráfico
             acaoSelecionadaHeatmap = ticker;
-            document.getElementById('heatmap-chart-wrapper').style.display = 'block';
+            wrapper.classList.add('open');
             
             const acao = dadosMercadoGlobais.todos.find(a => a.Ativo === ticker);
             if (acao) {
                 document.getElementById('hm-chart-ticker').textContent = acao.Ativo;
-                document.getElementById('hm-chart-price').textContent = `R$ ${acao['Preço (R$)'].toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                document.getElementById('hm-chart-price').textContent = `R$ ${acao['Preço (R$)'].toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 desenharGraficoHeatmap(acao);
             }
         }
-        // Recarrega o Heatmap para aplicar a borda na ação selecionada
         renderizarHeatmap(dadosMercadoGlobais.todos);
     }
 
-    // NOVO: Função que desenha o gráfico roxo de 1 ano
     function desenharGraficoHeatmap(acao) {
         const canvas = document.getElementById(`chart-heatmap`);
         if(!canvas) return;
@@ -638,7 +648,6 @@
         });
     }
 
-    // ATUALIZADO: renderizarHeatmap agora checa quem está selecionado para botar a classe CSS
     function renderizarHeatmap(lista) {
         const grid = document.getElementById('heatmap-container');
         if(!grid) return;
@@ -776,8 +785,13 @@
           vA.textContent = `--`; sA.textContent = `Consolidado`; vS.textContent = `--`; sS.textContent = `Consolidado`; b.textContent = `Aguardando sinais`;
       } else {
           vA.textContent = `R$ ${acao['Alvo (R$)']}`; vS.textContent = `R$ ${acao['Stop (R$)']}`;
-          sA.textContent = '+' + (Math.abs((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100).toFixed(1) + '%';
-          sS.textContent = '-' + (Math.abs((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100).toFixed(1) + '%';
+          
+          // MUDANÇA: SINAL DINÂMICO PARA COMPRA OU VENDA NO DETALHE
+          const diffAlvoPct = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1) * 100;
+          const diffStopPct = ((acao['Stop (R$)'] / acao['Preço (R$)']) - 1) * 100;
+          
+          sA.textContent = (diffAlvoPct > 0 ? '+' : '') + diffAlvoPct.toFixed(1) + '%';
+          sS.textContent = (diffStopPct > 0 ? '+' : '') + diffStopPct.toFixed(1) + '%';
           b.textContent = `Score ${acao.Score}/6`;
       }
 
@@ -810,7 +824,9 @@
       if(!acao) return;
 
       document.getElementById(`nav-${chave}`).querySelectorAll('.pill-btn').forEach((btn, i) => { btn.className = `pill-btn ${i === index ? 'active ' + tipoBotao : ''}`; });
-      document.getElementById(`ticker-${tipoBotao==='buy'?'compra':(tipoBotao==='sell'?'venda':'espera')}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
+      
+      const idSufixo = tipoBotao === 'buy' ? 'compra' : (tipoBotao === 'sell' ? 'venda' : 'espera');
+      document.getElementById(`ticker-${idSufixo}`).textContent = `${acao.Ativo} (R$ ${acao['Preço (R$)']})`;
       
       if(tipoBotao === 'buy') acaoSelecionadaCompra = acao; else if(tipoBotao === 'sell') acaoSelecionadaVenda = acao; else acaoSelecionadaEspera = acao;
       if (tipoBotao !== modoDetalhes) modoDetalhes = tipoBotao;
@@ -827,7 +843,7 @@
 
       let hist = precosStr ? precosStr.split(',').map(Number) : [0,0,0], dts = datasStr ? datasStr.split(',') : ['','',''];
       if(timeframeAtual === '10d') { hist = hist.slice(-10); dts = dts.slice(-10); } else if(timeframeAtual === '1m') { hist = hist.slice(-22); dts = dts.slice(-22); }
-      graficosAtuais[sufixo] = new Chart(ctx, { type: 'line', data: { labels: dts.map(d=>d.substring(5)), datasets: [{ data: hist, borderColor: cor, backgroundColor: grad, borderWidth: 2, pointRadius: timeframeAtual==='10d'?2:0, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } } });
+      graficosAtuais[sufixo] = new Chart(ctx, { type: 'line', data: { labels: dts.map(d=>d.substring(5)), datasets: [{ data: hist, borderColor: cor, backgroundColor: grad, borderWidth: 2, pointRadius: timeframeAtual==='10d'?2:0, pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function(c) { return 'R$ ' + c.parsed.y.toFixed(2); } } } }, scales: { x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } }, y: { display: false } }, interaction: { mode: 'index', intersect: false } } });
     }
 
     carregarDadosMercado();
