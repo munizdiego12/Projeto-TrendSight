@@ -2026,6 +2026,12 @@
         if (dados.status === "sucesso") {
           dadosMercadoGlobais = dados;
           
+          // NOVO: Preenche a lista de sugestões de ativos dinamicamente com os dados da API
+          const datalist = document.getElementById('tickers-b3');
+          if (datalist && dados.todos) {
+              datalist.innerHTML = dados.todos.map(a => `<option value="${a.Ativo}">`).join('');
+          }
+
           if(dados.todos.length > 0) renderizarHeatmap(dados.todos); 
           dispararNotificacao(dados.todos);
           
