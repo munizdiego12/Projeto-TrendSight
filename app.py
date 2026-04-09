@@ -1,138 +1,146 @@
-import os
-from flask import Flask, jsonify, send_file, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from sqlalchemy import create_engine, text
-import pandas as pd
-from dotenv import load_dotenv
-from time import time
-from datetime import datetime
-
-load_dotenv()
+import sqlite3
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("⚠️ ERRO CRÍTICO: DATABASE_URL não encontrada. Verifique o arquivo .env!")
-
-engine = create_engine(DATABASE_URL, pool_size=5, max_overflow=10)
-
-# --- SISTEMA DE CACHE EM MEMÓRIA ---
-# Evita sobrecarregar o banco Neon se muitos usuários acessarem ao mesmo tempo
-cache_mercado = {"dados": None, "timestamp": 0}
-TEMPO_CACHE_SEGUNDOS = 300 # 5 minutos
-
-@app.route('/')
-def home():
-    return send_file('index.html')
-
-# --- NOVA ROTA: HEALTH CHECK ---
-@app.route('/api/health')
-def health():
-    return jsonify({
-        "status": "ok", 
-        "ambiente": "TrendSight API v2.1",
-        "timestamp": datetime.utcnow().isoformat()
-    })
+def get_db_connection():
+    conn = sqlite3.connect('trendsight.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 @app.route('/api/mercado', methods=['GET'])
-def obter_dados_mercado():
-    global cache_mercado
-    
+def mercado():
     try:
-        # Verifica se o cache ainda é válido
-        if cache_mercado["dados"] and (time() - cache_mercado["timestamp"] < TEMPO_CACHE_SEGUNDOS):
-            return jsonify(cache_mercado["dados"])
-
-        # Se o cache expirou, busca no banco de dados
-        query = text('SELECT * FROM analise_mercado ORDER BY "Score" DESC, "Probabilidade (%)" DESC')
-        df = pd.read_sql_query(query, engine)
+        conn = get_db_connection()
+        ativos_db = conn.execute('SELECT * FROM mercado_diario').fetchall()
+        conn.close()
         
-        dados = df.to_dict(orient='records')
-        top_compras = [acao for acao in dados if acao['Sinal'] == 'COMPRA'][:5]
-        top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:5]
-        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:5]
+        todos = [dict(row) for row in ativos_db]
         
-        resultado_final = {
-            "status": "sucesso", 
-            "todos": dados, 
-            "compras": top_compras, 
-            "vendas": top_vendas, 
-            "espera": top_espera,
-            "origem": "banco_de_dados"
-        }
+        # Opcional: injetar dados fictícios de gráfico para o front se não existirem
+        for a in todos:
+            a['Probabilidade (%)'] = a.get('Score', 0) * 16.6
+            a['Historico_Precos'] = "10,12,15,14,16,18,17,19,21,20" # Simulando array p/ chart.js
+            a['Historico_Datas'] = "2026-04-01,2026-04-02,2026-04-03,2026-04-04,2026-04-05,2026-04-06,2026-04-07,2026-04-08,2026-04-09,2026-04-10"
+            
+        compras = sorted([a for a in todos if a['Sinal'] == 'COMPRA'], key=lambda x: x['Score'], reverse=True)
+        vendas = sorted([a for a in todos if a['Sinal'] == 'VENDA'], key=lambda x: x['Score'])
+        espera = [a for a in todos if a['Sinal'] == 'ESPERAR']
         
-        # Atualiza o Cache
-        cache_mercado["dados"] = resultado_final
-        cache_mercado["dados"]["origem"] = "cache_memoria" # Marcação para debug
-        cache_mercado["timestamp"] = time()
-        
-        return jsonify(resultado_final)
+        return jsonify({'status': 'sucesso', 'compras': compras, 'vendas': vendas, 'espera': espera, 'todos': todos})
     except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)})
+        return jsonify({'status': 'erro', 'mensagem': str(e)})
+
+@app.route('/api/historico', methods=['GET'])
+def historico():
+    try:
+        conn = get_db_connection()
+        # A query agora traz o Resultado_Atual oficial calculado pelo Python
+        sinais = conn.execute('SELECT * FROM historico_sinais ORDER BY id DESC LIMIT 50').fetchall()
+        conn.close()
+        
+        sinais_dict = [dict(s) for s in sinais]
+        
+        # Garante a compatibilidade dos nomes das chaves com o front-end
+        for s in sinais_dict:
+            s['Preço (R$)'] = s.pop('Preço_Base', 0)
+            s['Alvo (R$)'] = s.pop('Alvo', 0)
+            s['Stop (R$)'] = s.pop('Stop', 0)
+            
+        return jsonify({'status': 'sucesso', 'sinais': sinais_dict})
+    except Exception as e:
+        return jsonify({'status': 'erro', 'mensagem': str(e)})
 
 @app.route('/api/carteira', methods=['GET'])
-def obter_dados_carteira():
+def carteira():
     try:
-        query = text("""
-            SELECT c."Ativo", c."Quantidade", c."Preco_Medio", m."Preço (R$)" as "Preco_Atual", m."Sinal"
-            FROM minha_carteira c LEFT JOIN analise_mercado m ON c."Ativo" = m."Ativo"
-        """)
-        df_carteira = pd.read_sql_query(query, engine)
-
-        df_carteira['Preco_Atual'] = df_carteira['Preco_Atual'].fillna(df_carteira['Preco_Medio'])
-        df_carteira['Saldo_Total'] = round(df_carteira['Quantidade'] * df_carteira['Preco_Atual'], 2)
-        df_carteira['Lucro_R$'] = round((df_carteira['Preco_Atual'] - df_carteira['Preco_Medio']) * df_carteira['Quantidade'], 2)
-        df_carteira['Rentabilidade_%'] = round(((df_carteira['Preco_Atual'] / df_carteira['Preco_Medio']) - 1) * 100, 2)
+        conn = get_db_connection()
+        # FASE 1: Query enriquecida fazendo JOIN com a tabela mercado_diario para pegar os indicadores
+        query = """
+            SELECT 
+                c.Ativo, c.Quantidade, c.Preco_Medio,
+                m."Preço (R$)", m.Sinal, m.RSI, m.Score, m.BB_Posicao, m.MM50, m.MM200, m."Variação (%)"
+            FROM carteira_usuario c
+            LEFT JOIN mercado_diario m ON c.Ativo = m.Ativo
+        """
+        ativos_db = conn.execute(query).fetchall()
         
-        patrimonio_total = round(df_carteira['Saldo_Total'].sum(), 2)
-        lucro_total = round(df_carteira['Lucro_R$'].sum(), 2)
-
-        return jsonify({"status": "sucesso", "resumo": {"patrimonio_total": patrimonio_total, "lucro_total": lucro_total}, "ativos": df_carteira.to_dict(orient='records')})
-    except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)})
-
-@app.route('/api/carteira/adicionar', methods=['POST'])
-def adicionar_ativo():
-    dados = request.json
-    ativo = dados.get('Ativo').upper().strip()
-    quantidade = int(dados.get('Quantidade'))
-    preco = float(dados.get('Preco_Medio'))
-
-    try:
-        with engine.begin() as conn:
-            conn.execute(text('DELETE FROM minha_carteira WHERE "Ativo" = :ativo'), {"ativo": ativo})
-            conn.execute(text('INSERT INTO minha_carteira ("Ativo", "Quantidade", "Preco_Medio") VALUES (:ativo, :qtd, :preco)'), 
-                         {"ativo": ativo, "qtd": quantidade, "preco": preco})
-        return jsonify({"status": "sucesso"})
-    except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)})
-
-@app.route('/api/carteira/remover/<ativo>', methods=['DELETE'])
-def remover_ativo(ativo):
-    try:
-        with engine.begin() as conn:
-            conn.execute(text('DELETE FROM minha_carteira WHERE "Ativo" = :ativo'), {"ativo": ativo.upper()})
-        return jsonify({"status": "sucesso"})
-    except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)})
-
-# --- NOVA ROTA: BACKTESTING E HISTÓRICO ---
-@app.route('/api/historico', methods=['GET'])
-def obter_historico():
-    try:
-        # Busca os últimos 50 sinais registrados no banco, do mais novo pro mais velho
-        query = text('SELECT * FROM historico_sinais ORDER BY "Data" DESC LIMIT 50')
-        df_historico = pd.read_sql_query(query, engine)
+        ativos_formatados = []
+        patrimonio_total = 0
+        lucro_total = 0
+        
+        for row in ativos_db:
+            ativo = dict(row)
+            preco_atual = ativo.get('Preço (R$)') or ativo['Preco_Medio']
+            saldo = preco_atual * ativo['Quantidade']
+            lucro = (preco_atual - ativo['Preco_Medio']) * ativo['Quantidade']
+            rentabilidade = ((preco_atual / ativo['Preco_Medio']) - 1) * 100 if ativo['Preco_Medio'] > 0 else 0
+            
+            patrimonio_total += saldo
+            lucro_total += lucro
+            
+            ativo['Saldo_Total'] = saldo
+            ativo['Lucro_R$'] = lucro
+            ativo['Rentabilidade_%'] = round(rentabilidade, 2)
+            
+            ativos_formatados.append(ativo)
+            
+        conn.close()
         
         return jsonify({
-            "status": "sucesso",
-            "total_registros": len(df_historico),
-            "sinais": df_historico.to_dict(orient='records')
+            'status': 'sucesso',
+            'resumo': {
+                'patrimonio_total': patrimonio_total,
+                'lucro_total': lucro_total
+            },
+            'ativos': ativos_formatados
         })
     except Exception as e:
-        return jsonify({"status": "erro", "mensagem": "Tabela de histórico ainda não possui dados ou não foi criada. Rode o market_scanner primeiro."})
+        return jsonify({'status': 'erro', 'mensagem': str(e)})
+
+@app.route('/api/carteira/adicionar', methods=['POST'])
+def add_carteira():
+    dados = request.json
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT Quantidade, Preco_Medio FROM carteira_usuario WHERE Ativo = ?", (dados['Ativo'],))
+        existente = cursor.fetchone()
+        
+        qtd_nova = float(dados['Quantidade'])
+        preco_novo = float(dados['Preco_Medio'])
+        
+        if existente:
+            qtd_atual = existente['Quantidade']
+            preco_atual = existente['Preco_Medio']
+            qtd_total = qtd_atual + qtd_nova
+            preco_medio_total = ((qtd_atual * preco_atual) + (qtd_nova * preco_novo)) / qtd_total
+            
+            cursor.execute("UPDATE carteira_usuario SET Quantidade = ?, Preco_Medio = ? WHERE Ativo = ?", 
+                           (qtd_total, preco_medio_total, dados['Ativo']))
+        else:
+            cursor.execute("INSERT INTO carteira_usuario (Ativo, Quantidade, Preco_Medio) VALUES (?, ?, ?)", 
+                           (dados['Ativo'], qtd_nova, preco_novo))
+            
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'sucesso'})
+    except Exception as e:
+        return jsonify({'status': 'erro', 'mensagem': str(e)})
+
+@app.route('/api/carteira/remover/<ativo>', methods=['DELETE'])
+def rem_carteira(ativo):
+    try:
+        conn = get_db_connection()
+        conn.execute("DELETE FROM carteira_usuario WHERE Ativo = ?", (ativo,))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'sucesso'})
+    except Exception as e:
+        return jsonify({'status': 'erro', 'mensagem': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)

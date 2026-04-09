@@ -1,195 +1,189 @@
-import os
 import yfinance as yf
 import pandas as pd
-import warnings
-from sqlalchemy import create_engine, text
-from dotenv import load_dotenv
+import sqlite3
+from datetime import datetime
+import time
 
-warnings.filterwarnings('ignore')
-load_dotenv() 
+# Lista de ativos da B3 para o scanner
+ATIVOS_B3 = [
+    'PETR4', 'VALE3', 'ITUB4', 'BBDC4', 'BBAS3', 'ABEV3', 'WEGE3', 'MGLU3',
+    'RENT3', 'SUZB3', 'EQTL3', 'RADL3', 'B3SA3', 'CSAN3', 'BBSE3', 'KLBN11',
+    'PRIO3', 'HAPV3', 'TOTS3', 'SBSP3', 'CMIG4', 'VIVT3', 'BPAC11', 'RAIL3'
+]
 
-def analisar_mercado(tickers):
-    print("Analisando o termômetro global do IBOVESPA...")
+def calcular_indicadores(df):
+    """Calcula indicadores básicos para o Ensemble Scoring"""
+    # RSI (14)
+    delta = df['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    rs = gain / loss
+    df['RSI'] = 100 - (100 / (1 + rs))
+    
+    # Médias Móveis
+    df['MM50'] = df['Close'].rolling(window=50).mean()
+    df['MM200'] = df['Close'].rolling(window=200).mean()
+    
+    # Bandas de Bollinger
+    df['BB_Mid'] = df['Close'].rolling(window=20).mean()
+    df['BB_Std'] = df['Close'].rolling(window=20).std()
+    df['BB_Upper'] = df['BB_Mid'] + (df['BB_Std'] * 2)
+    df['BB_Lower'] = df['BB_Mid'] - (df['BB_Std'] * 2)
+    df['BB_Posicao'] = (df['Close'] - df['BB_Lower']) / (df['BB_Upper'] - df['BB_Lower'])
+    
+    # MACD Simples
+    ema12 = df['Close'].ewm(span=12, adjust=False).mean()
+    ema26 = df['Close'].ewm(span=26, adjust=False).mean()
+    df['MACD'] = ema12 - ema26
+    df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+    df['MACD_Hist'] = df['MACD'] - df['MACD_Signal']
+    
+    # ATR (Average True Range) para Stop/Alvo
+    high_low = df['High'] - df['Low']
+    high_close = (df['High'] - df['Close'].shift()).abs()
+    low_close = (df['Low'] - df['Close'].shift()).abs()
+    ranges = pd.concat([high_low, high_close, low_close], axis=1)
+    true_range = ranges.max(axis=1)
+    df['ATR'] = true_range.rolling(14).mean()
+    
+    return df.dropna()
+
+def resolver_backtesting_pendente(conn):
+    """
+    Cruza o histórico temporal real para descobrir se a ação bateu no Alvo ou no Stop PRIMEIRO.
+    """
+    print("\n--- INICIANDO AUDITORIA DE BACKTESTING TEMPORAL ---")
+    cursor = conn.cursor()
+    
     try:
-        ibov = yf.Ticker('^BVSP').history(period='10d')
-        ibov_tendencia = "ALTA" if ibov['Close'].iloc[-1] > ibov['Close'].iloc[-5] else "BAIXA"
-        print(f"Tendência Global: {ibov_tendencia}\n")
-    except:
-        ibov_tendencia = "ALTA"
-
-    print(f"Iniciando varredura Quantitativa Avançada (ATR/EMA9) em {len(tickers)} ativos...\n")
-    resultados = []
-
-    for ticker in tickers:
-        try:
-            acao = yf.Ticker(ticker)
-            df = acao.history(period="2y")
+        # Busca sinais que ainda não têm desfecho
+        cursor.execute("""
+            SELECT id, Data, Ativo, Sinal, Alvo, Stop 
+            FROM historico_sinais 
+            WHERE Resultado_Atual = 'Em andamento' OR Resultado_Atual IS NULL
+        """)
+        sinais = cursor.fetchall()
+        hoje = datetime.today().strftime('%Y-%m-%d')
+        
+        for sinal in sinais:
+            id_sinal, data_sinal, ativo, tipo_sinal, alvo, stop = sinal
+            ticker = f"{ativo}.SA"
             
-            if df.empty or len(df) < 200: 
+            hist = yf.Ticker(ticker).history(start=data_sinal, end=hoje)
+            if hist.empty:
                 continue
-
-            # 1. RSI (14 dias) e Cálculo de Divergência
-            delta = df['Close'].diff()
-            ganho = delta.clip(lower=0).ewm(alpha=1/14, adjust=False).mean()
-            perda = -delta.clip(upper=0).ewm(alpha=1/14, adjust=False).mean()
-            rs = ganho / perda
-            df['RSI_14'] = 100 - (100 / (1 + rs))
-
-            preco_min_recente = df['Close'].tail(20).min()
-            indice_min_preco = df['Close'].tail(20).idxmin()
-            rsi_no_min_preco = df['RSI_14'].loc[indice_min_preco]
-            rsi_atual_val = df['RSI_14'].iloc[-1]
+                
+            stop_atingido = False
+            alvo_atingido = False
+            data_stop = None
+            data_alvo = None
             
-            # 2. MACD
-            ema_rapida = df['Close'].ewm(span=12, adjust=False).mean()
-            ema_lenta = df['Close'].ewm(span=26, adjust=False).mean()
-            linha_macd = ema_rapida - ema_lenta
-            linha_sinal = linha_macd.ewm(span=9, adjust=False).mean()
-            df['MACD_Hist'] = linha_macd - linha_sinal
-
-            # 3. Bandas de Bollinger
-            media_20 = df['Close'].rolling(20).mean()
-            desvio = df['Close'].rolling(20).std()
-            bb_upper = media_20 + 2 * desvio
-            bb_lower = media_20 - 2 * desvio
-            amplitude_bb = bb_upper.iloc[-1] - bb_lower.iloc[-1]
-            posicao_bb = (df['Close'].iloc[-1] - bb_lower.iloc[-1]) / amplitude_bb if amplitude_bb != 0 else 0.5
-
-            # 4. Médias Móveis Clássicas e EMA 9 (Tendência Curta)
-            mm50 = df['Close'].tail(50).mean()
-            mm200 = df['Close'].tail(200).mean()
-            golden_cross = mm50 > mm200
-            ema9 = df['Close'].ewm(span=9, adjust=False).mean().iloc[-1]
-
-            # 5. Volume
-            volume_atual = int(df['Volume'].iloc[-1]) if not pd.isna(df['Volume'].iloc[-1]) else 0
-            vol_medio_20d = df['Volume'].tail(20).mean()
-            confirmacao_volume = volume_atual > (vol_medio_20d * 1.3)
+            if tipo_sinal == 'COMPRA':
+                if (hist['Low'] <= stop).any():
+                    stop_atingido = True
+                    data_stop = hist[hist['Low'] <= stop].index[0]
+                if (hist['High'] >= alvo).any():
+                    alvo_atingido = True
+                    data_alvo = hist[hist['High'] >= alvo].index[0]
+                    
+            elif tipo_sinal == 'VENDA':
+                if (hist['High'] >= stop).any():
+                    stop_atingido = True
+                    data_stop = hist[hist['High'] >= stop].index[0]
+                if (hist['Low'] <= alvo).any():
+                    alvo_atingido = True
+                    data_alvo = hist[hist['Low'] <= alvo].index[0]
             
-            # 6. NOVO: ATR (Average True Range) para Volatilidade Real
-            high_low = df['High'] - df['Low']
-            high_prev = abs(df['High'] - df['Close'].shift(1))
-            low_prev = abs(df['Low'] - df['Close'].shift(1))
-            tr = pd.concat([high_low, high_prev, low_prev], axis=1).max(axis=1)
-            atr = tr.rolling(14).mean().iloc[-1]
+            resultado_final = 'Em andamento'
             
-            df.dropna(inplace=True)
-            if df.empty: continue
+            if stop_atingido and alvo_atingido:
+                resultado_final = 'LOSS' if data_stop <= data_alvo else 'GAIN'
+            elif stop_atingido:
+                resultado_final = 'LOSS'
+            elif alvo_atingido:
+                resultado_final = 'GAIN'
+                
+            if resultado_final != 'Em andamento':
+                cursor.execute("UPDATE historico_sinais SET Resultado_Atual = ? WHERE id = ?", (resultado_final, id_sinal))
+                print(f"[{ativo}] Resolvido: {resultado_final}")
+                
+        conn.commit()
+    except Exception as e:
+        print(f"Erro no backtesting: {e}")
 
-            # Extrações Finais
-            preco_atual = round(df['Close'].iloc[-1], 2)
-            preco_ontem = df['Close'].iloc[-2]
-            variacao = round(((preco_atual / preco_ontem) - 1) * 100, 2)
-            macd_hist = df['MACD_Hist'].iloc[-1]
-            tendencia_curta = preco_atual > ema9
-
-            # --- NOVO SISTEMA DE PONTOS (Score Máximo = 6) ---
+def scan_mercado():
+    print(f"Iniciando varredura TrendSight... ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})")
+    
+    conn = sqlite3.connect('trendsight.db')
+    cursor = conn.cursor()
+    
+    # Limpa dados do dia anterior na tabela de mercado diário
+    cursor.execute('DELETE FROM mercado_diario')
+    
+    for ativo in ATIVOS_B3:
+        try:
+            df = yf.Ticker(f"{ativo}.SA").history(period="1y")
+            if df.empty or len(df) < 200:
+                continue
+                
+            df = calcular_indicadores(df)
+            hoje = df.iloc[-1]
+            ontem = df.iloc[-2]
+            
+            preco_atual = round(float(hoje['Close']), 2)
+            variacao = round(float(((hoje['Close'] / ontem['Close']) - 1) * 100), 2)
+            volume = float(hoje['Volume'])
+            
             score = 0
-            max_score = 6
+            if hoje['RSI'] < 45: score += 1
+            if hoje['MACD_Hist'] > 0: score += 1
+            if hoje['BB_Posicao'] < 0.3: score += 1
+            if hoje['MM50'] > hoje['MM200']: score += 2
+            elif hoje['MM50'] > hoje['MM200'] * 0.95: score += 1
             
-            if rsi_atual_val < 45: score += 1
-            if macd_hist > 0: score += 1
-            if posicao_bb < 0.30: score += 1
-            if golden_cross: score += 1
-            if confirmacao_volume: score += 1
+            sinal = "ESPERAR"
+            alvo = 0
+            stop = 0
             
-            # Bônus: Divergência de Alta
-            divergencia_alta = (preco_atual <= preco_min_recente * 1.02) and (rsi_atual_val > rsi_no_min_preco + 5)
-            if divergencia_alta: score += 1
-
-            if ibov_tendencia == "BAIXA" and score >= 3:
-                score -= 1 
-
-            probabilidade = (score / max_score) * 100
-
-            # --- DECISÃO DE NEGÓCIO (Usando ATR para Alvos e Stops) ---
-            if score >= 4: # Aumentei a exigência para 4/6 para filtrar melhor
+            # Setup de COMPRA
+            if score >= 4:
                 sinal = "COMPRA"
-                alvo = round(preco_atual + (atr * 3.0), 2) # Risco Retorno 1:2
-                stop = round(preco_atual - (atr * 1.5), 2)
+                alvo = round(preco_atual + (hoje['ATR'] * 2.5), 2)
+                stop = round(preco_atual - (hoje['ATR'] * 1.5), 2)
+                cursor.execute("""
+                    INSERT INTO historico_sinais (Data, Ativo, Sinal, "Preço_Base", "Alvo", "Stop", "Score", "Resultado_Atual") 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
+                """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
+            
+            # Setup de VENDA
             elif score <= 1:
                 sinal = "VENDA"
-                alvo = round(preco_atual - (atr * 3.0), 2) 
-                stop = round(preco_atual + (atr * 1.5), 2)
-            else:
-                sinal = "ESPERAR"
-                alvo = preco_atual
-                stop = preco_atual
-
-            df_historico = df.tail(250)
-            historico_precos = ",".join(df_historico['Close'].round(2).astype(str).tolist())
-            historico_datas = ",".join(df_historico.index.strftime('%Y-%m-%d').tolist())
-
-            resultados.append({
-                'Ativo': ticker.replace('.SA', ''),
-                'Preço (R$)': preco_atual,
-                'Variação (%)': variacao,
-                'Volume': volume_atual,
-                'Sinal': sinal,
-                'Probabilidade (%)': round(probabilidade, 1),
-                'Alvo (R$)': alvo,
-                'Stop (R$)': stop,
-                'Score': score,
-                'RSI': round(rsi_atual_val, 2),
-                'MACD_Hist': round(float(macd_hist), 4),
-                'BB_Posicao': round(float(posicao_bb), 2),
-                'MM50': round(float(mm50), 2),
-                'MM200': round(float(mm200), 2),
-                'Historico_Precos': historico_precos,
-                'Historico_Datas': historico_datas
-            })
+                alvo = round(preco_atual - (hoje['ATR'] * 2.5), 2)
+                stop = round(preco_atual + (hoje['ATR'] * 1.5), 2)
+                cursor.execute("""
+                    INSERT INTO historico_sinais (Data, Ativo, Sinal, "Preço_Base", "Alvo", "Stop", "Score", "Resultado_Atual") 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
+                """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
+                
+            # Salva na vitrine diária
+            cursor.execute("""
+                INSERT INTO mercado_diario 
+                (Ativo, "Preço (R$)", "Variação (%)", Volume, Sinal, Score, RSI, MACD_Hist, BB_Posicao, MM50, MM200, Alvo, Stop) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (ativo, preco_atual, variacao, volume, sinal, score, round(hoje['RSI'], 2), round(hoje['MACD_Hist'], 2), round(hoje['BB_Posicao'], 2), round(hoje['MM50'], 2), round(hoje['MM200'], 2), alvo, stop))
+            
+            time.sleep(0.5) # Pausa amigável para a API do Yahoo
+            
         except Exception as e:
-            print(f"Erro em {ticker}: {e}")
-
-    return pd.DataFrame(resultados)
-
-def salvar_no_banco(df):
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    if not DATABASE_URL:
-        print("⚠️ ERRO: DATABASE_URL não encontrada. Verifique o arquivo .env!")
-        return
-
-    engine = create_engine(DATABASE_URL)
-
-    df.to_sql('analise_mercado', engine, if_exists='replace', index=False)
+            print(f"Erro ao processar {ativo}: {e}")
+            
+    conn.commit()
+    print("Varredura concluída. Indicadores atualizados.")
     
-    # 2. Salva o Histórico (Empilha os dados para Backtesting)
-    try:
-        from datetime import datetime
-        hoje = datetime.now().strftime('%Y-%m-%d')
-        
-        # Filtra apenas os sinais fortes (ignora o ESPERAR para limpar o banco)
-        df_sinais = df[df['Sinal'].isin(['COMPRA', 'VENDA'])].copy()
-        
-        if not df_sinais.empty:
-            df_sinais['Data'] = hoje
-            # Seleciona apenas as colunas vitais para o histórico
-            colunas_historico = ['Data', 'Ativo', 'Sinal', 'Preço (R$)', 'Alvo (R$)', 'Stop (R$)', 'Score']
-            df_historico = df_sinais[colunas_historico]
-            
-            with engine.begin() as conn:
-                # Remove registros de hoje (caso o script rode duas vezes no mesmo dia) para não duplicar
-                conn.execute(text(f"DELETE FROM historico_sinais WHERE \"Data\" = '{hoje}'"))
-            
-            # Adiciona os sinais de hoje no fundo da pilha
-            df_historico.to_sql('historico_sinais', engine, if_exists='append', index=False)
-            print(f"✅ Histórico salvo! {len(df_historico)} sinais registrados para backtesting.")
-    except Exception as e:
-        # Se a tabela não existir ainda, o to_sql('append') cria ela automaticamente
-        try:
-            df_historico.to_sql('historico_sinais', engine, if_exists='append', index=False)
-            print(f"✅ Tabela de histórico criada e primeiros {len(df_historico)} sinais registrados.")
-        except Exception as ex:
-            print(f"⚠️ Erro ao salvar histórico: {ex}")
-    print("✅ Banco atualizado! Gestão de Risco por ATR e EMA9 aplicados com sucesso!")
+    # Chama o módulo de Backtesting Real para atualizar a taxa de acerto
+    resolver_backtesting_pendente(conn)
+    
+    conn.close()
 
 if __name__ == "__main__":
-    lista = [
-        'PETR4.SA', 'VALE3.SA', 'ITUB4.SA', 'BBDC4.SA', 'WEGE3.SA', 
-        'ABEV3.SA', 'MGLU3.SA', 'BBAS3.SA', 'RENT3.SA', 'B3SA3.SA',
-        'RADL3.SA', 'SUZB3.SA', 'EQTL3.SA', 'CSAN3.SA', 'VIVT3.SA', 
-        'HAPV3.SA', 'PRIO3.SA', 'GGBR4.SA', 'RAIL3.SA', 'SBSP3.SA', 
-        'CMIG4.SA', 'TOTS3.SA', 'BPAC11.SA', 'BBSE3.SA', 'KLBN11.SA'
-    ]
-    tabela = analisar_mercado(lista)
-    salvar_no_banco(tabela)
+    scan_mercado()
