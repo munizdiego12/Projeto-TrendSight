@@ -163,20 +163,12 @@
     .level.target .level-sub { color: var(--green); }
     .level.stop .level-sub { color: var(--red); }
 
-    /* CSS DO NOVO SCORECARD RADAR OTIMIZADO */
     .scorecard { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border2); display: none; }
-    
-    /* A mágica do Grid: 1fr pra espremer as caixas, 220px fixos para dar um super destaque ao gráfico */
     .scorecard-layout { display: grid; grid-template-columns: 1fr 220px; gap: 20px; align-items: center; }
-    
-    /* Mudei as caixas para um Grid 2x2 para ficarem curtinhas e num quadrado perfeito */
     .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
     .score-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; }
     .score-lbl { font-size: 11px; color: var(--text-muted); }
     .score-val { font-size: 13px; font-weight: 600; font-family: 'Syne', sans-serif; }
-    
-    /* Gráfico agora é gigante e vistoso! */
     .radar-container { width: 100%; height: 180px; position: relative; }
 
     .sim-wrap { display: flex; flex-direction: column; gap: 16px; }
@@ -349,22 +341,44 @@
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-label">Simulador de Lucro Projetado</div>
-          <div class="sim-wrap">
-            <div>
-              <div class="sim-input-row">
-                <span class="sim-prefix">R$</span>
-                <input class="sim-input" type="number" id="simVal" value="1000" min="100" step="100" oninput="calcSim()" placeholder="Valor investido" />
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="card-label">Simulador de Lucro Projetado</div>
+            <div class="sim-wrap">
+              <div>
+                <div class="sim-input-row">
+                  <span class="sim-prefix">R$</span>
+                  <input class="sim-input" type="number" id="simVal" value="1000" min="100" step="100" oninput="calcSim()" placeholder="Valor investido" />
+                </div>
+              </div>
+              <div class="sim-result">
+                <div class="sim-result-lbl" id="sim-lbl-acao">Se a ação atingir o Alvo, você terá:</div>
+                <div class="sim-result-val" id="simResult">R$ 0,00</div>
+                <div class="sim-gain" id="simGain">+R$ 0,00 &nbsp;·&nbsp; +0,0%</div>
+                <div class="sim-note" id="sim-note-abaixo">Cálculo dinâmico baseado no alvo estipulado pelo ATR.</div>
               </div>
             </div>
-            <div class="sim-result">
-              <div class="sim-result-lbl" id="sim-lbl-acao">Se a ação atingir o Alvo, você terá:</div>
-              <div class="sim-result-val" id="simResult">R$ 0,00</div>
-              <div class="sim-gain" id="simGain">+R$ 0,00 &nbsp;·&nbsp; +0,0%</div>
-              <div class="sim-note" id="sim-note-abaixo">Cálculo dinâmico baseado no alvo estipulado pelo ATR.</div>
+          </div>
+
+          <div class="scorecard" id="sim-risk-box" style="display: block; margin-top: 0; padding-top: 0; border-top: none;">
+            <div style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700; border-top: 1px solid var(--border2); padding-top: 20px;">
+              Gestão de Risco (Stop Loss)
+            </div>
+            <div class="score-grid">
+              <div class="score-item" style="align-items: center; text-align: center;">
+                <span class="score-lbl">Tamanho da Posição</span>
+                <span class="score-val" id="sim-qtd-cotas" style="font-size: 16px;">--</span>
+              </div>
+              <div class="score-item" style="align-items: center; text-align: center;">
+                <span class="score-lbl">Perda Máxima (Stop)</span>
+                <span class="score-val" id="sim-perda-stop" style="font-size: 16px; color: var(--red-bright);">--</span>
+              </div>
+            </div>
+            <div style="margin-top: 12px; font-size: 10px; color: var(--text-faint); text-align: center;">
+              Relação Risco/Retorno calculada nativamente via ATR.
             </div>
           </div>
+
         </div>
       </div>
 
@@ -499,12 +513,26 @@
       else if (modoDetalhes === 'sell') acao = acaoSelecionadaVenda;
       else acao = acaoSelecionadaEspera;
 
-      if (!acao) return;
+      const riskBox = document.getElementById('sim-risk-box');
+      const cotasEl = document.getElementById('sim-qtd-cotas');
+      const perdaEl = document.getElementById('sim-perda-stop');
+
+      if (!acao) {
+         if(riskBox) riskBox.style.display = 'none';
+         return;
+      }
 
       if (modoDetalhes === 'hold') {
          document.getElementById('simResult').textContent = 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
          document.getElementById('simGain').innerHTML = 'Ativo em Consolidação';
          document.getElementById('simGain').style.color = 'var(--text-muted)';
+         
+         if(riskBox) riskBox.style.display = 'block';
+         if(cotasEl) cotasEl.textContent = '--';
+         if(perdaEl) {
+            perdaEl.textContent = '--';
+            perdaEl.style.color = 'var(--text-muted)';
+         }
       } else {
          const diffAlvo = ((acao['Alvo (R$)'] / acao['Preço (R$)']) - 1);
          const percentualReal = Math.abs(diffAlvo);
@@ -514,6 +542,18 @@
          document.getElementById('simResult').textContent = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
          document.getElementById('simGain').innerHTML = '+R$ ' + gain.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' &nbsp;·&nbsp; +' + (percentualReal * 100).toFixed(1) + '%';
          document.getElementById('simGain').style.color = 'var(--green-bright)';
+
+         // MATEMÁTICA DE GESTÃO DE RISCO AQUI
+         if(riskBox) riskBox.style.display = 'block';
+         const qtdCotas = Math.floor(v / acao['Preço (R$)']);
+         const diffStop = Math.abs((acao['Stop (R$)'] / acao['Preço (R$)']) - 1);
+         const perdaEstimada = v * diffStop;
+
+         if(cotasEl) cotasEl.textContent = `${qtdCotas} cotas`;
+         if(perdaEl) {
+             perdaEl.textContent = `- R$ ${perdaEstimada.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+             perdaEl.style.color = 'var(--red-bright)';
+         }
       }
     }
 
@@ -882,7 +922,6 @@
           if (acao.MM50 > acao.MM200) { mmEl.textContent = 'Alta'; mmEl.style.color = 'var(--green-bright)'; }
           else { mmEl.textContent = 'Baixa'; mmEl.style.color = 'var(--red-bright)'; }
 
-          // --- CONFIGURAÇÃO OTIMIZADA DO RADAR CHART ---
           const canvasRadar = document.getElementById('radar-chart');
           if (canvasRadar) {
               if (radarChartObj) { radarChartObj.destroy(); }
