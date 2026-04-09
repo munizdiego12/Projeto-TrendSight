@@ -5,3 +5,4 @@ yfinance
 gunicorn
 psycopg2-binary
 SQLAlchemy
+python-dotenv

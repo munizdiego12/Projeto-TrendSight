@@ -1,0 +1,32 @@
+name: Pipeline de Dados - TrendSight
+
+on:
+  schedule:
+    # Roda de segunda a sexta às 21h00 UTC (18h00 no horário de Brasília)
+    - cron: '0 21 * * 1-5'
+  workflow_dispatch: # Adiciona um botão no GitHub para você testar manualmente quando quiser
+
+jobs:
+  atualizar_banco_dados:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Baixando o código do repositório
+      uses: actions/checkout@v3
+
+    - name: 🐍 Configurando o ambiente Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11' 
+
+    - name: 📦 Instalando os motores e bibliotecas
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 🚀 Executando o Robô do Mercado
+      env:
+        # Puxa a senha do banco de forma secreta e segura
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        python market_scanner.py

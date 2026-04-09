@@ -1,8 +1,12 @@
+import os
 import yfinance as yf
 import pandas as pd
 import warnings
 from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
+
 warnings.filterwarnings('ignore')
+load_dotenv() # Carrega a senha do .env
 
 def analisar_mercado(tickers):
     print(f"Iniciando varredura profunda (1 ano e datas) de {len(tickers)} ativos...\n")
@@ -31,8 +35,7 @@ def analisar_mercado(tickers):
             else:
                 sinal, prob = "ESPERAR", 50.0
 
-            # --- NOVO: CAPTURANDO PREÇOS E DATAS ---
-            df_historico = df.tail(250) # Últimos 250 dias úteis (1 ano)
+            df_historico = df.tail(250)
             historico_precos = ",".join(df_historico['Close'].round(2).astype(str).tolist())
             historico_datas = ",".join(df_historico.index.strftime('%Y-%m-%d').tolist())
 
@@ -45,17 +48,20 @@ def analisar_mercado(tickers):
                 'Probabilidade (%)': round(prob, 1),
                 'Alvo (R$)': round(preco_atual * 1.06, 2),
                 'Stop (R$)': round(preco_atual * 0.94, 2),
-                'Historico_Precos': historico_precos, # Enviando Preços
-                'Historico_Datas': historico_datas    # Enviando Datas Calendário
+                'Historico_Precos': historico_precos,
+                'Historico_Datas': historico_datas
             })
-
         except Exception as e:
             print(f"Erro em {ticker}: {e}")
 
     return pd.DataFrame(resultados)
 
 def salvar_no_banco(df):
-    DATABASE_URL = "postgresql://neondb_owner:npg_esUo6BKpL4Ib@ep-crimson-lab-amurwrao.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        print("⚠️ ERRO: DATABASE_URL não encontrada. Verifique o arquivo .env!")
+        return
+
     engine = create_engine(DATABASE_URL)
     df.to_sql('analise_mercado', engine, if_exists='replace', index=False)
     print("✅ Banco de dados atualizado com histórico de 1 ano e DATAS!")
