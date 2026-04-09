@@ -150,7 +150,37 @@ def salvar_no_banco(df):
         return
 
     engine = create_engine(DATABASE_URL)
+
     df.to_sql('analise_mercado', engine, if_exists='replace', index=False)
+    
+    # 2. Salva o Histórico (Empilha os dados para Backtesting)
+    try:
+        from datetime import datetime
+        hoje = datetime.now().strftime('%Y-%m-%d')
+        
+        # Filtra apenas os sinais fortes (ignora o ESPERAR para limpar o banco)
+        df_sinais = df[df['Sinal'].isin(['COMPRA', 'VENDA'])].copy()
+        
+        if not df_sinais.empty:
+            df_sinais['Data'] = hoje
+            # Seleciona apenas as colunas vitais para o histórico
+            colunas_historico = ['Data', 'Ativo', 'Sinal', 'Preço (R$)', 'Alvo (R$)', 'Stop (R$)', 'Score']
+            df_historico = df_sinais[colunas_historico]
+            
+            with engine.begin() as conn:
+                # Remove registros de hoje (caso o script rode duas vezes no mesmo dia) para não duplicar
+                conn.execute(text(f"DELETE FROM historico_sinais WHERE \"Data\" = '{hoje}'"))
+            
+            # Adiciona os sinais de hoje no fundo da pilha
+            df_historico.to_sql('historico_sinais', engine, if_exists='append', index=False)
+            print(f"✅ Histórico salvo! {len(df_historico)} sinais registrados para backtesting.")
+    except Exception as e:
+        # Se a tabela não existir ainda, o to_sql('append') cria ela automaticamente
+        try:
+            df_historico.to_sql('historico_sinais', engine, if_exists='append', index=False)
+            print(f"✅ Tabela de histórico criada e primeiros {len(df_historico)} sinais registrados.")
+        except Exception as ex:
+            print(f"⚠️ Erro ao salvar histórico: {ex}")
     print("✅ Banco atualizado! Gestão de Risco por ATR e EMA9 aplicados com sucesso!")
 
 if __name__ == "__main__":

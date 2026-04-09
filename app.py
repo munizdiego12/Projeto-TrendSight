@@ -52,7 +52,7 @@ def obter_dados_mercado():
         dados = df.to_dict(orient='records')
         top_compras = [acao for acao in dados if acao['Sinal'] == 'COMPRA'][:5]
         top_vendas = [acao for acao in dados if acao['Sinal'] == 'VENDA'][:5]
-        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:5] # Aumentei para mostrar mais consolidações
+        top_espera = [acao for acao in dados if acao['Sinal'] == 'ESPERAR'][:5]
         
         resultado_final = {
             "status": "sucesso", 
@@ -117,6 +117,22 @@ def remover_ativo(ativo):
         return jsonify({"status": "sucesso"})
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)})
+
+# --- NOVA ROTA: BACKTESTING E HISTÓRICO ---
+@app.route('/api/historico', methods=['GET'])
+def obter_historico():
+    try:
+        # Busca os últimos 50 sinais registrados no banco, do mais novo pro mais velho
+        query = text('SELECT * FROM historico_sinais ORDER BY "Data" DESC LIMIT 50')
+        df_historico = pd.read_sql_query(query, engine)
+        
+        return jsonify({
+            "status": "sucesso",
+            "total_registros": len(df_historico),
+            "sinais": df_historico.to_dict(orient='records')
+        })
+    except Exception as e:
+        return jsonify({"status": "erro", "mensagem": "Tabela de histórico ainda não possui dados ou não foi criada. Rode o market_scanner primeiro."})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
