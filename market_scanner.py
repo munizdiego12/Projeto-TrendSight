@@ -53,9 +53,9 @@ def setup_database(conn):
         )
     ''')
     
-    # Alterado para 'carteira' para tentar recuperar seus dados antigos
+    # Tabela da carteira do usuário (nome original restaurado)
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS carteira (
+        CREATE TABLE IF NOT EXISTS carteira_usuario (
             Ativo TEXT PRIMARY KEY,
             Quantidade REAL,
             Preco_Medio REAL
@@ -110,6 +110,7 @@ def resolver_backtesting_pendente(conn):
         for sinal in sinais:
             id_sinal, data_sinal, ativo, tipo_sinal, alvo, stop = sinal
             
+            # Evita erro da API do Yahoo se o sinal for de hoje
             if data_sinal == hoje:
                 continue
                 
