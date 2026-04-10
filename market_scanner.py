@@ -116,9 +116,16 @@ def resolver_backtesting_pendente(conn):
         
         for sinal in sinais:
             id_sinal, data_sinal, ativo, tipo_sinal, alvo, stop = sinal
+            
+            # Trava de Segurança: Se o sinal foi dado hoje, pula o backtest dele para evitar erros na API do Yahoo
+            if data_sinal == hoje:
+                continue
+                
             ticker = f"{ativo}.SA"
             
+            # Puxa o histórico apenas de ontem para trás
             hist = yf.Ticker(ticker).history(start=data_sinal, end=hoje)
+            
             if hist.empty:
                 continue
                 
