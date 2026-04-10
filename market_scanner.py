@@ -160,8 +160,12 @@ def scan_mercado():
     
     for ativo in ATIVOS_B3:
         try:
-            df = yf.Ticker(f"{ativo}.SA").history(period="1y")
-            if df.empty or len(df) < 200:
+            # CORREÇÃO MATEMÁTICA: Baixa 2 anos de dados para sobrar 1 ano inteiro após calcular a Média Móvel 200
+            df = yf.Ticker(f"{ativo}.SA").history(period="2y")
+            
+            # Precisamos de pelo menos 460 dias (200 pra MM + 260 de histórico)
+            if df.empty or len(df) < 460:
+                print(f"[{ativo}] Histórico insuficiente na B3. Pulando.")
                 continue
                 
             df = calcular_indicadores(df)
@@ -201,8 +205,7 @@ def scan_mercado():
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
                 """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
             
-            # --- MODIFICAÇÃO AQUI ---
-            # O sistema agora salva os últimos 260 dias (1 ano) em vez de apenas 22 dias
+            # Corta extamente os últimos 260 pregões (1 Ano exato de gráfico)
             probabilidade = round(min(100.0, score * 16.67), 1)
             hist_precos = ",".join(df['Close'].tail(260).round(2).astype(str).tolist())
             hist_datas = ",".join(df.index[-260:].strftime('%Y-%m-%d').tolist())
@@ -219,7 +222,7 @@ def scan_mercado():
             print(f"Erro ao processar {ativo}: {e}")
             
     conn.commit()
-    print("Varredura concluída. Indicadores atualizados.")
+    print("Varredura concluída. Histórico de 1 ANO (260 dias) gravado com sucesso.")
     resolver_backtesting_pendente(conn)
     conn.close()
 

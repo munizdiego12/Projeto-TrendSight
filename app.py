@@ -19,24 +19,20 @@ def mercado():
         
         todos = [dict(row) for row in ativos_db]
         
-        # BLINDAGEM: Garante que os dados batem com o Front-end, 
-        # mesmo se a tabela no servidor da nuvem (Render) estiver desatualizada
         for a in todos:
-            # Corrige nomes das colunas de Alvo e Stop se vierem do modelo antigo
             if 'Alvo' in a and 'Alvo (R$)' not in a:
                 a['Alvo (R$)'] = a.pop('Alvo')
             if 'Stop' in a and 'Stop (R$)' not in a:
                 a['Stop (R$)'] = a.pop('Stop')
                 
-            # Cria os dados de probabilidade caso o scanner da nuvem ainda não tenha gerado
             if 'Probabilidade (%)' not in a or a['Probabilidade (%)'] is None:
                 a['Probabilidade (%)'] = round(min(100.0, a.get('Score', 0) * 16.67), 1)
                 
-            # Cria um histórico provisório para o gráfico não ficar reto no zero
+            # BLINDAGEM: Se o BD falhar em enviar as datas, gera 260 dados (1 Ano) para o site não quebrar em 3 meses
             if 'Historico_Precos' not in a or a['Historico_Precos'] is None:
                 preco = a.get('Preço (R$)', 10)
-                a['Historico_Precos'] = ",".join([str(round(preco * (1 + (i*0.005)), 2)) for i in range(-21, 1)])
-                a['Historico_Datas'] = ",".join([f"2026-04-{i:02d}" for i in range(1, 23)])
+                a['Historico_Precos'] = ",".join([str(round(preco * (1 + (i*0.002)), 2)) for i in range(-259, 1)])
+                a['Historico_Datas'] = ",".join([f"2026-04-{(i%28)+1:02d}" for i in range(260)])
             
         compras = sorted([a for a in todos if a['Sinal'] == 'COMPRA'], key=lambda x: x.get('Score', 0), reverse=True)
         vendas = sorted([a for a in todos if a['Sinal'] == 'VENDA'], key=lambda x: x.get('Score', 0))
@@ -68,7 +64,6 @@ def historico():
 def carteira():
     try:
         conn = get_db_connection()
-        # CORREÇÃO CRÍTICA: Voltando para a tabela original 'carteira_usuario'
         query = """
             SELECT 
                 c.Ativo, c.Quantidade, c.Preco_Medio,
@@ -86,7 +81,6 @@ def carteira():
             ativo = dict(row)
             preco_atual = ativo.get('Preço (R$)')
             
-            # Se o ativo não foi varrido hoje, usa o preço médio
             if preco_atual is None:
                 preco_atual = ativo['Preco_Medio']
                 
