@@ -18,12 +18,6 @@ def mercado():
         conn.close()
         
         todos = [dict(row) for row in ativos_db]
-        
-        # Opcional: injetar dados fictícios de gráfico para o front se não existirem
-        for a in todos:
-            a['Probabilidade (%)'] = a.get('Score', 0) * 16.6
-            a['Historico_Precos'] = "10,12,15,14,16,18,17,19,21,20" # Simulando array p/ chart.js
-            a['Historico_Datas'] = "2026-04-01,2026-04-02,2026-04-03,2026-04-04,2026-04-05,2026-04-06,2026-04-07,2026-04-08,2026-04-09,2026-04-10"
             
         compras = sorted([a for a in todos if a['Sinal'] == 'COMPRA'], key=lambda x: x['Score'], reverse=True)
         vendas = sorted([a for a in todos if a['Sinal'] == 'VENDA'], key=lambda x: x['Score'])
@@ -37,13 +31,11 @@ def mercado():
 def historico():
     try:
         conn = get_db_connection()
-        # A query agora traz o Resultado_Atual oficial calculado pelo Python
         sinais = conn.execute('SELECT * FROM historico_sinais ORDER BY id DESC LIMIT 50').fetchall()
         conn.close()
         
         sinais_dict = [dict(s) for s in sinais]
         
-        # Garante a compatibilidade dos nomes das chaves com o front-end
         for s in sinais_dict:
             s['Preço (R$)'] = s.pop('Preço_Base', 0)
             s['Alvo (R$)'] = s.pop('Alvo', 0)
@@ -57,12 +49,11 @@ def historico():
 def carteira():
     try:
         conn = get_db_connection()
-        # FASE 1: Query enriquecida fazendo JOIN com a tabela mercado_diario para pegar os indicadores
         query = """
             SELECT 
                 c.Ativo, c.Quantidade, c.Preco_Medio,
                 m."Preço (R$)", m.Sinal, m.RSI, m.Score, m.BB_Posicao, m.MM50, m.MM200, m."Variação (%)"
-            FROM carteira_usuario c
+            FROM carteira c
             LEFT JOIN mercado_diario m ON c.Ativo = m.Ativo
         """
         ativos_db = conn.execute(query).fetchall()
@@ -107,7 +98,7 @@ def add_carteira():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT Quantidade, Preco_Medio FROM carteira_usuario WHERE Ativo = ?", (dados['Ativo'],))
+        cursor.execute("SELECT Quantidade, Preco_Medio FROM carteira WHERE Ativo = ?", (dados['Ativo'],))
         existente = cursor.fetchone()
         
         qtd_nova = float(dados['Quantidade'])
@@ -119,10 +110,10 @@ def add_carteira():
             qtd_total = qtd_atual + qtd_nova
             preco_medio_total = ((qtd_atual * preco_atual) + (qtd_nova * preco_novo)) / qtd_total
             
-            cursor.execute("UPDATE carteira_usuario SET Quantidade = ?, Preco_Medio = ? WHERE Ativo = ?", 
+            cursor.execute("UPDATE carteira SET Quantidade = ?, Preco_Medio = ? WHERE Ativo = ?", 
                            (qtd_total, preco_medio_total, dados['Ativo']))
         else:
-            cursor.execute("INSERT INTO carteira_usuario (Ativo, Quantidade, Preco_Medio) VALUES (?, ?, ?)", 
+            cursor.execute("INSERT INTO carteira (Ativo, Quantidade, Preco_Medio) VALUES (?, ?, ?)", 
                            (dados['Ativo'], qtd_nova, preco_novo))
             
         conn.commit()
@@ -135,7 +126,7 @@ def add_carteira():
 def rem_carteira(ativo):
     try:
         conn = get_db_connection()
-        conn.execute("DELETE FROM carteira_usuario WHERE Ativo = ?", (ativo,))
+        conn.execute("DELETE FROM carteira WHERE Ativo = ?", (ativo,))
         conn.commit()
         conn.close()
         return jsonify({'status': 'sucesso'})

@@ -12,12 +12,14 @@ ATIVOS_B3 = [
 ]
 
 def setup_database(conn):
-    """Garante que todas as tabelas necessárias existam no banco de dados."""
+    """Garante que todas as tabelas necessárias existam no banco de dados com os nomes exatos."""
     cursor = conn.cursor()
     
-    # Tabela do Mercado Diário (para a Carteira e Heatmap)
+    # APAGA a tabela diária antiga para recriar com as colunas certas do Front-end
+    cursor.execute("DROP TABLE IF EXISTS mercado_diario")
+    
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS mercado_diario (
+        CREATE TABLE mercado_diario (
             Ativo TEXT,
             "Preço (R$)" REAL,
             "Variação (%)" REAL,
@@ -29,12 +31,14 @@ def setup_database(conn):
             BB_Posicao REAL,
             MM50 REAL,
             MM200 REAL,
-            Alvo REAL,
-            Stop REAL
+            "Alvo (R$)" REAL,
+            "Stop (R$)" REAL,
+            "Probabilidade (%)" REAL,
+            Historico_Precos TEXT,
+            Historico_Datas TEXT
         )
     ''')
     
-    # Tabela do Histórico de Sinais (para o Backtesting)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS historico_sinais (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,9 +53,9 @@ def setup_database(conn):
         )
     ''')
     
-    # Tabela da Carteira do Usuário
+    # Alterado para 'carteira' para tentar recuperar seus dados antigos
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS carteira_usuario (
+        CREATE TABLE IF NOT EXISTS carteira (
             Ativo TEXT PRIMARY KEY,
             Quantidade REAL,
             Preco_Medio REAL
@@ -61,33 +65,27 @@ def setup_database(conn):
     conn.commit()
 
 def calcular_indicadores(df):
-    """Calcula indicadores básicos para o Ensemble Scoring"""
-    # RSI (14)
     delta = df['Close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
     df['RSI'] = 100 - (100 / (1 + rs))
     
-    # Médias Móveis
     df['MM50'] = df['Close'].rolling(window=50).mean()
     df['MM200'] = df['Close'].rolling(window=200).mean()
     
-    # Bandas de Bollinger
     df['BB_Mid'] = df['Close'].rolling(window=20).mean()
     df['BB_Std'] = df['Close'].rolling(window=20).std()
     df['BB_Upper'] = df['BB_Mid'] + (df['BB_Std'] * 2)
     df['BB_Lower'] = df['BB_Mid'] - (df['BB_Std'] * 2)
     df['BB_Posicao'] = (df['Close'] - df['BB_Lower']) / (df['BB_Upper'] - df['BB_Lower'])
     
-    # MACD Simples
     ema12 = df['Close'].ewm(span=12, adjust=False).mean()
     ema26 = df['Close'].ewm(span=26, adjust=False).mean()
     df['MACD'] = ema12 - ema26
     df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
     df['MACD_Hist'] = df['MACD'] - df['MACD_Signal']
     
-    # ATR (Average True Range) para Stop/Alvo
     high_low = df['High'] - df['Low']
     high_close = (df['High'] - df['Close'].shift()).abs()
     low_close = (df['Low'] - df['Close'].shift()).abs()
@@ -98,14 +96,9 @@ def calcular_indicadores(df):
     return df.dropna()
 
 def resolver_backtesting_pendente(conn):
-    """
-    Cruza o histórico temporal real para descobrir se a ação bateu no Alvo ou no Stop PRIMEIRO.
-    """
     print("\n--- INICIANDO AUDITORIA DE BACKTESTING TEMPORAL ---")
     cursor = conn.cursor()
-    
     try:
-        # Busca sinais que ainda não têm desfecho
         cursor.execute("""
             SELECT id, Data, Ativo, Sinal, Alvo, Stop 
             FROM historico_sinais 
@@ -117,13 +110,10 @@ def resolver_backtesting_pendente(conn):
         for sinal in sinais:
             id_sinal, data_sinal, ativo, tipo_sinal, alvo, stop = sinal
             
-            # Trava de Segurança: Se o sinal foi dado hoje, pula o backtest dele para evitar erros na API do Yahoo
             if data_sinal == hoje:
                 continue
                 
             ticker = f"{ativo}.SA"
-            
-            # Puxa o histórico apenas de ontem para trás
             hist = yf.Ticker(ticker).history(start=data_sinal, end=hoje)
             
             if hist.empty:
@@ -151,7 +141,6 @@ def resolver_backtesting_pendente(conn):
                     data_alvo = hist[hist['Low'] <= alvo].index[0]
             
             resultado_final = 'Em andamento'
-            
             if stop_atingido and alvo_atingido:
                 resultado_final = 'LOSS' if data_stop <= data_alvo else 'GAIN'
             elif stop_atingido:
@@ -169,16 +158,9 @@ def resolver_backtesting_pendente(conn):
 
 def scan_mercado():
     print(f"Iniciando varredura TrendSight... ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})")
-    
     conn = sqlite3.connect('trendsight.db')
-    
-    # Garante que as tabelas existem antes de qualquer coisa
     setup_database(conn)
-    
     cursor = conn.cursor()
-    
-    # Limpa dados do dia anterior na tabela de mercado diário
-    cursor.execute('DELETE FROM mercado_diario')
     
     for ativo in ATIVOS_B3:
         try:
@@ -205,7 +187,6 @@ def scan_mercado():
             alvo = 0
             stop = 0
             
-            # Setup de COMPRA
             if score >= 4:
                 sinal = "COMPRA"
                 alvo = round(preco_atual + (hoje['ATR'] * 2.5), 2)
@@ -215,7 +196,6 @@ def scan_mercado():
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
                 """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
             
-            # Setup de VENDA
             elif score <= 1:
                 sinal = "VENDA"
                 alvo = round(preco_atual - (hoje['ATR'] * 2.5), 2)
@@ -224,25 +204,26 @@ def scan_mercado():
                     INSERT INTO historico_sinais (Data, Ativo, Sinal, "Preço_Base", "Alvo", "Stop", "Score", "Resultado_Atual") 
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
                 """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
+            
+            # Gera dados reais para o gráfico e probabilidade real
+            probabilidade = round(min(100.0, score * 16.67), 1)
+            hist_precos = ",".join(df['Close'].tail(22).round(2).astype(str).tolist())
+            hist_datas = ",".join(df.index[-22:].strftime('%Y-%m-%d').tolist())
                 
-            # Salva na vitrine diária
             cursor.execute("""
                 INSERT INTO mercado_diario 
-                (Ativo, "Preço (R$)", "Variação (%)", Volume, Sinal, Score, RSI, MACD_Hist, BB_Posicao, MM50, MM200, Alvo, Stop) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (ativo, preco_atual, variacao, volume, sinal, score, round(hoje['RSI'], 2), round(hoje['MACD_Hist'], 2), round(hoje['BB_Posicao'], 2), round(hoje['MM50'], 2), round(hoje['MM200'], 2), alvo, stop))
+                (Ativo, "Preço (R$)", "Variação (%)", Volume, Sinal, Score, RSI, MACD_Hist, BB_Posicao, MM50, MM200, "Alvo (R$)", "Stop (R$)", "Probabilidade (%)", Historico_Precos, Historico_Datas) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (ativo, preco_atual, variacao, volume, sinal, score, round(hoje['RSI'], 2), round(hoje['MACD_Hist'], 2), round(hoje['BB_Posicao'], 2), round(hoje['MM50'], 2), round(hoje['MM200'], 2), alvo, stop, probabilidade, hist_precos, hist_datas))
             
-            time.sleep(0.5) # Pausa amigável para a API do Yahoo
+            time.sleep(0.5)
             
         except Exception as e:
             print(f"Erro ao processar {ativo}: {e}")
             
     conn.commit()
     print("Varredura concluída. Indicadores atualizados.")
-    
-    # Chama o módulo de Backtesting Real para atualizar a taxa de acerto
     resolver_backtesting_pendente(conn)
-    
     conn.close()
 
 if __name__ == "__main__":
