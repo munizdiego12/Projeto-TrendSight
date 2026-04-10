@@ -1785,6 +1785,10 @@
         hist = hist.slice(-10); dts = dts.slice(-10);
       } else if (timeframeAtual === '1m') {
         hist = hist.slice(-22); dts = dts.slice(-22);
+      } else if (timeframeAtual === '3m') {
+        hist = hist.slice(-66); dts = dts.slice(-66); /* Aprox. 3 meses úteis de pregão */
+      } else if (timeframeAtual === '1y') {
+        hist = hist.slice(-260); dts = dts.slice(-260); /* 1 ano útil de pregão */
       }
 
       graficosAtuais[sufixo] = new Chart(ctx, {

@@ -12,10 +12,7 @@ ATIVOS_B3 = [
 ]
 
 def setup_database(conn):
-    """Garante que todas as tabelas necessárias existam no banco de dados com os nomes exatos."""
     cursor = conn.cursor()
-    
-    # APAGA a tabela diária antiga para recriar com as colunas certas do Front-end
     cursor.execute("DROP TABLE IF EXISTS mercado_diario")
     
     cursor.execute('''
@@ -53,7 +50,6 @@ def setup_database(conn):
         )
     ''')
     
-    # Tabela da carteira do usuário (nome original restaurado)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS carteira_usuario (
             Ativo TEXT PRIMARY KEY,
@@ -110,7 +106,6 @@ def resolver_backtesting_pendente(conn):
         for sinal in sinais:
             id_sinal, data_sinal, ativo, tipo_sinal, alvo, stop = sinal
             
-            # Evita erro da API do Yahoo se o sinal for de hoje
             if data_sinal == hoje:
                 continue
                 
@@ -206,10 +201,11 @@ def scan_mercado():
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
                 """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
             
-            # Gera dados reais para o gráfico e probabilidade real
+            # --- MODIFICAÇÃO AQUI ---
+            # O sistema agora salva os últimos 260 dias (1 ano) em vez de apenas 22 dias
             probabilidade = round(min(100.0, score * 16.67), 1)
-            hist_precos = ",".join(df['Close'].tail(22).round(2).astype(str).tolist())
-            hist_datas = ",".join(df.index[-22:].strftime('%Y-%m-%d').tolist())
+            hist_precos = ",".join(df['Close'].tail(260).round(2).astype(str).tolist())
+            hist_datas = ",".join(df.index[-260:].strftime('%Y-%m-%d').tolist())
                 
             cursor.execute("""
                 INSERT INTO mercado_diario 
