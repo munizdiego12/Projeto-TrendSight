@@ -11,6 +11,55 @@ ATIVOS_B3 = [
     'PRIO3', 'HAPV3', 'TOTS3', 'SBSP3', 'CMIG4', 'VIVT3', 'BPAC11', 'RAIL3'
 ]
 
+def setup_database(conn):
+    """Garante que todas as tabelas necessárias existam no banco de dados."""
+    cursor = conn.cursor()
+    
+    # Tabela do Mercado Diário (para a Carteira e Heatmap)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS mercado_diario (
+            Ativo TEXT,
+            "Preço (R$)" REAL,
+            "Variação (%)" REAL,
+            Volume REAL,
+            Sinal TEXT,
+            Score INTEGER,
+            RSI REAL,
+            MACD_Hist REAL,
+            BB_Posicao REAL,
+            MM50 REAL,
+            MM200 REAL,
+            Alvo REAL,
+            Stop REAL
+        )
+    ''')
+    
+    # Tabela do Histórico de Sinais (para o Backtesting)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS historico_sinais (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Data TEXT,
+            Ativo TEXT,
+            Sinal TEXT,
+            "Preço_Base" REAL,
+            Alvo REAL,
+            Stop REAL,
+            Score INTEGER,
+            Resultado_Atual TEXT
+        )
+    ''')
+    
+    # Tabela da Carteira do Usuário
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS carteira_usuario (
+            Ativo TEXT PRIMARY KEY,
+            Quantidade REAL,
+            Preco_Medio REAL
+        )
+    ''')
+    
+    conn.commit()
+
 def calcular_indicadores(df):
     """Calcula indicadores básicos para o Ensemble Scoring"""
     # RSI (14)
@@ -115,6 +164,10 @@ def scan_mercado():
     print(f"Iniciando varredura TrendSight... ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})")
     
     conn = sqlite3.connect('trendsight.db')
+    
+    # Garante que as tabelas existem antes de qualquer coisa
+    setup_database(conn)
+    
     cursor = conn.cursor()
     
     # Limpa dados do dia anterior na tabela de mercado diário
