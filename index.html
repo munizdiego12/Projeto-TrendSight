@@ -1338,19 +1338,21 @@
     document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
-    let minhaCarteiraGlobal = [];
     let graficosAtuais = { compra: null, venda: null, espera: null };
+
+    // Nossas novas memórias globais
+    let minhaCarteiraGlobal = [];
+    let acoesSelecionadasHeatmap = [];
 
     let radarChartObj = null;
     let backtestChartObj = null;
     let heatmapChartObj = null;
-    let carteiraChartObj = null; // NOVO: Objeto do gráfico da carteira
+    let carteiraChartObj = null;
 
     let modoDetalhes = 'buy';
     let acaoSelecionadaCompra = null;
     let acaoSelecionadaVenda = null;
     let acaoSelecionadaEspera = null;
-    let acaoSelecionadaHeatmap = [];
 
     let timeframeAtual = '10d';
 
@@ -1376,12 +1378,10 @@
 
     function dispararNotificacao(acoes) {
       if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-      const fortes = acoes.filter(a => a.Score >= 5 && a.Sinal === 'COMPRA');
-
+      const fortes = acoes.filter(a => a.Score >= 6 && a.Sinal === 'COMPRA'); // Ajustado para score 8
       if (fortes.length > 0 && !window.notificacaoEnviadaHoje) {
         new Notification('TrendSight Analytics', {
-          body: `Oportunidade Forte: ${fortes[0].Ativo} está com Score ${fortes[0].Score}/6 para Compra!`,
+          body: `Oportunidade Forte: ${fortes[0].Ativo} está com Score ${fortes[0].Score}/8 para Compra!`,
           icon: 'https://cdn-icons-png.flaticon.com/512/2950/2950085.png'
         });
         window.notificacaoEnviadaHoje = true;
@@ -1538,7 +1538,7 @@
     }
 
     // ==============================================
-    // AÇÃO RÁPIDA (CARDS, GRÁFICOS E DETALHES)
+    // AÇÃO RÁPIDA E GRÁFICOS
     // ==============================================
     function mudarTimeframe(tf, btn) {
       btn.parentElement.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
@@ -1706,17 +1706,8 @@
               }]
             },
             options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                r: {
-                  angleLines: { color: 'rgba(255,255,255,0.1)' },
-                  grid: { color: 'rgba(255,255,255,0.1)' },
-                  pointLabels: { color: 'rgba(255,255,255,0.8)', font: { size: 9, family: 'Syne' } },
-                  ticks: { display: false, min: 0, max: 1 }
-                }
-              }
+              responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+              scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.8)', font: { size: 9, family: 'Syne' } }, ticks: { display: false, min: 0, max: 1 } } }
             }
           });
         }
@@ -1753,14 +1744,13 @@
       else if (tipoBotao === 'sell') acaoSelecionadaVenda = acao;
       else acaoSelecionadaEspera = acao;
 
-      if (tipoBotao !== modoDetalhes) {
-        modoDetalhes = tipoBotao;
-      }
+      if (tipoBotao !== modoDetalhes) modoDetalhes = tipoBotao;
 
       renderizarDetalhes();
     }
 
-    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) { 
+    // --- NOVO MOTOR DE GRÁFICOS (COM PREÇO MÉDIO) ---
+    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) {
       const cv = document.getElementById(`chart-${sufixo}`);
       if (!cv) return;
 
@@ -1770,49 +1760,31 @@
       let cor = tipo === 'buy' ? '#5DCAA5' : (tipo === 'sell' ? '#F09595' : '#FAC775');
       let grad = ctx.createLinearGradient(0, 0, 0, 60);
 
-      if (tipo === 'buy') {
-        grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)');
-      } else if (tipo === 'sell') {
-        grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)');
-      } else {
-        grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)');
-      }
+      if (tipo === 'buy') grad.addColorStop(0, 'rgba(93, 202, 165, 0.4)');
+      else if (tipo === 'sell') grad.addColorStop(0, 'rgba(240, 149, 149, 0.4)');
+      else grad.addColorStop(0, 'rgba(250, 199, 117, 0.4)');
       grad.addColorStop(1, 'rgba(0,0,0,0)');
 
       let hist = precosStr ? precosStr.split(',').map(Number) : [0, 0, 0];
       let dts = datasStr ? datasStr.split(',') : ['', '', ''];
 
-      if (timeframeAtual === '10d') {
-        hist = hist.slice(-10); dts = dts.slice(-10);
-      } else if (timeframeAtual === '1m') {
-        hist = hist.slice(-22); dts = dts.slice(-22);
-      } else if (timeframeAtual === '3m') {
-        hist = hist.slice(-66); dts = dts.slice(-66);
-      } else if (timeframeAtual === '1y') {
-        hist = hist.slice(-260); dts = dts.slice(-260);
-      }
+      if (timeframeAtual === '10d') { hist = hist.slice(-10); dts = dts.slice(-10); }
+      else if (timeframeAtual === '1m') { hist = hist.slice(-22); dts = dts.slice(-22); }
+      else if (timeframeAtual === '3m') { hist = hist.slice(-66); dts = dts.slice(-66); }
+      else if (timeframeAtual === '1y') { hist = hist.slice(-260); dts = dts.slice(-260); }
 
-      // FASE 3: Descobre qual ação está na tela agora
       let acaoAtual = null;
       if (tipo === 'buy') acaoAtual = acaoSelecionadaCompra;
       else if (tipo === 'sell') acaoAtual = acaoSelecionadaVenda;
       else acaoAtual = acaoSelecionadaEspera;
 
-      // FASE 3: Cria a linha do preço normal
       let datasetsGrafico = [{
-        data: hist,
-        borderColor: cor,
-        backgroundColor: grad,
-        borderWidth: 2,
-        pointRadius: timeframeAtual === '10d' ? 2 : 0,
-        pointHoverRadius: 6,
-        pointBackgroundColor: cor,
-        fill: true,
-        tension: 0.4
+        data: hist, borderColor: cor, backgroundColor: grad, borderWidth: 2,
+        pointRadius: timeframeAtual === '10d' ? 2 : 0, pointHoverRadius: 6, pointBackgroundColor: cor,
+        fill: true, tension: 0.4
       }];
 
-      // FASE 3: Se a ação está na carteira, injeta a linha pontilhada do Preço Médio
-      if (acaoAtual && typeof minhaCarteiraGlobal !== 'undefined') {
+      if (acaoAtual && typeof minhaCarteiraGlobal !== 'undefined' && minhaCarteiraGlobal.length > 0) {
         const ativoNaCarteira = minhaCarteiraGlobal.find(a => a.Ativo === acaoAtual.Ativo);
         if (ativoNaCarteira && ativoNaCarteira.Preco_Medio > 0) {
           datasetsGrafico.push({
@@ -1830,27 +1802,14 @@
       graficosAtuais[sufixo] = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: dts.map(d => {
-            const p = d.split('-');
-            return p.length === 3 ? `${p[2]}/${p[1]}/${p[0].substring(2)}` : d;
-          }),
+          labels: dts.map(d => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0].substring(2)}` : d; }),
           datasets: datasetsGrafico
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            tooltip: {
-              enabled: true,
-              backgroundColor: '#15151f',
-              titleColor: '#7F77DD',
-              bodyColor: '#fff',
-              displayColors: false,
-              callbacks: {
-                label: function (c) { return 'R$ ' + c.parsed.y.toFixed(2); }
-              }
-            }
+            tooltip: { enabled: true, backgroundColor: '#15151f', titleColor: '#7F77DD', bodyColor: '#fff', displayColors: false, callbacks: { label: function (c) { return 'R$ ' + c.parsed.y.toFixed(2); } } }
           },
           scales: {
             x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } },
@@ -1861,20 +1820,14 @@
       });
     }
 
-    // ==============================================
-    // HEATMAP GLOBAL (B3)
-    // ==============================================
+    // --- HEATMAP COM COMPARAÇÃO DE 2 AÇÕES ---
     window.selecionarHeatmap = function (ticker) {
       const wrapper = document.getElementById('heatmap-chart-wrapper');
 
-      // Se a ação já está selecionada, removemos ela (para desmarcar)
       if (acoesSelecionadasHeatmap.includes(ticker)) {
         acoesSelecionadasHeatmap = acoesSelecionadasHeatmap.filter(t => t !== ticker);
       } else {
-        // Se não está, adicionamos. Se já tiver 2, apagamos a mais velha.
-        if (acoesSelecionadasHeatmap.length >= 2) {
-          acoesSelecionadasHeatmap.shift(); 
-        }
+        if (acoesSelecionadasHeatmap.length >= 2) acoesSelecionadasHeatmap.shift();
         acoesSelecionadasHeatmap.push(ticker);
       }
 
@@ -1882,8 +1835,6 @@
         wrapper.classList.remove('open');
       } else {
         wrapper.classList.add('open');
-        
-        // Puxa os dados completos das ações selecionadas
         const acoes = acoesSelecionadasHeatmap.map(t => dadosMercadoGlobais.todos.find(a => a.Ativo === t)).filter(Boolean);
 
         if (acoes.length === 1) {
@@ -1899,18 +1850,16 @@
       renderizarHeatmap(dadosMercadoGlobais.todos);
     }
 
-    function desenharGraficoHeatmap(acao) {
+    function desenharGraficoHeatmap(acoes) {
       const canvas = document.getElementById(`chart-heatmap`);
       if (!canvas) return;
 
       if (heatmapChartObj) heatmapChartObj.destroy();
       const ctx = canvas.getContext('2d');
 
-      // Paleta de cores para não confundir as linhas
-      const paletaCores = ['#7F77DD', '#5DCAA5']; 
+      const paletaCores = ['#7F77DD', '#5DCAA5'];
       let datasetsGrafico = [];
 
-      // Usa as datas da primeira ação selecionada como eixo X
       let datasFinais = [];
       if (acoes[0] && acoes[0].Historico_Datas) {
         datasFinais = acoes[0].Historico_Datas.split(',').map(d => {
@@ -1919,35 +1868,25 @@
         });
       }
 
-      // Loop poderoso: desenha uma linha e uma área colorida para CADA ação selecionada
       acoes.forEach((acao, index) => {
         let cor = paletaCores[index % paletaCores.length];
         let precos = acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0];
-        
+
         let grad = ctx.createLinearGradient(0, 0, 0, 250);
-        grad.addColorStop(0, cor + '66'); // Cor com transparência
+        grad.addColorStop(0, cor + '66');
         grad.addColorStop(1, 'rgba(0,0,0,0)');
 
         datasetsGrafico.push({
-          label: acao.Ativo,
-          data: precos,
-          borderColor: cor,
-          backgroundColor: grad,
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 6,
-          pointBackgroundColor: cor,
-          fill: true,
-          tension: 0.4
+          label: acao.Ativo, data: precos, borderColor: cor, backgroundColor: grad, borderWidth: 2,
+          pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: cor, fill: true, tension: 0.4
         });
 
-        // Mantém a nossa linha de Preço Médio inteligente
-        if (typeof minhaCarteiraGlobal !== 'undefined') {
+        if (typeof minhaCarteiraGlobal !== 'undefined' && minhaCarteiraGlobal.length > 0) {
           const ativoNaCarteira = minhaCarteiraGlobal.find(a => a.Ativo === acao.Ativo);
           if (ativoNaCarteira && ativoNaCarteira.Preco_Medio > 0) {
             datasetsGrafico.push({
               data: Array(precos.length).fill(ativoNaCarteira.Preco_Medio),
-              borderColor: cor,
+              borderColor: '#ffffff',
               borderDash: [5, 5],
               borderWidth: 2,
               pointRadius: 0,
@@ -1962,21 +1901,13 @@
         type: 'line',
         data: { labels: datasFinais, datasets: datasetsGrafico },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: { 
-              display: true, // Agora a legenda é útil para saber qual cor é qual ação
-              labels: { color: '#fff', font: { family: 'Syne' }, usePointStyle: true }
-            },
-            tooltip: {
-              enabled: true, mode: 'index', intersect: false, backgroundColor: '#15151f', titleColor: '#fff', bodyColor: '#fff',
-              callbacks: { label: function (c) { return c.dataset.label + ': R$ ' + c.parsed.y.toFixed(2); } }
-            }
+            legend: { display: true, labels: { color: '#fff', font: { family: 'Syne' }, usePointStyle: true } },
+            tooltip: { enabled: true, mode: 'index', intersect: false, backgroundColor: '#15151f', titleColor: '#fff', bodyColor: '#fff', callbacks: { label: function (c) { return c.dataset.label + ': R$ ' + c.parsed.y.toFixed(2); } } }
           },
           scales: {
             x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 12, maxRotation: 0 } },
-            // Habilitei a régua Y na direita para você ver os preços reais das duas juntas
             y: { display: true, position: 'right', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } } }
           },
           interaction: { mode: 'index', intersect: false }
@@ -2022,32 +1953,17 @@
         const tb = document.getElementById('tb-historico');
 
         if (dados.status === 'sucesso' && dados.sinais.length > 0) {
-          let acertos = 0;
-          let erros = 0;
-          let andamento = 0;
+          let acertos = 0; let erros = 0; let andamento = 0;
 
           const htmlRows = dados.sinais.map(s => {
             const badgeClass = s.Sinal === 'COMPRA' ? 'b-buy' : (s.Sinal === 'VENDA' ? 'b-sell' : '');
-            let statusTxt = '⏳ Em andamento';
-            let statusColor = 'var(--amber-bright)';
+            let statusTxt = '⏳ Em andamento'; let statusColor = 'var(--amber-bright)';
 
-            const ativoHoje = dadosMercadoGlobais.todos.find(a => a.Ativo === s.Ativo);
+            if (s.Resultado_Atual === 'GAIN') { acertos++; statusTxt = '✅ GAIN'; statusColor = 'var(--green-bright)'; }
+            else if (s.Resultado_Atual === 'LOSS') { erros++; statusTxt = '❌ LOSS'; statusColor = 'var(--red-bright)'; }
+            else { andamento++; }
 
-            // O Backend Python agora entrega a verdade absoluta na chave 'Resultado_Atual'
-            if (s.Resultado_Atual === 'GAIN') {
-              acertos++;
-              statusTxt = '✅ GAIN';
-              statusColor = 'var(--green-bright)';
-            } else if (s.Resultado_Atual === 'LOSS') {
-              erros++;
-              statusTxt = '❌ LOSS';
-              statusColor = 'var(--red-bright)';
-            } else {
-              andamento++;
-            }
-
-            return `
-              <tr>
+            return `<tr>
                 <td style="color:var(--text-muted);">${s.Data}</td>
                 <td style="font-weight:700; font-family:'Syne', sans-serif;">${s.Ativo}</td>
                 <td><span class="badge ${badgeClass}">${s.Sinal}</span></td>
@@ -2055,8 +1971,7 @@
                 <td style="color:var(--green-bright)">R$ ${s['Alvo (R$)'].toFixed(2)}</td>
                 <td style="color:var(--red-bright)">R$ ${s['Stop (R$)'].toFixed(2)}</td>
                 <td style="color:${statusColor}; font-weight: 600;">${statusTxt}</td>
-              </tr>
-            `;
+              </tr>`;
           }).join('');
 
           tb.innerHTML = htmlRows;
@@ -2074,37 +1989,18 @@
           if (backtestChartObj) backtestChartObj.destroy();
           backtestChartObj = new Chart(ctx, {
             type: 'doughnut',
-            data: {
-              labels: ['Gain (Alvo)', 'Loss (Stop)', 'Em Andamento'],
-              datasets: [{
-                data: [acertos, erros, andamento],
-                backgroundColor: ['#5DCAA5', '#F09595', '#FAC775'],
-                borderColor: '#080810',
-                borderWidth: 4,
-                hoverOffset: 4
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              cutout: '75%',
-              plugins: {
-                legend: { display: false },
-                tooltip: { backgroundColor: '#15151f', titleColor: '#fff', bodyColor: '#fff', displayColors: true }
-              }
-            }
+            data: { labels: ['Gain (Alvo)', 'Loss (Stop)', 'Em Andamento'], datasets: [{ data: [acertos, erros, andamento], backgroundColor: ['#5DCAA5', '#F09595', '#FAC775'], borderColor: '#080810', borderWidth: 4, hoverOffset: 4 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#15151f', titleColor: '#fff', bodyColor: '#fff', displayColors: true } } }
           });
 
         } else {
           tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint);">Nenhum histórico encontrado.</td></tr>`;
         }
-      } catch (e) {
-        console.error("Erro histórico:", e);
-      }
+      } catch (e) { console.error("Erro histórico:", e); }
     }
 
     // ==============================================
-    // CARTEIRA COM GRÁFICO DE ALOCAÇÃO
+    // CARTEIRA E ALOCAÇÃO
     // ==============================================
     async function carregarDadosCarteira() {
       try {
@@ -2113,16 +2009,15 @@
 
         if (dados.status === "sucesso") {
           minhaCarteiraGlobal = dados.ativos;
+
           document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
           const divLucro = document.getElementById('lucro-total');
           divLucro.textContent = 'R$ ' + dados.resumo.lucro_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           divLucro.style.color = dados.resumo.lucro_total >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
 
-          let labelsGrafico = [];
-          let dadosGrafico = [];
+          let labelsGrafico = []; let dadosGrafico = [];
           let coresFundo = ['#7F77DD', '#5DCAA5', '#FAC775', '#F09595', '#534AB7', '#1D9E75', '#EF9F27', '#c0392b'];
-
           let htmlCards = '';
 
           dados.ativos.forEach(ativo => {
@@ -2130,12 +2025,8 @@
             dadosGrafico.push(ativo.Saldo_Total);
 
             let cl = 'hold', ic = '—', txt = 'Manter', cor = 'var(--amber-bright)', bd = 'var(--amber)';
-
-            if (ativo.Sinal === 'COMPRA') {
-              cl = 'buy'; ic = '↑'; txt = 'Comprar Mais'; cor = 'var(--green-bright)'; bd = 'var(--green)';
-            } else if (ativo.Sinal === 'VENDA') {
-              cl = 'sell'; ic = '↓'; txt = 'Vender Posição'; cor = 'var(--red-bright)'; bd = 'var(--red)';
-            }
+            if (ativo.Sinal === 'COMPRA') { cl = 'buy'; ic = '↑'; txt = 'Comprar Mais'; cor = 'var(--green-bright)'; bd = 'var(--green)'; }
+            else if (ativo.Sinal === 'VENDA') { cl = 'sell'; ic = '↓'; txt = 'Vender Posição'; cor = 'var(--red-bright)'; bd = 'var(--red)'; }
 
             let cRent = ativo['Rentabilidade_%'] >= 0 ? 'var(--green-bright)' : 'var(--red-bright)';
             let sinalLucro = ativo['Lucro_R$'] > 0 ? '+' : '';
@@ -2171,44 +2062,17 @@
           });
 
           document.getElementById('grid-carteira').innerHTML = htmlCards;
-          // FASE 3: Força o gráfico a se redesenhar AGORA que a carteira chegou
+
+          // FASE 3: Correção do Race Condition - Se a carteira chegar depois, ele redesenha o gráfico
           if (modoDetalhes) renderizarDetalhes();
 
-          // DESENHA O GRÁFICO DE ALOCAÇÃO DA CARTEIRA
           const ctx = document.getElementById('carteira-chart');
           if (ctx) {
             if (carteiraChartObj) carteiraChartObj.destroy();
             carteiraChartObj = new Chart(ctx.getContext('2d'), {
               type: 'doughnut',
-              data: {
-                labels: labelsGrafico,
-                datasets: [{
-                  data: dadosGrafico,
-                  backgroundColor: coresFundo.slice(0, dadosGrafico.length),
-                  borderColor: '#080810',
-                  borderWidth: 3,
-                  hoverOffset: 6
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    backgroundColor: '#15151f',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    callbacks: {
-                      label: function (c) {
-                        let valor = c.parsed.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                        return `R$ ${valor}`;
-                      }
-                    }
-                  }
-                }
-              }
+              data: { labels: labelsGrafico, datasets: [{ data: dadosGrafico, backgroundColor: coresFundo.slice(0, dadosGrafico.length), borderColor: '#080810', borderWidth: 3, hoverOffset: 6 }] },
+              options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#15151f', titleColor: '#fff', bodyColor: '#fff', callbacks: { label: function (c) { return `R$ ${c.parsed.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; } } } } }
             });
           }
         }
@@ -2219,21 +2083,13 @@
       const a = document.getElementById('nova-acao').value;
       const q = document.getElementById('nova-qtd').value;
       const p = document.getElementById('novo-preco').value;
-
       if (!a || !q || !p) return alert('Preencha todos os campos.');
-
-      await fetch('https://projeto-trendsight.onrender.com/api/carteira/adicionar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Ativo: a, Quantidade: q, Preco_Medio: p })
-      });
-
+      await fetch('https://projeto-trendsight.onrender.com/api/carteira/adicionar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Ativo: a, Quantidade: q, Preco_Medio: p }) });
       carregarDadosCarteira();
     }
 
     async function removerAcao(a) {
       if (!confirm(`Remover ${a}?`)) return;
-
       await fetch(`https://projeto-trendsight.onrender.com/api/carteira/remover/${a}`, { method: 'DELETE' });
       carregarDadosCarteira();
     }
@@ -2246,11 +2102,8 @@
         if (dados.status === "sucesso") {
           dadosMercadoGlobais = dados;
 
-          // NOVO: Preenche a lista de sugestões de ativos dinamicamente com os dados da API
           const datalist = document.getElementById('tickers-b3');
-          if (datalist && dados.todos) {
-            datalist.innerHTML = dados.todos.map(a => `<option value="${a.Ativo}">`).join('');
-          }
+          if (datalist && dados.todos) datalist.innerHTML = dados.todos.map(a => `<option value="${a.Ativo}">`).join('');
 
           if (dados.todos.length > 0) renderizarHeatmap(dados.todos);
           dispararNotificacao(dados.todos);
