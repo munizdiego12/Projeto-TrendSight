@@ -1498,7 +1498,7 @@
           reasonsHTML += `
               <div class="long-rec">
                   <div class="long-dot g"></div>
-                  <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Alvo projetado em R$ ${a['Alvo (R$)']}.</div>
+                  <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/8. Alvo projetado em R$ ${a['Alvo (R$)']}.</div>
               </div>`;
         });
       }
@@ -1520,7 +1520,7 @@
           reasonsHTML += `
               <div class="long-rec">
                   <div class="long-dot r"></div>
-                  <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/6. Risco de correção até R$ ${a['Alvo (R$)']}.</div>
+                  <div class="long-rec-body"><strong>${a.Ativo}</strong> — Score ${a.Score}/8. Risco de correção até R$ ${a['Alvo (R$)']}.</div>
               </div>`;
         });
       }
@@ -1661,7 +1661,7 @@
 
         subAlvo.textContent = (diffAlvoPct > 0 ? '+' : '') + diffAlvoPct.toFixed(1) + '%';
         subStop.textContent = (diffStopPct > 0 ? '+' : '') + diffStopPct.toFixed(1) + '%';
-        badge.textContent = `Score ${acao.Score}/6`;
+        badge.textContent = `Score ${acao.Score}/8`;
       }
 
       if (acao.Score !== undefined) {
@@ -1942,7 +1942,7 @@
         const selClass = acaoSelecionadaHeatmap === acao.Ativo ? 'selected' : '';
 
         html += `
-            <div class="heatmap-cell ${selClass}" style="background: ${bg};" title="Score: ${acao.Score || 0}/6" onclick="selecionarHeatmap('${acao.Ativo}')">
+            <div class="heatmap-cell ${selClass}" style="background: ${bg};" title="Score: ${acao.Score || 0}/8" onclick="selecionarHeatmap('${acao.Ativo}')">
                 <span class="hm-ticker">${acao.Ativo}</span>
                 <span class="hm-var">${v > 0 ? '+' + v : v}%</span>
             </div>`;
