@@ -1350,7 +1350,7 @@
     let acaoSelecionadaCompra = null;
     let acaoSelecionadaVenda = null;
     let acaoSelecionadaEspera = null;
-    let acaoSelecionadaHeatmap = null;
+    let acaoSelecionadaHeatmap = [];
 
     let timeframeAtual = '10d';
 
@@ -1867,19 +1867,34 @@
     window.selecionarHeatmap = function (ticker) {
       const wrapper = document.getElementById('heatmap-chart-wrapper');
 
-      if (acaoSelecionadaHeatmap === ticker) {
-        acaoSelecionadaHeatmap = null;
+      // Se a ação já está selecionada, removemos ela (para desmarcar)
+      if (acoesSelecionadasHeatmap.includes(ticker)) {
+        acoesSelecionadasHeatmap = acoesSelecionadasHeatmap.filter(t => t !== ticker);
+      } else {
+        // Se não está, adicionamos. Se já tiver 2, apagamos a mais velha.
+        if (acoesSelecionadasHeatmap.length >= 2) {
+          acoesSelecionadasHeatmap.shift(); 
+        }
+        acoesSelecionadasHeatmap.push(ticker);
+      }
+
+      if (acoesSelecionadasHeatmap.length === 0) {
         wrapper.classList.remove('open');
       } else {
-        acaoSelecionadaHeatmap = ticker;
         wrapper.classList.add('open');
+        
+        // Puxa os dados completos das ações selecionadas
+        const acoes = acoesSelecionadasHeatmap.map(t => dadosMercadoGlobais.todos.find(a => a.Ativo === t)).filter(Boolean);
 
-        const acao = dadosMercadoGlobais.todos.find(a => a.Ativo === ticker);
-        if (acao) {
-          document.getElementById('hm-chart-ticker').textContent = acao.Ativo;
-          document.getElementById('hm-chart-price').textContent = `R$ ${acao['Preço (R$)'].toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-          desenharGraficoHeatmap(acao);
+        if (acoes.length === 1) {
+          document.getElementById('hm-chart-ticker').textContent = acoes[0].Ativo;
+          document.getElementById('hm-chart-price').textContent = `R$ ${acoes[0]['Preço (R$)'].toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        } else if (acoes.length === 2) {
+          document.getElementById('hm-chart-ticker').textContent = `${acoes[0].Ativo} vs ${acoes[1].Ativo}`;
+          document.getElementById('hm-chart-price').textContent = `Comparação de Desempenho`;
         }
+
+        desenharGraficoHeatmap(acoes);
       }
       renderizarHeatmap(dadosMercadoGlobais.todos);
     }
@@ -1889,49 +1904,59 @@
       if (!canvas) return;
 
       if (heatmapChartObj) heatmapChartObj.destroy();
-
       const ctx = canvas.getContext('2d');
-      let cor = '#7F77DD';
-      let grad = ctx.createLinearGradient(0, 0, 0, 250);
-      grad.addColorStop(0, 'rgba(127, 119, 221, 0.4)');
-      grad.addColorStop(1, 'rgba(0,0,0,0)');
 
-      let precos = acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0, 0, 0];
-      let datas = acao.Historico_Datas ? acao.Historico_Datas.split(',') : ['', '', ''];
+      // Paleta de cores para não confundir as linhas
+      const paletaCores = ['#7F77DD', '#5DCAA5']; 
+      let datasetsGrafico = [];
 
-      let datasFinais = datas.map(d => {
-        const partes = d.split('-');
-        if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0].substring(2)}`;
-        return d;
-      });
-
-      let datasetsGrafico = [{
-        data: precos,
-        borderColor: cor,
-        backgroundColor: grad,
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointBackgroundColor: cor,
-        fill: true,
-        tension: 0.4
-      }];
-
-      // FASE 3: Se a ação do Heatmap está na carteira, injeta a linha pontilhada também!
-      if (typeof minhaCarteiraGlobal !== 'undefined') {
-        const ativoNaCarteira = minhaCarteiraGlobal.find(a => a.Ativo === acao.Ativo);
-        if (ativoNaCarteira && ativoNaCarteira.Preco_Medio > 0) {
-          datasetsGrafico.push({
-            data: Array(precos.length).fill(ativoNaCarteira.Preco_Medio),
-            borderColor: '#ffffff',
-            borderDash: [5, 5],
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: false,
-            label: 'Seu preço médio'
-          });
-        }
+      // Usa as datas da primeira ação selecionada como eixo X
+      let datasFinais = [];
+      if (acoes[0] && acoes[0].Historico_Datas) {
+        datasFinais = acoes[0].Historico_Datas.split(',').map(d => {
+          const partes = d.split('-');
+          return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0].substring(2)}` : d;
+        });
       }
+
+      // Loop poderoso: desenha uma linha e uma área colorida para CADA ação selecionada
+      acoes.forEach((acao, index) => {
+        let cor = paletaCores[index % paletaCores.length];
+        let precos = acao.Historico_Precos ? acao.Historico_Precos.split(',').map(Number) : [0];
+        
+        let grad = ctx.createLinearGradient(0, 0, 0, 250);
+        grad.addColorStop(0, cor + '66'); // Cor com transparência
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+        datasetsGrafico.push({
+          label: acao.Ativo,
+          data: precos,
+          borderColor: cor,
+          backgroundColor: grad,
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointBackgroundColor: cor,
+          fill: true,
+          tension: 0.4
+        });
+
+        // Mantém a nossa linha de Preço Médio inteligente
+        if (typeof minhaCarteiraGlobal !== 'undefined') {
+          const ativoNaCarteira = minhaCarteiraGlobal.find(a => a.Ativo === acao.Ativo);
+          if (ativoNaCarteira && ativoNaCarteira.Preco_Medio > 0) {
+            datasetsGrafico.push({
+              data: Array(precos.length).fill(ativoNaCarteira.Preco_Medio),
+              borderColor: cor,
+              borderDash: [5, 5],
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: false,
+              label: `Preço Médio ${acao.Ativo}`
+            });
+          }
+        }
+      });
 
       heatmapChartObj = new Chart(ctx, {
         type: 'line',
@@ -1940,19 +1965,19 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false },
+            legend: { 
+              display: true, // Agora a legenda é útil para saber qual cor é qual ação
+              labels: { color: '#fff', font: { family: 'Syne' }, usePointStyle: true }
+            },
             tooltip: {
-              enabled: true,
-              backgroundColor: '#15151f',
-              titleColor: '#7F77DD',
-              bodyColor: '#fff',
-              displayColors: false,
-              callbacks: { label: function (c) { return 'R$ ' + c.parsed.y.toFixed(2); } }
+              enabled: true, mode: 'index', intersect: false, backgroundColor: '#15151f', titleColor: '#fff', bodyColor: '#fff',
+              callbacks: { label: function (c) { return c.dataset.label + ': R$ ' + c.parsed.y.toFixed(2); } }
             }
           },
           scales: {
             x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 12, maxRotation: 0 } },
-            y: { display: false }
+            // Habilitei a régua Y na direita para você ver os preços reais das duas juntas
+            y: { display: true, position: 'right', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } } }
           },
           interaction: { mode: 'index', intersect: false }
         }
@@ -1975,7 +2000,7 @@
         else if (v <= -2.5) bg = 'rgba(192, 57, 43, 0.9)';
         else if (v < -0.5) bg = 'rgba(192, 57, 43, 0.4)';
 
-        const selClass = acaoSelecionadaHeatmap === acao.Ativo ? 'selected' : '';
+        const selClass = acoesSelecionadasHeatmap.includes(acao.Ativo) ? 'selected' : '';
 
         html += `
             <div class="heatmap-cell ${selClass}" style="background: ${bg};" title="Score: ${acao.Score || 0}/8" onclick="selecionarHeatmap('${acao.Ativo}')">
