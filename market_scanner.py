@@ -61,21 +61,33 @@ def setup_database(conn):
     conn.commit()
 
 def calcular_indicadores(df):
+    # RSI
     delta = df['Close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
     df['RSI'] = 100 - (100 / (1 + rs))
     
+    # FASE 2: Stochastic RSI (Mais sensível)
+    rsi_min = df['RSI'].rolling(window=14).min()
+    rsi_max = df['RSI'].rolling(window=14).max()
+    df['StochRSI'] = (df['RSI'] - rsi_min) / (rsi_max - rsi_min + 1e-9)
+    
+    # FASE 2: OBV (On-Balance Volume)
+    direcao = df['Close'].diff().apply(lambda x: 1 if x > 0 else (-1 if x < 0 else 0))
+    df['OBV'] = (df['Volume'] * direcao).cumsum()
+    df['OBV_Media'] = df['OBV'].rolling(window=20).mean()
+    
+    # Médias Móveis e Bandas
     df['MM50'] = df['Close'].rolling(window=50).mean()
     df['MM200'] = df['Close'].rolling(window=200).mean()
-    
     df['BB_Mid'] = df['Close'].rolling(window=20).mean()
     df['BB_Std'] = df['Close'].rolling(window=20).std()
     df['BB_Upper'] = df['BB_Mid'] + (df['BB_Std'] * 2)
     df['BB_Lower'] = df['BB_Mid'] - (df['BB_Std'] * 2)
     df['BB_Posicao'] = (df['Close'] - df['BB_Lower']) / (df['BB_Upper'] - df['BB_Lower'])
     
+    # MACD e ATR
     ema12 = df['Close'].ewm(span=12, adjust=False).mean()
     ema26 = df['Close'].ewm(span=26, adjust=False).mean()
     df['MACD'] = ema12 - ema26
@@ -92,7 +104,6 @@ def calcular_indicadores(df):
     return df.dropna()
 
 def resolver_backtesting_pendente(conn):
-    print("\n--- INICIANDO AUDITORIA DE BACKTESTING TEMPORAL ---")
     cursor = conn.cursor()
     try:
         cursor.execute("""
@@ -105,15 +116,11 @@ def resolver_backtesting_pendente(conn):
         
         for sinal in sinais:
             id_sinal, data_sinal, ativo, tipo_sinal, alvo, stop = sinal
-            
-            if data_sinal == hoje:
-                continue
+            if data_sinal == hoje: continue
                 
             ticker = f"{ativo}.SA"
             hist = yf.Ticker(ticker).history(start=data_sinal, end=hoje)
-            
-            if hist.empty:
-                continue
+            if hist.empty: continue
                 
             stop_atingido = False
             alvo_atingido = False
@@ -127,7 +134,6 @@ def resolver_backtesting_pendente(conn):
                 if (hist['High'] >= alvo).any():
                     alvo_atingido = True
                     data_alvo = hist[hist['High'] >= alvo].index[0]
-                    
             elif tipo_sinal == 'VENDA':
                 if (hist['High'] >= stop).any():
                     stop_atingido = True
@@ -139,34 +145,25 @@ def resolver_backtesting_pendente(conn):
             resultado_final = 'Em andamento'
             if stop_atingido and alvo_atingido:
                 resultado_final = 'LOSS' if data_stop <= data_alvo else 'GAIN'
-            elif stop_atingido:
-                resultado_final = 'LOSS'
-            elif alvo_atingido:
-                resultado_final = 'GAIN'
+            elif stop_atingido: resultado_final = 'LOSS'
+            elif alvo_atingido: resultado_final = 'GAIN'
                 
             if resultado_final != 'Em andamento':
                 cursor.execute("UPDATE historico_sinais SET Resultado_Atual = ? WHERE id = ?", (resultado_final, id_sinal))
-                print(f"[{ativo}] Resolvido: {resultado_final}")
-                
         conn.commit()
     except Exception as e:
         print(f"Erro no backtesting: {e}")
 
 def scan_mercado():
-    print(f"Iniciando varredura TrendSight... ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})")
+    print(f"Iniciando varredura TrendSight... Fase 2 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})")
     conn = sqlite3.connect('trendsight.db')
     setup_database(conn)
     cursor = conn.cursor()
     
     for ativo in ATIVOS_B3:
         try:
-            # CORREÇÃO MATEMÁTICA: Baixa 2 anos de dados para sobrar 1 ano inteiro após calcular a Média Móvel 200
             df = yf.Ticker(f"{ativo}.SA").history(period="2y")
-            
-            # Precisamos de pelo menos 460 dias (200 pra MM + 260 de histórico)
-            if df.empty or len(df) < 460:
-                print(f"[{ativo}] Histórico insuficiente na B3. Pulando.")
-                continue
+            if df.empty or len(df) < 460: continue
                 
             df = calcular_indicadores(df)
             hoje = df.iloc[-1]
@@ -176,6 +173,7 @@ def scan_mercado():
             variacao = round(float(((hoje['Close'] / ontem['Close']) - 1) * 100), 2)
             volume = float(hoje['Volume'])
             
+            # --- O NOVO MOTOR DE SCORE (MÁXIMO 8 PONTOS) ---
             score = 0
             if hoje['RSI'] < 45: score += 1
             if hoje['MACD_Hist'] > 0: score += 1
@@ -183,11 +181,19 @@ def scan_mercado():
             if hoje['MM50'] > hoje['MM200']: score += 2
             elif hoje['MM50'] > hoje['MM200'] * 0.95: score += 1
             
+            # Novas regras Fase 2
+            if hoje['StochRSI'] < 0.20: score += 1
+            if hoje['OBV'] > hoje['OBV_Media']: score += 1
+            
+            # Sazonalidade (Ex: Jan, Nov, Dez historicamente mais fortes)
+            if datetime.now().month in [11, 12, 1]: score += 1
+            
             sinal = "ESPERAR"
             alvo = 0
             stop = 0
             
-            if score >= 4:
+            # O sarrafo subiu. Agora precisa de pelo menos 5 pontos para COMPRA forte
+            if score >= 5:
                 sinal = "COMPRA"
                 alvo = round(preco_atual + (hoje['ATR'] * 2.5), 2)
                 stop = round(preco_atual - (hoje['ATR'] * 1.5), 2)
@@ -196,7 +202,7 @@ def scan_mercado():
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
                 """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
             
-            elif score <= 1:
+            elif score <= 2:
                 sinal = "VENDA"
                 alvo = round(preco_atual - (hoje['ATR'] * 2.5), 2)
                 stop = round(preco_atual + (hoje['ATR'] * 1.5), 2)
@@ -205,8 +211,8 @@ def scan_mercado():
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Em andamento')
                 """, (datetime.now().strftime('%Y-%m-%d'), ativo, sinal, preco_atual, alvo, stop, score))
             
-            # Corta extamente os últimos 260 pregões (1 Ano exato de gráfico)
-            probabilidade = round(min(100.0, score * 16.67), 1)
+            # Probabilidade agora é baseada em 8 pontos (12.5% por ponto)
+            probabilidade = round(min(100.0, score * 12.5), 1)
             hist_precos = ",".join(df['Close'].tail(260).round(2).astype(str).tolist())
             hist_datas = ",".join(df.index[-260:].strftime('%Y-%m-%d').tolist())
                 
@@ -217,12 +223,11 @@ def scan_mercado():
             """, (ativo, preco_atual, variacao, volume, sinal, score, round(hoje['RSI'], 2), round(hoje['MACD_Hist'], 2), round(hoje['BB_Posicao'], 2), round(hoje['MM50'], 2), round(hoje['MM200'], 2), alvo, stop, probabilidade, hist_precos, hist_datas))
             
             time.sleep(0.5)
-            
         except Exception as e:
             print(f"Erro ao processar {ativo}: {e}")
             
     conn.commit()
-    print("Varredura concluída. Histórico de 1 ANO (260 dias) gravado com sucesso.")
+    print("Varredura concluída com Motor Quantitativo Fase 2.")
     resolver_backtesting_pendente(conn)
     conn.close()
 

@@ -1098,7 +1098,7 @@
           <div class="scorecard" id="detalhes-scorecard">
             <div
               style="font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 700;">
-              Raio-X do Algoritmo (Score: <span id="score-num">0</span>/6)</div>
+              Raio-X do Algoritmo (Score: <span id="score-num">0</span>/8)</div>
             <div class="scorecard-layout">
               <div class="score-grid">
                 <div class="score-item"><span class="score-lbl">RSI (14d)</span><span class="score-val"
@@ -1697,7 +1697,7 @@
                   acao.MACD_Hist > 0 ? 1 : 0.3,
                   acao.BB_Posicao < 0.3 ? 1 : 0.3,
                   acao.MM50 > acao.MM200 ? 1 : 0.3,
-                  acao.Score / 6
+                  acao.Score / 8
                 ],
                 backgroundColor: 'rgba(127, 119, 221, 0.25)',
                 borderColor: '#7F77DD',
@@ -2101,7 +2101,7 @@
                     <span class="prob-pct" style="color: #fff; font-size: 14px;">R$ ${ativo.Saldo_Total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border2);">
-                    <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border);">Score: ${ativo.Score !== null ? ativo.Score + '/6' : '--'}</span>
+                    <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border);">Score: ${ativo.Score !== null ? ativo.Score + '/8' : '--'}</span>
                     <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border);">RSI: ${ativo.RSI !== null ? ativo.RSI : '--'}</span>
                 </div>
                 <button onclick="removerAcao('${ativo.Ativo}')" class="btn-ghost" style="width:100%;font-size:12px;border-color:var(--border2); margin-top: 16px;">Encerrar Posição</button>
