@@ -1578,7 +1578,7 @@
       const subStop = document.getElementById('detalhes-sub-stop');
 
       if (modoDetalhes === 'buy') {
-        document.getElementById('detalhes-label').textContent = acao ? 'Operação de compra — DETALHES' : 'Sem Ativos';
+        document.getElementById('detalhes-label').textContent = 'Operação de compra — DETALHES';
         document.getElementById('detalhes-lbl-entrada').textContent = 'Compre por até';
         document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo';
         document.getElementById('detalhes-lbl-stop').textContent = 'Stop';
@@ -1595,7 +1595,7 @@
         document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo, você terá:';
 
       } else if (modoDetalhes === 'sell') {
-        document.getElementById('detalhes-label').textContent = acao ? 'Operação de venda — DETALHES' : 'Sem Ativos';
+        document.getElementById('detalhes-label').textContent = 'Operação de venda — DETALHES';
         document.getElementById('detalhes-lbl-entrada').textContent = 'Short por';
         document.getElementById('detalhes-lbl-alvo').textContent = 'Alvo (Queda)';
         document.getElementById('detalhes-lbl-stop').textContent = 'Trava';
@@ -1612,7 +1612,7 @@
         document.getElementById('sim-lbl-acao').textContent = 'Se a ação atingir o Alvo (queda), seu lucro será:';
 
       } else {
-        document.getElementById('detalhes-label').textContent = acao ? 'Em Observação' : 'Sem Ativos';
+        document.getElementById('detalhes-label').textContent = 'Em Observação';
         document.getElementById('detalhes-lbl-entrada').textContent = 'Atual';
         document.getElementById('detalhes-lbl-alvo').textContent = 'Sem alvo';
         document.getElementById('detalhes-lbl-stop').textContent = 'Sem trava';
