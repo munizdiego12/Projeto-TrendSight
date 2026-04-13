@@ -1338,6 +1338,7 @@
     document.getElementById('dateDisplay').textContent = now.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
     let dadosMercadoGlobais = { compras: [], vendas: [], espera: [], todos: [] };
+    let minhaCarteiraGlobal = [];
     let graficosAtuais = { compra: null, venda: null, espera: null };
 
     let radarChartObj = null;
@@ -1759,7 +1760,7 @@
       renderizarDetalhes();
     }
 
-    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) {
+    function desenharGrafico(tipo, sufixo, precoAtual, precosStr, datasStr) { 
       const cv = document.getElementById(`chart-${sufixo}`);
       if (!cv) return;
 
@@ -1786,30 +1787,54 @@
       } else if (timeframeAtual === '1m') {
         hist = hist.slice(-22); dts = dts.slice(-22);
       } else if (timeframeAtual === '3m') {
-        hist = hist.slice(-66); dts = dts.slice(-66); /* Aprox. 3 meses úteis de pregão */
+        hist = hist.slice(-66); dts = dts.slice(-66);
       } else if (timeframeAtual === '1y') {
-        hist = hist.slice(-260); dts = dts.slice(-260); /* 1 ano útil de pregão */
+        hist = hist.slice(-260); dts = dts.slice(-260);
+      }
+
+      // FASE 3: Descobre qual ação está na tela agora
+      let acaoAtual = null;
+      if (tipo === 'buy') acaoAtual = acaoSelecionadaCompra;
+      else if (tipo === 'sell') acaoAtual = acaoSelecionadaVenda;
+      else acaoAtual = acaoSelecionadaEspera;
+
+      // FASE 3: Cria a linha do preço normal
+      let datasetsGrafico = [{
+        data: hist,
+        borderColor: cor,
+        backgroundColor: grad,
+        borderWidth: 2,
+        pointRadius: timeframeAtual === '10d' ? 2 : 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: cor,
+        fill: true,
+        tension: 0.4
+      }];
+
+      // FASE 3: Se a ação está na carteira, injeta a linha pontilhada do Preço Médio
+      if (acaoAtual && typeof minhaCarteiraGlobal !== 'undefined') {
+        const ativoNaCarteira = minhaCarteiraGlobal.find(a => a.Ativo === acaoAtual.Ativo);
+        if (ativoNaCarteira && ativoNaCarteira.Preco_Medio > 0) {
+          datasetsGrafico.push({
+            data: Array(hist.length).fill(ativoNaCarteira.Preco_Medio),
+            borderColor: '#ffffff',
+            borderDash: [5, 5],
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false,
+            label: 'Seu preço médio'
+          });
+        }
       }
 
       graficosAtuais[sufixo] = new Chart(ctx, {
         type: 'line',
         data: {
-          // CORREÇÃO: FORMATANDO A DATA AQUI (DD/MM/YY)
           labels: dts.map(d => {
             const p = d.split('-');
             return p.length === 3 ? `${p[2]}/${p[1]}/${p[0].substring(2)}` : d;
           }),
-          datasets: [{
-            data: hist,
-            borderColor: cor,
-            backgroundColor: grad,
-            borderWidth: 2,
-            pointRadius: timeframeAtual === '10d' ? 2 : 0,
-            pointHoverRadius: 6,
-            pointBackgroundColor: cor,
-            fill: true,
-            tension: 0.4
-          }]
+          datasets: datasetsGrafico
         },
         options: {
           responsive: true,
@@ -1828,11 +1853,7 @@
             }
           },
           scales: {
-            x: {
-              display: true,
-              grid: { display: false, drawBorder: false },
-              ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 }
-            },
+            x: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, family: 'Syne' }, maxTicksLimit: 6, maxRotation: 0 } },
             y: { display: false }
           },
           interaction: { mode: 'index', intersect: false }
@@ -1884,22 +1905,37 @@
         return d;
       });
 
-      heatmapChartObj = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: datasFinais,
-          datasets: [{
-            data: precos,
-            borderColor: cor,
-            backgroundColor: grad,
+      let datasetsGrafico = [{
+        data: precos,
+        borderColor: cor,
+        backgroundColor: grad,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: cor,
+        fill: true,
+        tension: 0.4
+      }];
+
+      // FASE 3: Se a ação do Heatmap está na carteira, injeta a linha pontilhada também!
+      if (typeof minhaCarteiraGlobal !== 'undefined') {
+        const ativoNaCarteira = minhaCarteiraGlobal.find(a => a.Ativo === acao.Ativo);
+        if (ativoNaCarteira && ativoNaCarteira.Preco_Medio > 0) {
+          datasetsGrafico.push({
+            data: Array(precos.length).fill(ativoNaCarteira.Preco_Medio),
+            borderColor: '#ffffff',
+            borderDash: [5, 5],
             borderWidth: 2,
             pointRadius: 0,
-            pointHoverRadius: 6,
-            pointBackgroundColor: cor,
-            fill: true,
-            tension: 0.4
-          }]
-        },
+            fill: false,
+            label: 'Seu preço médio'
+          });
+        }
+      }
+
+      heatmapChartObj = new Chart(ctx, {
+        type: 'line',
+        data: { labels: datasFinais, datasets: datasetsGrafico },
         options: {
           responsive: true,
           maintainAspectRatio: false,
@@ -2051,6 +2087,7 @@
         const dados = await resposta.json();
 
         if (dados.status === "sucesso") {
+          minhaCarteiraGlobal = dados.ativos;
           document.getElementById('patrimonio-total').textContent = 'R$ ' + dados.resumo.patrimonio_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
           const divLucro = document.getElementById('lucro-total');
@@ -2109,6 +2146,8 @@
           });
 
           document.getElementById('grid-carteira').innerHTML = htmlCards;
+          // FASE 3: Força o gráfico a se redesenhar AGORA que a carteira chegou
+          if (modoDetalhes) renderizarDetalhes();
 
           // DESENHA O GRÁFICO DE ALOCAÇÃO DA CARTEIRA
           const ctx = document.getElementById('carteira-chart');
