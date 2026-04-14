@@ -2011,30 +2011,29 @@
     function gerarPDFCarteira(evento) {
       const btn = evento.currentTarget;
       
-      // Oculta o botão (usando display none para o título ficar bem centralizado)
+      // Oculta o botão temporariamente
       btn.style.display = 'none';
 
-      // Pega o container inteiro
       const elemento = document.getElementById('view-carteira');
-      
-      // Salva o estilo original para não quebrar o site depois
       const bgOriginal = elemento.style.backgroundColor;
       const pOriginal = elemento.style.padding;
       
-      // TRUQUE: Força o fundo do elemento a ficar na cor Dark Mode antes da foto
+      // Pinta o fundo e dá um respiro nas laterais
       elemento.style.backgroundColor = '#080810';
       elemento.style.padding = '20px';
       
       const opcoes = {
-        margin:       [10, 0, 10, 0], // Margem zerada nas laterais para a tinta escura preencher a folha toda
+        margin:       0, // Margem ZERO para o Dark Mode preencher a folha inteira sem faixas brancas
         filename:     'Relatorio_TrendSight_Diego.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#080810' },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        // A MÁGICA DA GUILHOTINA: Avisa o PDF para nunca cortar os cards no meio da quebra de página
+        pagebreak:    { avoid: ['.card', '.signal-card'] } 
       };
       
       html2pdf().set(opcoes).from(elemento).save().then(() => {
-        // Traz o botão de volta e remove a tinta temporária do fundo
+        // Restaura tudo após o download
         btn.style.display = 'flex';
         elemento.style.backgroundColor = bgOriginal;
         elemento.style.padding = pOriginal;
