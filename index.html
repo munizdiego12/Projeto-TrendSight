@@ -12,6 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     :root {
       --bg: #080810;
@@ -1254,8 +1255,13 @@
 
     <div id="view-carteira" class="view">
       <div style="text-align: center; margin-bottom: 40px; padding: 0 20px;">
-        <h1 style="font-family: 'Syne', sans-serif; font-size: 32px; color: #fff; margin-bottom: 14px;">Raio-X da
-          Carteira</h1>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 14px;">
+            <h1 style="font-family: 'Syne', sans-serif; font-size: 32px; color: #fff; margin: 0;">Raio-X da Carteira</h1>
+            <button onclick="gerarPDFCarteira(event)" style="background: var(--purple); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'DM Sans', sans-serif; transition: 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Exportar Relatório
+            </button>
+        </div>
         <p style="color: var(--text-muted); font-size: 16px; max-width: 750px; margin: 0 auto; line-height: 1.6;">
           Acompanhe sua alocação, rentabilidade em tempo real e os sinais do algoritmo para cada ativo que você possui.
         </p>
@@ -1997,6 +2003,32 @@
           tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint);">Nenhum histórico encontrado.</td></tr>`;
         }
       } catch (e) { console.error("Erro histórico:", e); }
+    }
+
+    // ==============================================
+    // EXPORTAÇÃO DE RELATÓRIO PDF
+    // ==============================================
+    function gerarPDFCarteira(evento) {
+      const btn = evento.currentTarget;
+      const textoOriginal = btn.innerHTML;
+      btn.innerHTML = 'A processar documento...';
+      btn.style.opacity = '0.5';
+
+      // Seleciona a div completa do Raio-X da Carteira para "fotografar"
+      const elemento = document.getElementById('view-carteira');
+      
+      const opcoes = {
+        margin:       [10, 10, 10, 10], // Margens do PDF
+        filename:     'Relatorio_TrendSight_Diego.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#080810' },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      
+      html2pdf().set(opcoes).from(elemento).save().then(() => {
+        btn.innerHTML = textoOriginal;
+        btn.style.opacity = '1';
+      });
     }
 
     // ==============================================
