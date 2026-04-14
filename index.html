@@ -2010,9 +2010,9 @@
     // ==============================================
     function gerarPDFCarteira(evento) {
       const btn = evento.currentTarget;
-      const textoOriginal = btn.innerHTML;
-      btn.innerHTML = 'A processar documento...';
-      btn.style.opacity = '0.5';
+      
+      // TRUQUE DE UX: Deixa o botão invisível (mas mantendo o espaço dele) para não sair no PDF
+      btn.style.visibility = 'hidden';
 
       // Seleciona a div completa do Raio-X da Carteira para "fotografar"
       const elemento = document.getElementById('view-carteira');
@@ -2026,8 +2026,8 @@
       };
       
       html2pdf().set(opcoes).from(elemento).save().then(() => {
-        btn.innerHTML = textoOriginal;
-        btn.style.opacity = '1';
+        // Traz o botão de volta para a tela assim que o download começar
+        btn.style.visibility = 'visible';
       });
     }
 
