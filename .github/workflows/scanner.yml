@@ -1,0 +1,30 @@
+name: Bot Varredura TrendSight
+
+on:
+  schedule:
+    # Roda de segunda a sexta às 21:30 UTC (18:30 no Horário de Brasília)
+    - cron: '30 21 * * 1-5'
+  workflow_dispatch: # Permite que você rode manualmente clicando num botão no GitHub se quiser testar
+
+jobs:
+  rodar-scanner:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Baixar o código do repositório
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10' 
+
+    - name: Instalar dependências
+      run: |
+        python -m pip install --upgrade pip
+        pip install yfinance pandas pymysql cryptography python-dotenv
+
+    - name: Executar o Robô de Varredura (market_scanner.py)
+      env:
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      run: python market_scanner.py
