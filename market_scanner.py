@@ -18,7 +18,7 @@ ATIVOS_B3 = [
 def get_db_connection():
     # Conexão segura com a nuvem puxando a senha do .env
     return pymysql.connect(
-        host='trendsight-db-trendsight-db.a.aivencloud.com',
+        host='trendsight-db-trendsight-db.l.aivencloud.com',
         port=27805,
         user='avnadmin',
         password=os.getenv('DB_PASSWORD'),
