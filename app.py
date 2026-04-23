@@ -70,7 +70,6 @@ def carteira():
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
-            # Sintaxe atualizada para MySQL usando crases (backticks)
             query = """
                 SELECT 
                     c.Ativo, c.Quantidade, c.Preco_Medio,
@@ -113,7 +112,6 @@ def add_carteira():
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
-            # Substituição de ? por %s para o MySQL
             cursor.execute("SELECT Quantidade, Preco_Medio FROM carteira_usuario WHERE Ativo = %s", (dados['Ativo'],))
             existente = cursor.fetchone()
             
@@ -148,4 +146,5 @@ def rem_carteira(ativo):
         return jsonify({'status': 'erro', 'mensagem': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
