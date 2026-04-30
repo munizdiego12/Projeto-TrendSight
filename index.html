@@ -2138,73 +2138,86 @@
 
     async function carregarDadosMercado() {
       try {
-        const resposta = await fetch('https://projeto-trendsight.onrender.com/api/mercado');
-        const dados = await resposta.json();
+      const resposta = await fetch('https://projeto-trendsight.onrender.com/api/mercado');
+      const dados = await resposta.json();
 
-        if (dados.status === "sucesso") {
-          dadosMercadoGlobais = dados;
+      // Adicionamos a verificação se "dados.todos" realmente tem ações dentro
+      if (dados.status === "sucesso" && dados.todos && dados.todos.length > 0) {
+      dadosMercadoGlobais = dados;
 
-          const datalist = document.getElementById('tickers-b3');
-          if (datalist && dados.todos) datalist.innerHTML = dados.todos.map(a => `<option value="${a.Ativo}">`).join('');
+      const datalist = document.getElementById('tickers-b3');
+      if (datalist && dados.todos) datalist.innerHTML = dados.todos.map(a => `<option value="${a.Ativo}">`).join('');
 
-          if (dados.todos.length > 0) renderizarHeatmap(dados.todos);
-          dispararNotificacao(dados.todos);
+      if (dados.todos.length > 0) renderizarHeatmap(dados.todos);
+      dispararNotificacao(dados.todos);
 
-          const fita = document.getElementById('fita-cotacoes');
-          if (fita) {
-            const htmlFita = dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)'] >= 0 ? 'ticker-up' : 'ticker-down'}">${a['Variação (%)'] >= 0 ? '▲' : '▼'} ${a['Variação (%)']}%</span></div>`).join('');
-            fita.innerHTML = htmlFita + htmlFita;
-          }
+      const fita = document.getElementById('fita-cotacoes');
+      if (fita) {
+        const htmlFita = dados.todos.map(a => `<div class="ticker-item"><span class="ticker-symbol">${a.Ativo}</span><span class="ticker-price">R$ ${a['Preço (R$)']}</span><span class="${a['Variação (%)'] >= 0 ? 'ticker-up' : 'ticker-down'}">${a['Variação (%)'] >= 0 ? '▲' : '▼'} ${a['Variação (%)']}%</span></div>`).join('');
+        fita.innerHTML = htmlFita + htmlFita;
+      }
 
-          const criarBotoes = (l, cl) => l.map((a, i) => `<button class="pill-btn ${i === 0 ? 'active ' + cl : ''}" onclick="mudarAcaoCard('${cl}', ${i})">${a.Ativo}</button>`).join('');
+      const criarBotoes = (l, cl) => l.map((a, i) => `<button class="pill-btn ${i === 0 ? 'active ' + cl : ''}" onclick="mudarAcaoCard('${cl}', ${i})">${a.Ativo}</button>`).join('');
 
-          document.getElementById('grid-sinais').innerHTML = `
-            <div class="signal-card buy">
-              <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
-              <p class="signal-text">Ativos aprovados pelo Ensemble Scoring hoje.</p>
-              <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
-              <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
-              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-compra" style="background: rgba(93, 202, 165, 0.15); color: var(--green-bright); border: 1px solid var(--green);">--</span></div>
-              <div class="prob-row">
-                  <span class="prob-label">Score</span>
-                  <div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div>
-                  <span class="prob-pct" id="pct-compra">0%</span>
-              </div>
-            </div>
-            
-            <div class="signal-card sell">
-              <div class="signal-header"><div class="signal-icon">↓</div><span class="signal-action">Vender</span></div>
-              <p class="signal-text">Maior risco de queda ou reversão.</p>
-              <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
-              <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
-              <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-venda" style="background: rgba(240, 149, 149, 0.15); color: var(--red-bright); border: 1px solid var(--red);">--</span></div>
-              <div class="prob-row">
-                  <span class="prob-label">Risco</span>
-                  <div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div>
-                  <span class="prob-pct" id="pct-venda">0%</span>
-              </div>
-            </div>
-            
-            <div class="signal-card hold">
-              <div class="signal-header"><div class="signal-icon" style="background:var(--amber);color:#fff">—</div><span class="signal-action" style="color:var(--amber-bright)">Esperar</span></div>
-              <p class="signal-text">Ativos em consolidação.</p>
-              <div class="pill-nav" id="nav-espera">${criarBotoes(dados.espera, 'hold')}</div>
-              <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-espera"></canvas></div>
-              <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
-            </div>`;
+      document.getElementById('grid-sinais').innerHTML = `
+        <div class="signal-card buy">
+          <div class="signal-header"><div class="signal-icon">↑</div><span class="signal-action">Comprar</span></div>
+          <p class="signal-text">Ativos aprovados pelo Ensemble Scoring hoje.</p>
+          <div class="pill-nav" id="nav-compras">${criarBotoes(dados.compras, 'buy')}</div>
+          <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-compra"></canvas></div>
+          <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-compra" style="background: rgba(93, 202, 165, 0.15); color: var(--green-bright); border: 1px solid var(--green);">--</span></div>
+          <div class="prob-row">
+              <span class="prob-label">Score</span>
+              <div class="prob-track"><div class="prob-fill" id="barra-compra" style="width:0%"></div></div>
+              <span class="prob-pct" id="pct-compra">0%</span>
+          </div>
+        </div>
+        
+        <div class="signal-card sell">
+          <div class="signal-header"><div class="signal-icon">↓</div><span class="signal-action">Vender</span></div>
+          <p class="signal-text">Maior risco de queda ou reversão.</p>
+          <div class="pill-nav" id="nav-vendas">${criarBotoes(dados.vendas, 'sell')}</div>
+          <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-venda"></canvas></div>
+          <div class="tickers" style="margin-top:10px; margin-bottom:14px;"><span class="ticker" id="ticker-venda" style="background: rgba(240, 149, 149, 0.15); color: var(--red-bright); border: 1px solid var(--red);">--</span></div>
+          <div class="prob-row">
+              <span class="prob-label">Risco</span>
+              <div class="prob-track"><div class="prob-fill" id="barra-venda" style="width:0%"></div></div>
+              <span class="prob-pct" id="pct-venda">0%</span>
+          </div>
+        </div>
+        
+        <div class="signal-card hold">
+          <div class="signal-header"><div class="signal-icon" style="background:var(--amber);color:#fff">—</div><span class="signal-action" style="color:var(--amber-bright)">Esperar</span></div>
+          <p class="signal-text">Ativos em consolidação.</p>
+          <div class="pill-nav" id="nav-espera">${criarBotoes(dados.espera, 'hold')}</div>
+          <div class="chart-container" style="position: relative; height: 80px;"><canvas id="chart-espera"></canvas></div>
+          <div class="tickers" style="margin-top:10px;"><span class="ticker" id="ticker-espera" style="background:rgba(239,159,39,.2);color:var(--amber-bright);border:1px solid var(--amber)">--</span></div>
+        </div>`;
 
-          if (dados.compras.length > 0) mudarAcaoCard('buy', 0);
-          if (dados.vendas.length > 0) mudarAcaoCard('sell', 0);
-          if (dados.espera.length > 0) mudarAcaoCard('hold', 0);
+      if (dados.compras.length > 0) mudarAcaoCard('buy', 0);
+      if (dados.vendas.length > 0) mudarAcaoCard('sell', 0);
+      if (dados.espera.length > 0) mudarAcaoCard('hold', 0);
 
-          if (dados.compras.length > 0) { modoDetalhes = 'buy'; renderizarDetalhes(); }
-          else if (dados.vendas.length > 0) { modoDetalhes = 'sell'; renderizarDetalhes(); }
-          else if (dados.espera.length > 0) { modoDetalhes = 'hold'; renderizarDetalhes(); }
+      if (dados.compras.length > 0) { modoDetalhes = 'buy'; renderizarDetalhes(); }
+      else if (dados.vendas.length > 0) { modoDetalhes = 'sell'; renderizarDetalhes(); }
+      else if (dados.espera.length > 0) { modoDetalhes = 'hold'; renderizarDetalhes(); }
 
-          renderizarPilotoAutomatico();
-        }
-      } catch (e) { console.error(e); }
+      renderizarPilotoAutomatico();
+    } else {
+      // NOVA TRAVA: Se a API der erro ou o banco estiver vazio, exibe o alerta na tela.
+      console.error("A API retornou um erro ou está vazia:", dados.mensagem);
+      document.getElementById('detalhes-ticker').textContent = "BANCO VAZIO";
+      document.getElementById('detalhes-ticker').style.color = "var(--red-bright)";
+      document.getElementById('grid-sinais').innerHTML = `
+        <div style="grid-column: span 3; background: var(--surface2); padding: 30px; border-radius: 12px; border: 1px solid var(--red); text-align: center;">
+          <h3 style="color: var(--red-bright); margin-bottom: 10px;">🚨 Banco de Dados Vazio ou Desconectado</h3>
+          <p style="color: var(--text-muted);">Mensagem do servidor: ${dados.mensagem || 'Execute o market_scanner.py para popular o banco de dados.'}</p>
+        </div>`;
     }
+  } catch (e) { 
+    console.error("Falha fatal na comunicação com a API:", e); 
+  }
+}
 
     carregarDadosMercado();
     carregarDadosCarteira();
