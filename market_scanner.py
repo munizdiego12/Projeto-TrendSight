@@ -32,7 +32,7 @@ def setup_database(conn):
         
         cursor.execute('''
             CREATE TABLE mercado_diario (
-                Ativo VARCHAR(10),
+                Ativo VARCHAR(10) PRIMARY KEY,
                 `Preço (R$)` FLOAT,
                 `Variação (%)` FLOAT,
                 Volume FLOAT,
