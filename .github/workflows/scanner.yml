@@ -24,7 +24,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install yfinance pandas pymysql cryptography python-dotenv
 
-    - name: Executar o Robô de Varredura (market_scanner.py)
+    - name: Executando o Robô do Mercado
       env:
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: python market_scanner.py
