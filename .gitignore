@@ -1,2 +1,5 @@
 .env
 __pycache__/
+# Bancos de dados locais
+*.db
+*.sqlite3
