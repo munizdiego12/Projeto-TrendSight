@@ -111,6 +111,14 @@ def add_carteira():
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
+            # --- INÍCIO DA BARREIRA DE SEGURANÇA (SQL INJECTION) ---
+            cursor.execute("SELECT Ativo FROM mercado_diario WHERE Ativo = %s", (dados['Ativo'],))
+            ativo_valido = cursor.fetchone()
+            
+            if not ativo_valido:
+                return jsonify({'status': 'erro', 'mensagem': 'Ativo não suportado ou tentativa de injeção.'}), 400
+            # --- FIM DA BARREIRA DE SEGURANÇA ---
+
             cursor.execute("SELECT Quantidade, Preco_Medio FROM carteira_usuario WHERE Ativo = %s", (dados['Ativo'],))
             existente = cursor.fetchone()
             
