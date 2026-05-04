@@ -228,7 +228,7 @@ def scan_mercado():
                     
                 cursor.execute("""
                     INSERT INTO mercado_diario 
-                    (Ativo, `Preço (R$)`, `Variação (%)`, Volume, Sinal, Score, RSI, MACD_Hist, BB_Posicao, MM50, MM200, `Alvo (R$)`, `Stop (R$)`, `Probabilidade (%)`, Historico_Precos, Historico_Datas) 
+                    (Ativo, `Preço (R$)`, `Variação (%%)`, Volume, Sinal, Score, RSI, MACD_Hist, BB_Posicao, MM50, MM200, `Alvo (R$)`, `Stop (R$)`, `Probabilidade (%%)`, Historico_Precos, Historico_Datas) 
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (ativo, preco_atual, variacao, volume, sinal, score, 
                       round(float(hoje['RSI']), 2), round(float(hoje['MACD_Hist']), 2), 
