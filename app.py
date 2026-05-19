@@ -3,6 +3,7 @@ from flask_cors import CORS
 import pymysql
 import os
 from dotenv import load_dotenv
+import pymysql.cursors
 
 load_dotenv()
 
@@ -16,7 +17,8 @@ def get_db_connection():
         user=os.getenv('DB_USER'),
         password=os.getenv('DB_PASSWORD'),
         database='defaultdb',
-        autocommit=True
+        autocommit=True,
+        cursorclass=pymysql.cursors.DictCursor
     )
 
 @app.route('/api/mercado', methods=['GET'])
